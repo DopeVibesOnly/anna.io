@@ -310,7 +310,18 @@
             symbiosis: { duration: 60000, multiplier: 5, cost: 500000 }
         };
 
-        let activeBoosts = {};
+        const cooldowns = {
+            hydroponics: 0,
+            automation: 0,
+            ledLighting: 0,
+            climateControl: 0,
+            aiAssistant: 0,
+            photosynthesis: 0,
+            rootSystem: 0,
+            symbiosis: 0
+        };
+
+        const COOLDOWN_DURATION = 300000; // 5 minutes in milliseconds
 
         function loadGame() {
             const savedGame = localStorage.getItem('ecoGardenSave');
@@ -333,13 +344,14 @@
         }
 
         function saveGame() {
-            const gameData = JSON.parse(localStorage.getItem('ecoGardenSave')) || {};
-            gameData.plants = plants;
-            gameData.pps = pps;
-            gameData.rebirthMultiplier = rebirthMultiplier;
-            gameData.prestigeMultiplier = prestigeMultiplier;
-            gameData.multiplier = multiplier;
-            gameData.greenhouseUpgrades = greenhouseUpgrades.map(upgrade => ({ count: upgrade.count, effect: upgrade.effect }));
+            const gameData = {
+                plants: plants,
+                pps: pps,
+                rebirthMultiplier: rebirthMultiplier,
+                prestigeMultiplier: prestigeMultiplier,
+                multiplier: multiplier,
+                greenhouseUpgrades: greenhouseUpgrades.map(upgrade => ({ count: upgrade.count, effect: upgrade.effect }))
+            };
             localStorage.setItem('ecoGardenSave', JSON.stringify(gameData));
         }
 
@@ -366,8 +378,6 @@
         function clickGreenhouse() {
             plants += (1 + greenhouseUpgrades[0].effect * greenhouseUpgrades[0].count) * rebirthMultiplier * prestigeMultiplier * multiplier;
             updatePlants();
-            document.querySelector('.greenhouse').classList.add('grow');
-            setTimeout(() => document.querySelector('.greenhouse').classList.remove('grow'), 500);
             showRandomMessage();
             createLeaf();
             saveGame();
@@ -458,85 +468,105 @@
         }
 
         function activateHydroponics() {
-            if (plants >= 50000) {
+            if (plants >= 50000 && Date.now() >= cooldowns.hydroponics) {
                 plants -= 50000;
                 multiplier *= 1.5;
                 updatePlants();
                 showMessage("Гидропоника активирована! 50% бонус к производству на 5 минут.");
+                cooldowns.hydroponics = Date.now() + COOLDOWN_DURATION;
                 setTimeout(() => {
                     multiplier /= 1.5;
                     updatePlants();
                     showMessage("Эффект гидропоники закончился.");
                 }, 300000);
                 saveGame();
+            } else if (Date.now() < cooldowns.hydroponics) {
+                const remainingTime = Math.ceil((cooldowns.hydroponics - Date.now()) / 60000);
+                showMessage(`Гидропоника перезаряжается. Осталось ${remainingTime} минут.`);
             } else {
                 showMessage("Недостаточно растений для активации гидропоники!");
             }
         }
 
         function activateAutomation() {
-            if (plants >= 100000) {
+            if (plants >= 100000 && Date.now() >= cooldowns.automation) {
                 plants -= 100000;
                 multiplier *= 2;
                 updatePlants();
                 showMessage("Автоматизация активирована! Удвоенное производство на 5 минут.");
+                cooldowns.automation = Date.now() + COOLDOWN_DURATION;
                 setTimeout(() => {
                     multiplier /= 2;
                     updatePlants();
                     showMessage("Эффект автоматизации закончился.");
                 }, 300000);
                 saveGame();
+            } else if (Date.now() < cooldowns.automation) {
+                const remainingTime = Math.ceil((cooldowns.automation - Date.now()) / 60000);
+                showMessage(`Автоматизация перезаряжается. Осталось ${remainingTime} минут.`);
             } else {
                 showMessage("Недостаточно растений для активации автоматизации!");
             }
         }
 
         function activateLEDLighting() {
-            if (plants >= 250000) {
+            if (plants >= 250000 && Date.now() >= cooldowns.ledLighting) {
                 plants -= 250000;
                 multiplier *= 3;
                 updatePlants();
                 showMessage("LED освещение активировано! Утроенное производство на 5 минут.");
+                cooldowns.ledLighting = Date.now() + COOLDOWN_DURATION;
                 setTimeout(() => {
                     multiplier /= 3;
                     updatePlants();
                     showMessage("Эффект LED освещения закончился.");
                 }, 300000);
                 saveGame();
+            } else if (Date.now() < cooldowns.ledLighting) {
+                const remainingTime = Math.ceil((cooldowns.ledLighting - Date.now()) / 60000);
+                showMessage(`LED освещение перезаряжается. Осталось ${remainingTime} минут.`);
             } else {
                 showMessage("Недостаточно растений для активации LED освещения!");
             }
         }
 
         function activateClimateControl() {
-            if (plants >= 500000) {
+            if (plants >= 500000 && Date.now() >= cooldowns.climateControl) {
                 plants -= 500000;
                 multiplier *= 5;
                 updatePlants();
                 showMessage("Климат-контроль активирован! Производство увеличено в 5 раз на 5 минут.");
+                cooldowns.climateControl = Date.now() + COOLDOWN_DURATION;
                 setTimeout(() => {
                     multiplier /= 5;
                     updatePlants();
                     showMessage("Эффект климат-контроля закончился.");
                 }, 300000);
                 saveGame();
+            } else if (Date.now() < cooldowns.climateControl) {
+                const remainingTime = Math.ceil((cooldowns.climateControl - Date.now()) / 60000);
+                showMessage(`Климат-контроль перезаряжается. Осталось ${remainingTime} минут.`);
             } else {
                 showMessage("Недостаточно растений для активации климат-контроля!");
             }
         }
 
         function activateAIAssistant() {
-            if (plants >= 1000000) {
+            if (plants >= 1000000 && Date.now() >= cooldowns.aiAssistant) {
                 plants -= 1000000;
                 multiplier *= 10;
                 updatePlants();
                 showMessage("ИИ ассистент активирован! Производство увеличено в 10 раз на 5 минут.");
+                cooldowns.aiAssistant = Date.now() + COOLDOWN_DURATION;
                 setTimeout(() => {
                     multiplier /= 10;
                     updatePlants();
                     showMessage("Эффект ИИ ассистента закончился.");
                 }, 300000);
                 saveGame();
+            } else if (Date.now() < cooldowns.aiAssistant) {
+                const remainingTime = Math.ceil((cooldowns.aiAssistant - Date.now()) / 60000);
+                showMessage(`ИИ ассистент перезаряжается. Осталось ${remainingTime} минут.`);
             } else {
                 showMessage("Недостаточно растений для активации ИИ ассистента!");
             }
@@ -544,21 +574,21 @@
 
         function activateBoost(boostType) {
             const boost = boosts[boostType];
-            if (plants >= boost.cost && !activeBoosts[boostType]) {
+            if (plants >= boost.cost && Date.now() >= cooldowns[boostType]) {
                 plants -= boost.cost;
-                activeBoosts[boostType] = true;
                 multiplier *= boost.multiplier;
                 updatePlants();
                 showMessage(`${boostType} активирован! Производство увеличено в ${boost.multiplier} раз на ${boost.duration / 1000} секунд.`);
+                cooldowns[boostType] = Date.now() + COOLDOWN_DURATION;
                 setTimeout(() => {
                     multiplier /= boost.multiplier;
                     updatePlants();
                     showMessage(`Эффект ${boostType} закончился.`);
-                    activeBoosts[boostType] = false;
                 }, boost.duration);
                 saveGame();
-            } else if (activeBoosts[boostType]) {
-                showMessage(`${boostType} уже активен!`);
+            } else if (Date.now() < cooldowns[boostType]) {
+                const remainingTime = Math.ceil((cooldowns[boostType] - Date.now()) / 60000);
+                showMessage(`${boostType} перезаряжается. Осталось ${remainingTime} минут.`);
             } else {
                 showMessage(`Недостаточно растений для активации ${boostType}!`);
             }
