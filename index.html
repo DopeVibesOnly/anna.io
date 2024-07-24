@@ -4,7 +4,7 @@
     <base href="index.html">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Симулятор кликер</title>
+    <title>Кликер Симулятор</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
 
@@ -319,7 +319,7 @@
         <div id="inventory" class="inventory"></div>
     </div>
     <div class="game-container">
-        <h1>Симулятор кликер</h1>
+        <h1>Кликер Развития</h1>
         <div class="stats">
             <div class="stat">Клики: <span id="clicks">0</span> / <span id="max-clicks">10</span></div>
             <div class="stat">Монеты: <span id="coins">0</span></div>
@@ -345,6 +345,8 @@
         let autoClickerInterval = null;
         let potionActive = false;
         let potionTimer = null;
+        let lastClickTime = 0;
+        const clickDelay = 500; // 0.5 seconds in milliseconds
 
         const upgrades = [
             { name: "Больше места", description: "Увеличивает вместимость рюкзака", cost: 50, effect: () => { maxClicks += 5; }, maxLevel: Infinity },
@@ -377,7 +379,7 @@
 
         const potions = [
             { name: "Малое зелье прибыли", description: "Увеличивает прибыль от продажи на 50% на 3 минуты", cost: 1000, boost: 1.5 },
-            { name: "Большое зелье прибыли", description: "Удваивает прибыль от продажи на 3 минуты", cost: 5000, boost: 2 },
+            { name: "Большое зелье прибыли", description: "Удваивает прибыль от продажи на 3 минуты", cost: 6900, boost: 2 },
             { name: "Зелье сверхприбыли", description: "Утраивает прибыль от продажи на 3 минуты", cost: 15000, boost: 3 },
         ];
 
@@ -420,15 +422,19 @@
         }
 
         clickArea.addEventListener('click', (e) => {
-            if (clicks < maxClicks) {
-                clicks = Math.min(clicks + clickValue, maxClicks);
-                updateDisplay();
-                createPopText(e.clientX, e.clientY, `+${clickValue}`);
-            } else {
-                clickArea.classList.add('shake');
-                setTimeout(() => {
-                    clickArea.classList.remove('shake');
-                }, 500);
+            const currentTime = new Date().getTime();
+            if (currentTime - lastClickTime >= clickDelay) {
+                if (clicks < maxClicks) {
+                    clicks = Math.min(clicks + clickValue, maxClicks);
+                    updateDisplay();
+                    createPopText(e.clientX, e.clientY, `+${clickValue}`);
+                    lastClickTime = currentTime;
+                } else {
+                    clickArea.classList.add('shake');
+                    setTimeout(() => {
+                        clickArea.classList.remove('shake');
+                    }, 500);
+                }
             }
         });
 
