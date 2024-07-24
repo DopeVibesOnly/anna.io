@@ -1,0 +1,2 @@
+# sigmagarouspammer.io
+Кликер
