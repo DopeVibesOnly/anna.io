@@ -1,572 +1,627 @@
-<html><head><base href="https://websim.ai/"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Эко-Сад Кликер</title><style>
-body {
-    font-family: 'Comfortaa', cursive;
-    background: linear-gradient(135deg, #7cbb5e, #2e8b57);
-    color: #1a3a1a;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    margin: 0;
-    overflow-x: hidden;
-}
-.game-container {
-    background: rgba(255, 255, 255, 0.8);
-    border-radius: 20px;
-    padding: 30px;
-    text-align: center;
-    box-shadow: 0 0 20px rgba(0, 100, 0, 0.3);
-    max-width: 800px;
-    width: 90%;
-}
-#garden {
-    width: 200px;
-    height: 200px;
-    cursor: pointer;
-    transition: transform 0.3s;
-    margin: 20px auto;
-}
-#garden:hover {
-    transform: scale(1.05);
-}
-#garden:active {
-    transform: scale(0.95);
-}
-.upgrade, .special-action {
-    margin: 10px;
-    padding: 10px;
-    background: rgba(124, 187, 94, 0.3);
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.3s;
-    display: inline-block;
-}
-.upgrade:hover, .special-action:hover {
-    background: rgba(124, 187, 94, 0.5);
-    transform: translateY(-3px);
-}
-#particles {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: -1;
-}
-@keyframes grow {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
-}
-.grow {
-    animation: grow 0.5s;
-}
-#message-display {
-    font-size: 18px;
-    margin: 20px 0;
-    min-height: 30px;
-    color: #4a7023;
-}
-.special-actions {
-    display: flex;
-    justify-content: space-around;
-    margin-top: 20px;
-}
-#weather-event {
-    position: fixed;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(135, 206, 250, 0.8);
-    padding: 10px 20px;
-    border-radius: 20px;
-    display: none;
-}
-.menu {
-    position: fixed;
-    top: 0;
-    left: -300px;
-    width: 300px;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.9);
-    transition: left 0.3s ease-in-out;
-    overflow-y: auto;
-    padding: 20px;
-    box-sizing: border-box;
-}
-.menu.open {
-    left: 0;
-}
-.menu-toggle {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    z-index: 1000;
-    background: rgba(124, 187, 94, 0.8);
-    border: none;
-    color: white;
-    padding: 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-.menu-toggle:hover {
-    background: rgba(124, 187, 94, 1);
-}
-.menu-item {
-    margin: 10px 0;
-    padding: 10px;
-    background: rgba(124, 187, 94, 0.3);
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-.menu-item:hover {
-    background: rgba(124, 187, 94, 0.5);
-    transform: translateY(-3px);
-}
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-}
-.pulse {
-    animation: pulse 2s infinite;
-}
-.help-button {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: rgba(124, 187, 94, 0.8);
-    border: none;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.3s;
-    font-size: 16px;
-}
-.help-button:hover {
-    background: rgba(124, 187, 94, 1);
-}
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1001;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.4);
-}
-.modal-content {
-    background-color: #fefefe;
-    margin: 15% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
-    max-width: 600px;
-    border-radius: 10px;
-}
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-}
-.close:hover,
-.close:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-}
-</style>
-<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&display=swap" rel="stylesheet">
-</head><body>
-<button class="menu-toggle" onclick="toggleMenu()">☰ Меню</button>
-<div class="menu" id="menu">
-    <h2>Дополнительные функции</h2>
-    <div class="menu-item" onclick="activateAutoClicker()">Авто-Кликер (Стоимость: 1000 🌱)</div>
-    <div class="menu-item" onclick="activateGoldenSeeds()">Золотые Семена (Стоимость: 2000 🌱)</div>
-    <div class="menu-item" onclick="activateRainDance()">Танец Дождя (Стоимость: 3000 🌱)</div>
-    <div class="menu-item" onclick="activateFairyDust()">Пыльца Фей (Стоимость: 5000 🌱)</div>
-    <div class="menu-item" onclick="activateTimeWarp()">Искривление Времени (Стоимость: 10000 🌱)</div>
-</div>
-<div class="game-container">
-    <h1>Эко-Сад Кликер</h1>
-    <p>Растения: <span id="plantCount">0</span> 🌱</p>
-    <p>Растений в секунду: <span id="pps">0</span> 🌱</p>
-    <svg id="garden" viewBox="0 0 100 100" onclick="clickGarden()">
-        <rect x="0" y="70" width="100" height="30" fill="#8B4513"/>
-        <circle cx="50" cy="50" r="30" fill="#228B22"/>
-        <circle cx="50" cy="50" r="25" fill="#32CD32"/>
-        <circle cx="50" cy="50" r="20" fill="#7CFC00"/>
-        <circle cx="40" cy="40" r="5" fill="#FFD700"/>
-        <circle cx="60" cy="40" r="5" fill="#FFD700"/>
-        <circle cx="50" cy="60" r="5" fill="#FFD700"/>
-    </svg>
-    <div id="message-display"></div>
-    <div id="upgrades"></div>
-    <div class="special-actions">
-        <div class="special-action" onclick="activateSunshine()">Активировать Солнечный Свет</div>
-        <div class="special-action" onclick="callPollinators()">Призвать Опылителей</div>
+<html>
+
+<head>
+    <base href="https://websim.ai/">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Эко-Сад Кликер</title>
+    <style>
+        body {
+            font-family: 'Comfortaa', cursive;
+            background: linear-gradient(135deg, #7cbb5e, #2e8b57);
+            color: #1a3a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0, 100, 0, 0.3);
+            max-width: 800px;
+            width: 90%;
+        }
+
+        #garden {
+            width: 200px;
+            height: 200px;
+            cursor: pointer;
+            transition: transform 0.3s;
+            margin: 20px auto;
+        }
+
+        #garden:hover {
+            transform: scale(1.05);
+        }
+
+        #garden:active {
+            transform: scale(0.95);
+        }
+
+        .upgrade,
+        .special-action {
+            margin: 10px;
+            padding: 10px;
+            background: rgba(124, 187, 94, 0.3);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .upgrade:hover,
+        .special-action:hover {
+            background: rgba(124, 187, 94, 0.5);
+            transform: translateY(-3px);
+        }
+
+        #particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes grow {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .grow {
+            animation: grow 0.5s;
+        }
+
+        #message-display {
+            font-size: 18px;
+            margin: 20px 0;
+            min-height: 30px;
+            color: #4a7023;
+        }
+
+        .special-actions {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        #weather-event {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(135, 206, 250, 0.8);
+            padding: 10px 20px;
+            border-radius: 20px;
+            display: none;
+        }
+
+        .menu {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 300px;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            transition: left 0.3s ease-in-out;
+            overflow-y: auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .menu.open {
+            left: 0;
+        }
+
+        .menu-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(124, 187, 94, 0.8);
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .menu-toggle:hover {
+            background: rgba(124, 187, 94, 1);
+        }
+
+        .menu-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(124, 187, 94, 0.3);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .menu-item:hover {
+            background: rgba(124, 187, 94, 0.5);
+            transform: translateY(-3px);
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        .help-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(124, 187, 94, 0.8);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+        }
+
+        .help-button:hover {
+            background: rgba(124, 187, 94, 1);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 10px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <button class="menu-toggle" onclick="toggleMenu()">☰ Меню</button>
+    <div class="menu" id="menu">
+        <h2>Дополнительные функции</h2>
+        <div class="menu-item" onclick="activateAutoClicker()">Авто-Кликер (Стоимость: 1000 🌱)</div>
+        <div class="menu-item" onclick="activateGoldenSeeds()">Золотые Семена (Стоимость: 2000 🌱)</div>
+        <div class="menu-item" onclick="activateRainDance()">Танец Дождя (Стоимость: 3000 🌱)</div>
+        <div class="menu-item" onclick="activateFairyDust()">Пыльца Фей (Стоимость: 5000 🌱)</div>
+        <div class="menu-item" onclick="activateTimeWarp()">Искривление Времени (Стоимость: 10000 🌱)</div>
     </div>
-</div>
-<canvas id="particles"></canvas>
-<div id="weather-event"></div>
-<button class="help-button" onclick="showHelp()">Помощь</button>
-
-<div id="helpModal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeHelp()">&times;</span>
-        <h2>Справка по улучшениям</h2>
-        <div id="helpContent"></div>
+    <div class="game-container">
+        <h1>Эко-Сад Кликер</h1>
+        <p>Растения: <span id="plantCount">0</span> 🌱</p>
+        <p>Растений в секунду: <span id="pps">0</span> 🌱</p>
+        <svg id="garden" viewBox="0 0 100 100" onclick="clickGarden()">
+            <rect x="0" y="70" width="100" height="30" fill="#8B4513" />
+            <circle cx="50" cy="50" r="30" fill="#228B22" />
+            <circle cx="50" cy="50" r="25" fill="#32CD32" />
+            <circle cx="50" cy="50" r="20" fill="#7CFC00" />
+            <circle cx="40" cy="40" r="5" fill="#FFD700" />
+            <circle cx="60" cy="40" r="5" fill="#FFD700" />
+            <circle cx="50" cy="60" r="5" fill="#FFD700" />
+        </svg>
+        <div id="message-display"></div>
+        <div id="upgrades"></div>
+        <div class="special-actions">
+            <div class="special-action" onclick="activateSunshine()">Активировать Солнечный Свет</div>
+            <div class="special-action" onclick="callPollinators()">Призвать Опылителей</div>
+        </div>
     </div>
-</div>
+    <canvas id="particles"></canvas>
+    <div id="weather-event"></div>
+    <button class="help-button" onclick="showHelp()">Помощь</button>
 
-<script>
-let plants = 0;
-let pps = 0;
-const upgrades = [
-    { name: "Зелёный Палец", baseCost: 10, costMultiplier: 1.15, baseEffect: 1, effect: 1, count: 0, description: "Увеличивает количество растений за клик" },
-    { name: "Лейка", baseCost: 50, costMultiplier: 1.2, baseEffect: 5, effect: 5, count: 0, description: "Автоматически выращивает растения каждую секунду" },
-    { name: "Удобрение", baseCost: 200, costMultiplier: 1.25, baseEffect: 20, effect: 20, count: 0, description: "Значительно ускоряет рост растений" },
-    { name: "Теплица", baseCost: 1000, costMultiplier: 1.3, baseEffect: 100, effect: 100, count: 0, description: "Создает идеальные условия для массового выращивания растений" },
-    { name: "Ботанические Исследования", baseCost: 5000, costMultiplier: 1.35, baseEffect: 500, effect: 500, count: 0, description: "Открывает новые виды растений и методы их выращивания" }
-];
+    <div id="helpModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeHelp()">&times;</span>
+            <h2>Справка по улучшениям</h2>
+            <div id="helpContent"></div>
+        </div>
+    </div>
 
-let sunshineActive = false;
-let pollinatorsActive = false;
-let autoClickerActive = false;
-let goldenSeedsActive = false;
-let rainDanceActive = false;
-let fairyDustActive = false;
-let timeWarpActive = false;
+    <script>
+        let plants = 0;
+        let pps = 0;
+        const upgrades = [
+            { name: "Зелёный Палец", baseCost: 10, costMultiplier: 1.15, baseEffect: 1, effect: 1, count: 0, description: "Увеличивает количество растений за клик" },
+            { name: "Лейка", baseCost: 50, costMultiplier: 1.2, baseEffect: 5, effect: 5, count: 0, description: "Автоматически выращивает растения каждую секунду" },
+            { name: "Удобрение", baseCost: 200, costMultiplier: 1.25, baseEffect: 20, effect: 20, count: 0, description: "Значительно ускоряет рост растений" },
+            { name: "Теплица", baseCost: 1000, costMultiplier: 1.3, baseEffect: 100, effect: 100, count: 0, description: "Создает идеальные условия для массового выращивания растений" },
+            { name: "Ботанические Исследования", baseCost: 5000, costMultiplier: 1.35, baseEffect: 500, effect: 500, count: 0, description: "Открывает новые виды растений и методы их выращивания" }
+        ];
 
-function toggleMenu() {
-    document.getElementById('menu').classList.toggle('open');
-}
+        let sunshineActive = false;
+        let pollinatorsActive = false;
+        let autoClickerActive = false;
+        let goldenSeedsActive = false;
+        let rainDanceActive = false;
+        let fairyDustActive = false;
+        let timeWarpActive = false;
 
-function updatePlants() {
-    document.getElementById('plantCount').textContent = Math.floor(plants);
-    document.getElementById('pps').textContent = pps.toFixed(1);
-}
+        function toggleMenu() {
+            document.getElementById('menu').classList.toggle('open');
+        }
 
-function clickGarden() {
-    let baseClick = 1 + upgrades[0].effect * upgrades[0].count;
-    if (sunshineActive) baseClick *= 2;
-    if (pollinatorsActive) baseClick *= 3;
-    if (goldenSeedsActive) baseClick *= 2;
-    if (fairyDustActive) baseClick *= 5;
-    plants += baseClick;
-    updatePlants();
-    document.getElementById('garden').classList.add('grow');
-    setTimeout(() => document.getElementById('garden').classList.remove('grow'), 500);
-    createLeaf();
-    showRandomMessage();
-}
+        function updatePlants() {
+            document.getElementById('plantCount').textContent = Math.floor(plants);
+            document.getElementById('pps').textContent = pps.toFixed(1);
+        }
 
-function buyUpgrade(index) {
-    const upgrade = upgrades[index];
-    const cost = Math.floor(upgrade.baseCost * Math.pow(upgrade.costMultiplier, upgrade.count));
-    if (plants >= cost && upgrade.count < 100) {
-        plants -= cost;
-        upgrade.count++;
-        upgrade.effect = upgrade.baseEffect * Math.pow(1.05, upgrade.count);
-        updateUpgrades();
-        updatePlants();
-        pps = calculatePPS();
-    }
-}
+        function clickGarden() {
+            let baseClick = 1 + upgrades[0].effect * upgrades[0].count;
+            if (sunshineActive) baseClick *= 2;
+            if (pollinatorsActive) baseClick *= 3;
+            if (goldenSeedsActive) baseClick *= 2;
+            if (fairyDustActive) baseClick *= 5;
+            plants += baseClick;
+            updatePlants();
+            document.getElementById('garden').classList.add('grow');
+            setTimeout(() => document.getElementById('garden').classList.remove('grow'), 500);
+            createLeaf();
+            showRandomMessage();
+        }
 
-function calculatePPS() {
-    let basePPS = upgrades.reduce((sum, upgrade) => sum + upgrade.effect * upgrade.count, 0);
-    if (rainDanceActive) basePPS *= 2;
-    if (timeWarpActive) basePPS *= 3;
-    return basePPS;
-}
+        function buyUpgrade(index) {
+            const upgrade = upgrades[index];
+            const cost = Math.floor(upgrade.baseCost * Math.pow(upgrade.costMultiplier, upgrade.count));
+            if (plants >= cost && upgrade.count < 100) {
+                plants -= cost;
+                upgrade.count++;
+                upgrade.effect = upgrade.baseEffect * Math.pow(1.05, upgrade.count);
+                updateUpgrades();
+                updatePlants();
+                pps = calculatePPS();
+            }
+        }
 
-function updateUpgrades() {
-    const upgradesContainer = document.getElementById('upgrades');
-    upgradesContainer.innerHTML = '';
-    upgrades.forEach((upgrade, index) => {
-        const cost = Math.floor(upgrade.baseCost * Math.pow(upgrade.costMultiplier, upgrade.count));
-        const button = document.createElement('div');
-        button.className = 'upgrade';
-        button.textContent = `${upgrade.name} (${upgrade.count}/100) - Стоимость: ${cost} 🌱`;
-        button.onclick = () => buyUpgrade(index);
-        upgradesContainer.appendChild(button);
-    });
-}
+        function calculatePPS() {
+            let basePPS = upgrades.reduce((sum, upgrade) => sum + upgrade.effect * upgrade.count, 0);
+            if (rainDanceActive) basePPS *= 2;
+            if (timeWarpActive) basePPS *= 3;
+            return basePPS;
+        }
 
-function createLeaf() {
-    const leaf = document.createElement('div');
-    leaf.style.position = 'absolute';
-    leaf.style.width = '20px';
-    leaf.style.height = '20px';
-    leaf.style.backgroundColor = `hsl(${Math.random() * 60 + 90}, 100%, 40%)`;
-    leaf.style.clipPath = 'polygon(50% 0%, 0% 100%, 100% 100%)';
-    leaf.style.pointerEvents = 'none';
-    const gardenRect = document.getElementById('garden').getBoundingClientRect();
-    const startX = gardenRect.left + gardenRect.width / 2;
-    const startY = gardenRect.top + gardenRect.height / 2;
-    leaf.style.left = startX + 'px';
-    leaf.style.top = startY + 'px';
-    document.body.appendChild(leaf);
+        function updateUpgrades() {
+            const upgradesContainer = document.getElementById('upgrades');
+            upgradesContainer.innerHTML = '';
+            upgrades.forEach((upgrade, index) => {
+                const cost = Math.floor(upgrade.baseCost * Math.pow(upgrade.costMultiplier, upgrade.count));
+                const button = document.createElement('div');
+                button.className = 'upgrade';
+                button.textContent = `${upgrade.name} (${upgrade.count}/100) - Стоимость: ${cost} 🌱`;
+                button.onclick = () => buyUpgrade(index);
+                upgradesContainer.appendChild(button);
+            });
+        }
 
-    const angle = Math.random() * Math.PI * 2;
-    const velocity = 2 + Math.random() * 3;
-    const rotationSpeed = Math.random() * 360 - 180;
-    const lifetime = 2000 + Math.random() * 1000;
-    let opacity = 1;
+        function createLeaf() {
+            const leaf = document.createElement('div');
+            leaf.style.position = 'absolute';
+            leaf.style.width = '20px';
+            leaf.style.height = '20px';
+            leaf.style.backgroundColor = `hsl(${Math.random() * 60 + 90}, 100%, 40%)`;
+            leaf.style.clipPath = 'polygon(50% 0%, 0% 100%, 100% 100%)';
+            leaf.style.pointerEvents = 'none';
+            const gardenRect = document.getElementById('garden').getBoundingClientRect();
+            const startX = gardenRect.left + gardenRect.width / 2;
+            const startY = gardenRect.top + gardenRect.height / 2;
+            leaf.style.left = startX + 'px';
+            leaf.style.top = startY + 'px';
+            document.body.appendChild(leaf);
 
-    const animate = (timestamp) => {
-        const progress = timestamp - startTime;
-        if (progress < lifetime) {
-            const x = startX + Math.cos(angle) * velocity * progress / 50;
-            const y = startY + Math.sin(angle) * velocity * progress / 50 + 0.5 * progress * progress / 5000;
-            opacity = 1 - progress / lifetime;
-            leaf.style.left = x + 'px';
-            leaf.style.top = y + 'px';
-            leaf.style.opacity = opacity;
-            leaf.style.transform = `rotate(${rotationSpeed * progress / 1000}deg)`;
+            const angle = Math.random() * Math.PI * 2;
+            const velocity = 2 + Math.random() * 3;
+            const rotationSpeed = Math.random() * 360 - 180;
+            const lifetime = 2000 + Math.random() * 1000;
+            let opacity = 1;
+
+            const animate = (timestamp) => {
+                const progress = timestamp - startTime;
+                if (progress < lifetime) {
+                    const x = startX + Math.cos(angle) * velocity * progress / 50;
+                    const y = startY + Math.sin(angle) * velocity * progress / 50 + 0.5 * progress * progress / 5000;
+                    opacity = 1 - progress / lifetime;
+                    leaf.style.left = x + 'px';
+                    leaf.style.top = y + 'px';
+                    leaf.style.opacity = opacity;
+                    leaf.style.transform = `rotate(${rotationSpeed * progress / 1000}deg)`;
+                    requestAnimationFrame(animate);
+                } else {
+                    leaf.remove();
+                }
+            };
+
+            const startTime = performance.now();
             requestAnimationFrame(animate);
-        } else {
-            leaf.remove();
         }
-    };
 
-    const startTime = performance.now();
-    requestAnimationFrame(animate);
-}
-
-function gameLoop() {
-    plants += pps / 10;
-    if (autoClickerActive) {
-        plants += upgrades[0].effect * upgrades[0].count / 10;
-    }
-    updatePlants();
-}
-
-function showRandomMessage() {
-    const messages = [
-        "Ваш сад процветает!",
-        "Растения растут прекрасно!",
-        "Гармония природы окружает вас!",
-        "У вас зелёная рука!",
-        "Экосистема процветает!"
-    ];
-    const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-    document.getElementById('message-display').textContent = randomMessage;
-    setTimeout(() => document.getElementById('message-display').textContent = '', 3000);
-}
-
-function activateSunshine() {
-    if (plants >= 1000 && !sunshineActive) {
-        plants -= 1000;
-        sunshineActive = true;
-        document.body.style.background = 'linear-gradient(135deg, #ffd700, #ff8c00)';
-        setTimeout(() => {
-            sunshineActive = false;
-            document.body.style.background = 'linear-gradient(135deg, #7cbb5e, #2e8b57)';
-        }, 30000);
-    }
-}
-
-function callPollinators() {
-    if (plants >= 5000 && !pollinatorsActive) {
-        plants -= 5000;
-        pollinatorsActive = true;
-        const weatherEvent = document.getElementById('weather-event');
-        weatherEvent.textContent = "Опылители роятся в вашем саду!";
-        weatherEvent.style.display = 'block';
-        setTimeout(() => {
-            pollinatorsActive = false;
-            weatherEvent.style.display = 'none';
-        }, 60000);
-    }
-}
-
-function activateAutoClicker() {
-    if (plants >= 1000 && !autoClickerActive) {
-        plants -= 1000;
-        autoClickerActive = true;
-        showMessage("Авто-Кликер активирован!");
-    }
-}
-
-function activateGoldenSeeds() {
-    if (plants >= 2000 && !goldenSeedsActive) {
-        plants -= 2000;
-        goldenSeedsActive = true;
-        showMessage("Золотые Семена активированы!");
-        setTimeout(() => {
-            goldenSeedsActive = false;
-            showMessage("Действие Золотых Семян закончилось.");
-        }, 120000);
-    }
-}
-
-function activateRainDance() {
-    if (plants >= 3000 && !rainDanceActive) {
-        plants -= 3000;
-        rainDanceActive = true;
-        showMessage("Танец Дождя активирован!");
-        document.body.style.background = 'linear-gradient(135deg, #4a69bd, #0c2461)';
-        setTimeout(() => {
-            rainDanceActive = false;
-            document.body.style.background = 'linear-gradient(135deg, #7cbb5e, #2e8b57)';
-            showMessage("Дождь прекратился.");
-        }, 180000);
-    }
-}
-
-function activateFairyDust() {
-    if (plants >= 5000 && !fairyDustActive) {
-        plants -= 5000;
-        fairyDustActive = true;
-        showMessage("Пыльца Фей активирована!");
-        document.getElementById('garden').classList.add('pulse');
-        setTimeout(() => {
-            fairyDustActive = false;
-            document.getElementById('garden').classList.remove('pulse');
-            showMessage("Действие Пыльцы Фей закончилось.");
-        }, 300000);
-    }
-}
-
-function activateTimeWarp() {
-    if (plants >= 10000 && !timeWarpActive) {
-        plants -= 10000;
-        timeWarpActive = true;
-        showMessage("Искривление Времени активировано!");
-        document.body.style.transition = 'all 0.5s';
-        document.body.style.filter = 'hue-rotate(180deg)';
-        setTimeout(() => {
-            timeWarpActive = false;
-            document.body.style.filter = 'none';
-            showMessage("Время вернулось в норму.");
-        }, 600000);
-    }
-}
-
-function showMessage(message) {
-    const weatherEvent = document.getElementById('weather-event');
-    weatherEvent.textContent = message;
-    weatherEvent.style.display = 'block';
-    setTimeout(() => {
-        weatherEvent.style.display = 'none';
-    }, 5000);
-}
-
-function showHelp() {
-    const modal = document.getElementById('helpModal');
-    const helpContent = document.getElementById('helpContent');
-    helpContent.innerHTML = '';
-
-    upgrades.forEach(upgrade => {
-        const upgradeInfo = document.createElement('p');
-        upgradeInfo.innerHTML = `<strong>${upgrade.name}:</strong> ${upgrade.description}`;
-        helpContent.appendChild(upgradeInfo);
-    });
-
-    const specialActions = [
-        { name: "Активировать Солнечный Свет", description: "Удваивает производство растений на 30 секунд" },
-        { name: "Призвать Опылителей", description: "Утраивает производство растений на 60 секунд" },
-        { name: "Авто-Кликер", description: "Автоматически кликает по саду каждую секунду" },
-        { name: "Золотые Семена", description: "Удваивает производство от кликов на 2 минуты" },
-        { name: "Танец Дождя", description: "Удваивает пассивное производство растений на 3 минуты" },
-        { name: "Пыльца Фей", description: "Увеличивает производство от кликов в 5 раз на 5 минут" },
-        { name: "Искривление Времени", description: "Утраивает все производство растений на 10 минут" }
-    ];
-
-    helpContent.appendChild(document.createElement('hr'));
-
-    specialActions.forEach(action => {
-        const actionInfo = document.createElement('p');
-        actionInfo.innerHTML = `<strong>${action.name}:</strong> ${action.description}`;
-        helpContent.appendChild(actionInfo);
-    });
-
-    modal.style.display = 'block';
-}
-
-function closeHelp() {
-    document.getElementById('helpModal').style.display = 'none';
-}
-
-window.onclick = function(event) {
-    const modal = document.getElementById('helpModal');
-    if (event.target == modal) {
-        modal.style.display = "none";
-    }
-}
-
-updateUpgrades();
-setInterval(gameLoop, 100);
-
-// Particle background
-const canvas = document.getElementById('particles');
-const ctx = canvas.getContext('2d');
-
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-const particlesArray = [];
-
-class Particle {
-    constructor() {
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height;
-        this.size = Math.random() * 5 + 1;
-        this.speedX = Math.random() * 3 - 1.5;
-        this.speedY = Math.random() * 3 - 1.5;
-        this.color = `hsl(${Math.random() * 60 + 90}, 100%, 50%)`;
-    }
-    update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
-        if (this.size > 0.2) this.size -= 0.1;
-    }
-    draw() {
-        ctx.fillStyle = this.color;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
-    }
-}
-
-function handleParticles() {
-    for (let i = 0; i < particlesArray.length; i++) {
-        particlesArray[i].update();
-        particlesArray[i].draw();
-        if (particlesArray[i].size <= 0.2) {
-            particlesArray.splice(i, 1);
-            i--;
+        function gameLoop() {
+            plants += pps / 10;
+            if (autoClickerActive) {
+                plants += upgrades[0].effect * upgrades[0].count / 10;
+            }
+            updatePlants();
         }
-    }
-}
 
-function createParticles() {
-    if (particlesArray.length < 100) {
-        particlesArray.push(new Particle());
-    }
-}
+        function showRandomMessage() {
+            const messages = [
+                "Ваш сад процветает!",
+                "Растения растут прекрасно!",
+                "Гармония природы окружает вас!",
+                "У вас зелёная рука!",
+                "Экосистема процветает!"
+            ];
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+            document.getElementById('message-display').textContent = randomMessage;
+            setTimeout(() => document.getElementById('message-display').textContent = '', 3000);
+        }
 
-function animateParticles() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    handleParticles();
-    createParticles();
-    requestAnimationFrame(animateParticles);
-}
+        function activateSunshine() {
+            if (plants >= 1000 && !sunshineActive) {
+                plants -= 1000;
+                sunshineActive = true;
+                document.body.style.background = 'linear-gradient(135deg, #ffd700, #ff8c00)';
+                setTimeout(() => {
+                    sunshineActive = false;
+                    document.body.style.background = 'linear-gradient(135deg, #7cbb5e, #2e8b57)';
+                }, 30000);
+            }
+        }
 
-animateParticles();
+        function callPollinators() {
+            if (plants >= 5000 && !pollinatorsActive) {
+                plants -= 5000;
+                pollinatorsActive = true;
+                const weatherEvent = document.getElementById('weather-event');
+                weatherEvent.textContent = "Опылители роятся в вашем саду!";
+                weatherEvent.style.display = 'block';
+                setTimeout(() => {
+                    pollinatorsActive = false;
+                    weatherEvent.style.display = 'none';
+                }, 60000);
+            }
+        }
 
-window.addEventListener('resize', function() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-});
-</script>
-</body></html>
+        function activateAutoClicker() {
+            if (plants >= 1000 && !autoClickerActive) {
+                plants -= 1000;
+                autoClickerActive = true;
+                showMessage("Авто-Кликер активирован!");
+            }
+        }
+
+        function activateGoldenSeeds() {
+            if (plants >= 2000 && !goldenSeedsActive) {
+                plants -= 2000;
+                goldenSeedsActive = true;
+                showMessage("Золотые Семена активированы!");
+                setTimeout(() => {
+                    goldenSeedsActive = false;
+                    showMessage("Действие Золотых Семян закончилось.");
+                }, 120000);
+            }
+        }
+
+        function activateRainDance() {
+            if (plants >= 3000 && !rainDanceActive) {
+                plants -= 3000;
+                rainDanceActive = true;
+                showMessage("Танец Дождя активирован!");
+                document.body.style.background = 'linear-gradient(135deg, #4a69bd, #0c2461)';
+                setTimeout(() => {
+                    rainDanceActive = false;
+                    document.body.style.background = 'linear-gradient(135deg, #7cbb5e, #2e8b57)';
+                    showMessage("Дождь прекратился.");
+                }, 180000);
+            }
+        }
+
+        function activateFairyDust() {
+            if (plants >= 5000 && !fairyDustActive) {
+                plants -= 5000;
+                fairyDustActive = true;
+                showMessage("Пыльца Фей активирована!");
+                document.getElementById('garden').classList.add('pulse');
+                setTimeout(() => {
+                    fairyDustActive = false;
+                    document.getElementById('garden').classList.remove('pulse');
+                    showMessage("Действие Пыльцы Фей закончилось.");
+                }, 300000);
+            }
+        }
+
+        function activateTimeWarp() {
+            if (plants >= 10000 && !timeWarpActive) {
+                plants -= 10000;
+                timeWarpActive = true;
+                showMessage("Искривление Времени активировано!");
+                document.body.style.transition = 'all 0.5s';
+                document.body.style.filter = 'hue-rotate(180deg)';
+                setTimeout(() => {
+                    timeWarpActive = false;
+                    document.body.style.filter = 'none';
+                    showMessage("Время вернулось в норму.");
+                }, 600000);
+            }
+        }
+
+        function showMessage(message) {
+            const weatherEvent = document.getElementById('weather-event');
+            weatherEvent.textContent = message;
+            weatherEvent.style.display = 'block';
+            setTimeout(() => {
+                weatherEvent.style.display = 'none';
+            }, 5000);
+        }
+
+        function showHelp() {
+            const modal = document.getElementById('helpModal');
+            const helpContent = document.getElementById('helpContent');
+            helpContent.innerHTML = '';
+
+            upgrades.forEach(upgrade => {
+                const upgradeInfo = document.createElement('p');
+                upgradeInfo.innerHTML = `<strong>${upgrade.name}:</strong> ${upgrade.description}`;
+                helpContent.appendChild(upgradeInfo);
+            });
+
+            const specialActions = [
+                { name: "Активировать Солнечный Свет", description: "Удваивает производство растений на 30 секунд" },
+                { name: "Призвать Опылителей", description: "Утраивает производство растений на 60 секунд" },
+                { name: "Авто-Кликер", description: "Автоматически кликает по саду каждую секунду" },
+                { name: "Золотые Семена", description: "Удваивает производство от кликов на 2 минуты" },
+                { name: "Танец Дождя", description: "Удваивает пассивное производство растений на 3 минуты" },
+                { name: "Пыльца Фей", description: "Увеличивает производство от кликов в 5 раз на 5 минут" },
+                { name: "Искривление Времени", description: "Утраивает все производство растений на 10 минут" }
+            ];
+
+            helpContent.appendChild(document.createElement('hr'));
+
+            specialActions.forEach(action => {
+                const actionInfo = document.createElement('p');
+                actionInfo.innerHTML = `<strong>${action.name}:</strong> ${action.description}`;
+                helpContent.appendChild(actionInfo);
+            });
+
+            modal.style.display = 'block';
+        }
+
+        function closeHelp() {
+            document.getElementById('helpModal').style.display = 'none';
+        }
+
+        window.onclick = function (event) {
+            const modal = document.getElementById('helpModal');
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        updateUpgrades();
+        setInterval(gameLoop, 100);
+
+        // Particle background
+        const canvas = document.getElementById('particles');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particlesArray = [];
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 5 + 1;
+                this.speedX = Math.random() * 3 - 1.5;
+                this.speedY = Math.random() * 3 - 1.5;
+                this.color = `hsl(${Math.random() * 60 + 90}, 100%, 50%)`;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.size > 0.2) this.size -= 0.1;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function handleParticles() {
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+                if (particlesArray[i].size <= 0.2) {
+                    particlesArray.splice(i, 1);
+                    i--;
+                }
+            }
+        }
+
+        function createParticles() {
+            if (particlesArray.length < 100) {
+                particlesArray.push(new Particle());
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            handleParticles();
+            createParticles();
+            requestAnimationFrame(animateParticles);
+        }
+
+        animateParticles();
+
+        window.addEventListener('resize', function () {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+
+</html>
