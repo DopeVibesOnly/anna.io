@@ -4,119 +4,184 @@
     <base href="index.html">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Эко-Сад Кликер</title>
+    <title>Смачно Кликер </title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --background-color: #ecf0f1;
+            --text-color: #34495e;
+            --menu-bg-color: rgba(52, 73, 94, 0.95);
+        }
+
         body {
-            font-family: 'Comfortaa', cursive;
-            background: linear-gradient(135deg, #7cbb5e, #2e8b57);
-            color: #1a3a1a;
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            margin: 0;
-            overflow-x: hidden;
+            overflow: hidden;
         }
 
         .game-container {
-            background: rgba(255, 255, 255, 0.8);
+            background-color: white;
             border-radius: 20px;
-            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
             text-align: center;
-            box-shadow: 0 0 20px rgba(0, 100, 0, 0.3);
-            max-width: 800px;
-            width: 90%;
+            max-width: 400px;
+            width: 100%;
         }
 
-        #garden {
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .stat {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .click-area {
             width: 200px;
             height: 200px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            margin: 2rem auto;
             cursor: pointer;
-            transition: transform 0.3s;
-            margin: 20px auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            color: white;
+            transition: transform 0.1s, box-shadow 0.1s, opacity 0.3s;
+            user-select: none;
         }
 
-        #garden:hover {
-            transform: scale(1.05);
-        }
-
-        #garden:active {
+        .click-area:active {
             transform: scale(0.95);
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
         }
 
-        .upgrade,
-        .special-action {
-            margin: 10px;
-            padding: 10px;
-            background: rgba(124, 187, 94, 0.3);
-            border-radius: 10px;
+        .click-area.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .sell-button {
+            background-color: var(--secondary-color);
+            border: none;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 5px;
             cursor: pointer;
-            transition: all 0.3s;
-            display: inline-block;
+            transition: background-color 0.3s, transform 0.1s;
         }
 
-        .upgrade:hover,
-        .special-action:hover {
-            background: rgba(124, 187, 94, 0.5);
-            transform: translateY(-3px);
+        .sell-button:hover {
+            background-color: #27ae60;
         }
 
-        .upgrade:active,
-        .special-action:active {
-            transform: translateY(1px);
+        .sell-button:active {
+            transform: scale(0.98);
         }
 
-        #particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        @keyframes grow {
+        @keyframes pop {
             0% {
                 transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.1);
+                opacity: 1;
             }
 
             100% {
-                transform: scale(1);
+                transform: scale(1.5);
+                opacity: 0;
             }
         }
 
-        .grow {
-            animation: grow 0.5s;
+        .pop-text {
+            position: absolute;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            pointer-events: none;
+            animation: pop 0.5s ease-out;
         }
 
-        #message-display {
-            font-size: 18px;
-            margin: 20px 0;
-            min-height: 30px;
-            color: #4a7023;
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin-top: 1rem;
+            overflow: hidden;
         }
 
-        .special-actions {
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            margin-top: 20px;
+        .progress {
+            width: 0%;
+            height: 100%;
+            background-color: var(--secondary-color);
+            transition: width 0.3s ease-out;
         }
 
-        #weather-event {
+        @keyframes shake {
+            0% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            50% {
+                transform: translateX(5px);
+            }
+
+            75% {
+                transform: translateX(-5px);
+            }
+
+            100% {
+                transform: translateX(0);
+            }
+        }
+
+        .shake {
+            animation: shake 0.5s;
+        }
+
+        .menu-button {
             position: fixed;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(135, 206, 250, 0.8);
-            padding: 10px 20px;
-            border-radius: 20px;
-            display: none;
+            top: 20px;
+            left: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            transition: transform 0.3s, background-color 0.3s;
+            z-index: 1000;
+        }
+
+        .menu-button:hover {
+            transform: scale(1.1);
+            background-color: #2980b9;
         }
 
         .menu {
@@ -125,634 +190,240 @@
             left: -300px;
             width: 300px;
             height: 100%;
-            background: rgba(255, 255, 255, 0.9);
-            transition: left 0.3s ease-in-out;
+            background-color: var(--menu-bg-color);
+            transition: left 0.3s ease-out;
+            z-index: 999;
             overflow-y: auto;
             padding: 20px;
             box-sizing: border-box;
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
         }
 
         .menu.open {
             left: 0;
         }
 
-        .menu-toggle {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 1000;
-            background: rgba(124, 187, 94, 0.8);
-            border: none;
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .menu-toggle:hover {
-            background: rgba(124, 187, 94, 1);
-        }
-
-        .menu-item {
-            margin: 15px 0;
-            padding: 12px;
-            background: rgba(124, 187, 94, 0.3);
+        .upgrade-item {
+            background-color: rgba(255, 255, 255, 0.1);
             border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: left;
-            font-size: 16px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        .menu-item:hover {
-            background: rgba(124, 187, 94, 0.5);
-            transform: translateY(-3px);
-        }
-
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.05);
-            }
-
-            100% {
-                transform: scale(1);
-            }
-        }
-
-        .pulse {
-            animation: pulse 2s infinite;
-        }
-
-        .help-button {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(124, 187, 94, 0.8);
-            border: none;
+            padding: 15px;
+            margin-bottom: 15px;
             color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
             cursor: pointer;
-            transition: all 0.3s;
-            font-size: 16px;
+            transition: background-color 0.3s;
         }
 
-        .help-button:hover {
-            background: rgba(124, 187, 94, 1);
+        .upgrade-item:hover {
+            background-color: rgba(255, 255, 255, 0.2);
         }
 
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1001;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.4);
+        .upgrade-item h3 {
+            margin: 0 0 10px 0;
         }
 
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 600px;
-            border-radius: 10px;
-        }
-
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        #passive-income {
-            font-size: 18px;
-            margin-top: 20px;
-            color: #4a7023;
-        }
-
-        .modal-buttons {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 20px;
-        }
-
-        .modal-button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .modal-button.yes {
-            background-color: #4CAF50;
-            color: white;
-        }
-
-        .modal-button.no {
-            background-color: #f44336;
-            color: white;
-        }
-
-        .modal-button:hover {
+        .upgrade-item p {
+            margin: 0;
+            font-size: 0.9em;
             opacity: 0.8;
         }
+
+        .upgrade-cost {
+            font-weight: bold;
+            color: #f1c40f;
+        }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
-    <button class="menu-toggle" onclick="toggleMenu()">☰ Меню</button>
+    <button class="menu-button" id="menu-button">☰</button>
     <div class="menu" id="menu">
-        <h2>Дополнительные функции</h2>
-        <div class="menu-item" onclick="activateAutoClicker()">🖱️ Авто-Кликер (Стоимость: 1000 🌱)</div>
-        <div class="menu-item" onclick="activateGoldenSeeds()">🌟 Золотые Семена (Стоимость: 2000 🌱)</div>
-        <div class="menu-item" onclick="activateRainDance()">💃 Танец Дождя (Стоимость: 3000 🌱)</div>
-        <div class="menu-item" onclick="activateFairyDust()">✨ Пыльца Фей (Стоимость: 5000 🌱)</div>
-        <div class="menu-item" onclick="activateTimeWarp()">⏳ Искривление Времени (Стоимость: 10000 🌱)</div>
-        <div class="menu-item" onclick="goToGreenhouse()">🏡 Перейти в Теплицу</div>
-        <div class="menu-item" onclick="showRebirthModal()">🔄 Возрождение</div>
-        <div class="menu-item" onclick="showPrestigeModal()">🏆 Престиж</div>
+        <h2 style="color: white;">Улучшения</h2>
+        <div id="upgrades-list"></div>
     </div>
     <div class="game-container">
-        <h1>Эко-Сад Кликер</h1>
-        <p>Растения: <span id="plantCount">0</span> 🌱</p>
-        <p>Растений в секунду: <span id="pps">0</span> 🌱</p>
-        <p id="passive-income">Пассивный доход: <span id="passiveIncomeValue">0</span> 🌱/сек</p>
-        <p>Количество возрождений: <span id="rebirthCount">0</span></p>
-        <svg id="garden" viewBox="0 0 100 100" onclick="clickGarden()">
-            <rect x="0" y="70" width="100" height="30" fill="#8B4513" />
-            <circle cx="50" cy="50" r="30" fill="#228B22" />
-            <circle cx="50" cy="50" r="25" fill="#32CD32" />
-            <circle cx="50" cy="50" r="20" fill="#7CFC00" />
-            <circle cx="40" cy="40" r="5" fill="#FFD700" />
-            <circle cx="60" cy="40" r="5" fill="#FFD700" />
-            <circle cx="50" cy="60" r="5" fill="#FFD700" />
-        </svg>
-        <div id="message-display"></div>
-        <div id="upgrades"></div>
-        <div class="special-actions">
-            <div class="special-action" onclick="activateSunshine()">Активировать Солнечный Свет</div>
-            <div class="special-action" onclick="callPollinators()">Призвать Опылителей</div>
+        <h1>Кликер Развития</h1>
+        <div class="stats">
+            <div class="stat">Клики: <span id="clicks">0</span> / <span id="max-clicks">10</span></div>
+            <div class="stat">Монеты: <span id="coins">0</span></div>
         </div>
-    </div>
-    <canvas id="particles"></canvas>
-    <div id="weather-event"></div>
-    <button class="help-button" onclick="showHelp()">Помощь</button>
-
-    <div id="helpModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeHelp()">&times;</span>
-            <h2>Справка по улучшениям</h2>
-            <div id="helpContent"></div>
-        </div>
-    </div>
-
-    <div id="rebirthModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeRebirthModal()">&times;</span>
-            <h2>Возрождение</h2>
-            <p>Вы уверены, что хотите совершить возрождение?</p>
-            <p>Это даст вам множитель x1.5 ко всему производству.</p>
-            <p>Стоимость возрождения: <span id="rebirthCost">10000000</span> 🌱</p>
-            <div class="modal-buttons">
-                <button class="modal-button yes" onclick="performRebirth()">Да</button>
-                <button class="modal-button no" onclick="closeRebirthModal()">Нет</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="prestigeModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closePrestigeModal()">&times;</span>
-            <h2>Престиж</h2>
-            <p>Вы уверены, что хотите выполнить престиж?</p>
-            <p>Это даст вам множитель x20 ко всему производству.</p>
-            <p>Требуется 10 возрождений для престижа.</p>
-            <div class="modal-buttons">
-                <button class="modal-button yes" onclick="performPrestige()">Да</button>
-                <button class="modal-button no" onclick="closePrestigeModal()">Нет</button>
-            </div>
+        <div class="click-area" id="click-area">Клик!</div>
+        <button class="sell-button" id="sell-button">Продать клики</button>
+        <div class="progress-bar">
+            <div class="progress" id="progress"></div>
         </div>
     </div>
 
     <script>
-        let plants = 0;
-        let pps = 0;
-        let passiveIncome = 0;
-        let rebirthMultiplier = 1;
-        let rebirthCost = 10000000;
-        let rebirthCount = 0;
-        let prestigeMultiplier = 1;
-        let lastClickTime = 0;
-        const clickDelay = 500; // 0.5 seconds in milliseconds
+        let clicks = 0;
+        let coins = 0;
+        let maxClicks = 10;
+        let clickValue = 1;
+        let autoClickerInterval = null;
+        let canClick = true;
 
         const upgrades = [
-            { name: "Зелёный Палец", baseCost: 10, costMultiplier: 1.15, baseEffect: 1, effect: 1, count: 0, description: "Увеличивает количество растений за клик" },
-            { name: "Лейка", baseCost: 50, costMultiplier: 1.2, baseEffect: 5, effect: 5, count: 0, description: "Автоматически выращивает растения каждую секунду" },
-            { name: "Удобрение", baseCost: 200, costMultiplier: 1.25, baseEffect: 20, effect: 20, count: 0, description: "Значительно ускоряет рост растений" },
-            { name: "Теплица", baseCost: 1000, costMultiplier: 1.3, baseEffect: 100, effect: 100, count: 0, description: "Создает идеальные условия для массового выращивания растений" },
-            { name: "Ботанические Исследования", baseCost: 5000, costMultiplier: 1.35, baseEffect: 500, effect: 500, count: 0, description: "Открывает новые виды растений и методы их выращивания" }
+            { name: "Больше места", description: "Увеличивает вместимость рюкзака", cost: 50, effect: () => { maxClicks += 5; } },
+            { name: "Улучшенный клик", description: "Увеличивает стоимость клика", cost: 100, effect: () => { clickValue++; } },
+            {
+                name: "Автокликер", description: "Автоматически кликает каждую секунду", cost: 200, effect: () => {
+                    if (!autoClickerInterval) {
+                        autoClickerInterval = setInterval(() => {
+                            if (clicks < maxClicks) {
+                                clicks = Math.min(clicks + 1, maxClicks);
+                                updateDisplay();
+                                saveGame();
+                            }
+                        }, 1000);
+                    }
+                }
+            },
+            {
+                name: "Эффективность продаж", description: "Увеличивает прибыль от продажи кликов", cost: 300, effect: () => {
+                    const oldSellValue = sellClicks;
+                    sellClicks = () => {
+                        const value = clicks * 2;
+                        coins += value;
+                        clicks = 0;
+                        updateDisplay();
+                        saveGame();
+                        return value;
+                    };
+                }
+            },
         ];
 
-        let sunshineActive = false;
-        let pollinatorsActive = false;
-        let autoClickerActive = false;
-        let goldenSeedsActive = false;
-        let rainDanceActive = false;
-        let fairyDustActive = false;
-        let timeWarpActive = false;
+        const clicksElement = document.getElementById('clicks');
+        const maxClicksElement = document.getElementById('max-clicks');
+        const coinsElement = document.getElementById('coins');
+        const clickArea = document.getElementById('click-area');
+        const sellButton = document.getElementById('sell-button');
+        const progressBar = document.getElementById('progress');
+        const menuButton = document.getElementById('menu-button');
+        const menu = document.getElementById('menu');
+        const upgradesList = document.getElementById('upgrades-list');
 
-        function loadGame() {
-            const savedGame = localStorage.getItem('ecoGardenSave');
-            if (savedGame) {
-                const gameData = JSON.parse(savedGame);
-                plants = gameData.plants;
-                pps = gameData.pps;
-                passiveIncome = gameData.passiveIncome || 0;
-                rebirthMultiplier = gameData.rebirthMultiplier || 1;
-                rebirthCost = gameData.rebirthCost || 1000;
-                rebirthCount = gameData.rebirthCount || 0;
-                prestigeMultiplier = gameData.prestigeMultiplier || 1;
-                upgrades.forEach((upgrade, index) => {
-                    upgrade.count = gameData.upgrades[index].count;
-                    upgrade.effect = gameData.upgrades[index].effect;
-                });
-                updatePlants();
-                updateUpgrades();
-                updatePassiveIncome();
-                updateRebirthCount();
+        function updateDisplay() {
+            clicksElement.textContent = clicks;
+            maxClicksElement.textContent = maxClicks;
+            coinsElement.textContent = coins;
+            progressBar.style.width = `${(clicks / maxClicks) * 100}%`;
+        }
+
+        function createPopText(x, y, text) {
+            const popText = document.createElement('div');
+            popText.classList.add('pop-text');
+            popText.style.left = `${x}px`;
+            popText.style.top = `${y}px`;
+            popText.textContent = text;
+            document.body.appendChild(popText);
+            setTimeout(() => {
+                document.body.removeChild(popText);
+            }, 500);
+        }
+
+        clickArea.addEventListener('click', (e) => {
+            if (canClick && clicks < maxClicks) {
+                canClick = false;
+                clickArea.classList.add('disabled');
+
+                setTimeout(() => {
+                    clicks = Math.min(clicks + clickValue, maxClicks);
+                    updateDisplay();
+                    createPopText(e.clientX, e.clientY, `+${clickValue}`);
+                    canClick = true;
+                    clickArea.classList.remove('disabled');
+                    saveGame();
+                }, 500);
+            } else if (clicks >= maxClicks) {
+                clickArea.classList.add('shake');
+                setTimeout(() => {
+                    clickArea.classList.remove('shake');
+                }, 500);
             }
-        }
+        });
 
-        function saveGame() {
-            const gameData = {
-                plants: plants,
-                pps: pps,
-                passiveIncome: passiveIncome,
-                rebirthMultiplier: rebirthMultiplier,
-                rebirthCost: rebirthCost,
-                rebirthCount: rebirthCount,
-                prestigeMultiplier: prestigeMultiplier,
-                upgrades: upgrades.map(upgrade => ({ count: upgrade.count, effect: upgrade.effect }))
-            };
-            localStorage.setItem('ecoGardenSave', JSON.stringify(gameData));
-        }
-
-        function toggleMenu() {
-            document.getElementById('menu').classList.toggle('open');
-        }
-
-        function formatNumber(num) {
-            const suffixes = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx'];
-            let suffixIndex = 0;
-            while (num >= 1000 && suffixIndex < suffixes.length - 1) {
-                num /= 1000;
-                suffixIndex++;
-            }
-            return num.toFixed(3) + suffixes[suffixIndex];
-        }
-
-        function updatePlants() {
-            document.getElementById('plantCount').textContent = formatNumber(plants);
-            document.getElementById('pps').textContent = formatNumber(pps);
-        }
-
-        function updatePassiveIncome() {
-            document.getElementById('passiveIncomeValue').textContent = formatNumber(passiveIncome);
-        }
-
-        function updateRebirthCount() {
-            document.getElementById('rebirthCount').textContent = rebirthCount;
-        }
-
-        function clickGarden() {
-            const currentTime = new Date().getTime();
-            if (currentTime - lastClickTime < clickDelay) {
-                return; // Ignore clicks that are too close together
-            }
-            lastClickTime = currentTime;
-
-            plants += (1 + upgrades[0].effect * upgrades[0].count) * rebirthMultiplier * prestigeMultiplier;
-            updatePlants();
-            document.getElementById('garden').classList.add('grow');
-            setTimeout(() => document.getElementById('garden').classList.remove('grow'), 500);
-            createLeaf();
-            showRandomMessage();
+        function sellClicks() {
+            const value = clicks;
+            coins += value;
+            clicks = 0;
+            updateDisplay();
             saveGame();
+            return value;
+        }
+
+        sellButton.addEventListener('click', () => {
+            if (clicks > 0) {
+                const soldValue = sellClicks();
+                createPopText(
+                    sellButton.offsetLeft + sellButton.offsetWidth / 2,
+                    sellButton.offsetTop,
+                    `+${soldValue} монет`
+                );
+            }
+        });
+
+        menuButton.addEventListener('click', () => {
+            menu.classList.toggle('open');
+        });
+
+        function renderUpgrades() {
+            upgradesList.innerHTML = '';
+            upgrades.forEach((upgrade, index) => {
+                const upgradeElement = document.createElement('div');
+                upgradeElement.classList.add('upgrade-item');
+                upgradeElement.innerHTML = `
+            <h3>${upgrade.name}</h3>
+            <p>${upgrade.description}</p>
+            <p class="upgrade-cost">Стоимость: ${upgrade.cost} монет</p>
+        `;
+                upgradeElement.addEventListener('click', () => buyUpgrade(index));
+                upgradesList.appendChild(upgradeElement);
+            });
         }
 
         function buyUpgrade(index) {
             const upgrade = upgrades[index];
-            const cost = Math.floor(upgrade.baseCost * Math.pow(upgrade.costMultiplier, upgrade.count));
-            if (plants >= cost) {
-                plants -= cost;
-                upgrade.count++;
-                upgrade.effect = upgrade.baseEffect * Math.pow(1.05, upgrade.count) * rebirthMultiplier * prestigeMultiplier;
-                updateUpgrades();
-                updatePlants();
-                pps = calculatePPS();
-                updatePassiveIncome();
+            if (coins >= upgrade.cost) {
+                coins -= upgrade.cost;
+                upgrade.effect();
+                upgrade.cost = Math.floor(upgrade.cost * 1.5);
+                updateDisplay();
+                renderUpgrades();
                 saveGame();
-            }
-        }
-
-        function calculatePPS() {
-            return upgrades.reduce((sum, upgrade) => sum + upgrade.effect * upgrade.count, 0) * rebirthMultiplier * prestigeMultiplier;
-        }
-
-        function updateUpgrades() {
-            const upgradesContainer = document.getElementById('upgrades');
-            upgradesContainer.innerHTML = '';
-            upgrades.forEach((upgrade, index) => {
-                const cost = Math.floor(upgrade.baseCost * Math.pow(upgrade.costMultiplier, upgrade.count));
-                const button = document.createElement('div');
-                button.className = 'upgrade';
-                button.textContent = `${upgrade.name} (${upgrade.count}) - Стоимость: ${formatNumber(cost)} 🌱`;
-                button.onclick = () => buyUpgrade(index);
-                upgradesContainer.appendChild(button);
-            });
-        }
-
-        function createLeaf() {
-            const leaf = document.createElement('div');
-            leaf.style.position = 'absolute';
-            leaf.style.width = '20px';
-            leaf.style.height = '20px';
-            leaf.style.backgroundColor = `hsl(${Math.random() * 60 + 90}, 100%, 50%)`;
-            leaf.style.borderRadius = '50%';
-            leaf.style.pointerEvents = 'none';
-            leaf.style.left = `${Math.random() * window.innerWidth}px`;
-            leaf.style.top = '-20px';
-            leaf.style.transform = 'rotate(45deg)';
-            leaf.style.transition = 'all 3s linear';
-            document.body.appendChild(leaf);
-
-            setTimeout(() => {
-                leaf.style.top = `${window.innerHeight + 20}px`;
-                leaf.style.transform = 'rotate(405deg)';
-            }, 100);
-
-            setTimeout(() => {
-                document.body.removeChild(leaf);
-            }, 3000);
-        }
-
-        function gameLoop() {
-            plants += pps / 10;
-            plants += passiveIncome / 10;
-            updatePlants();
-            saveGame();
-        }
-
-        function showRandomMessage() {
-            const messages = [
-                "Ваш сад процветает!",
-                "Растения растут прекрасно!",
-                "Гармония природы окружает вас!",
-                "У вас зелёная рука!",
-                "Экосистема процветает!"
-            ];
-            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-            document.getElementById('message-display').textContent = randomMessage;
-            setTimeout(() => document.getElementById('message-display').textContent = '', 3000);
-        }
-
-        function activateSunshine() {
-            if (plants >= 1000 && !sunshineActive) {
-                plants -= 1000;
-                sunshineActive = true;
-                document.body.style.background = 'linear-gradient(135deg, #ffd700, #ff8c00)';
-                setTimeout(() => {
-                    sunshineActive = false;
-                    document.body.style.background = 'linear-gradient(135deg, #7cbb5e, #2e8b57)';
-                }, 30000);
-                saveGame();
-            }
-        }
-
-        function callPollinators() {
-            if (plants >= 5000 && !pollinatorsActive) {
-                plants -= 5000;
-                pollinatorsActive = true;
-                const weatherEvent = document.getElementById('weather-event');
-                weatherEvent.textContent = "Опылители роятся в вашем саду!";
-                weatherEvent.style.display = 'block';
-                setTimeout(() => {
-                    pollinatorsActive = false;
-                    weatherEvent.style.display = 'none';
-                }, 60000);
-                saveGame();
-            }
-        }
-
-        function showHelp() {
-            const modal = document.getElementById('helpModal');
-            const helpContent = document.getElementById('helpContent');
-            helpContent.innerHTML = '';
-
-            upgrades.forEach(upgrade => {
-                const upgradeInfo = document.createElement('p');
-                upgradeInfo.innerHTML = `<strong>${upgrade.name}:</strong> ${upgrade.description}`;
-                helpContent.appendChild(upgradeInfo);
-            });
-
-            const specialActions = [
-                { name: "Активировать Солнечный Свет", description: "Удваивает производство растений на 30 секунд" },
-                { name: "Призвать Опылителей", description: "Утраивает производство растений на 60 секунд" }
-            ];
-
-            helpContent.appendChild(document.createElement('hr'));
-
-            specialActions.forEach(action => {
-                const actionInfo = document.createElement('p');
-                actionInfo.innerHTML = `<strong>${action.name}:</strong> ${action.description}`;
-                helpContent.appendChild(actionInfo);
-            });
-
-            modal.style.display = 'block';
-        }
-
-        function closeHelp() {
-            document.getElementById('helpModal').style.display = 'none';
-        }
-
-        function showRebirthModal() {
-            document.getElementById('rebirthCost').textContent = formatNumber(rebirthCost);
-            document.getElementById('rebirthModal').style.display = 'block';
-        }
-
-        function closeRebirthModal() {
-            document.getElementById('rebirthModal').style.display = 'none';
-        }
-
-        function performRebirth() {
-            if (plants >= rebirthCost) {
-                plants = 0;
-                rebirthMultiplier *= 1.5;
-                upgrades.forEach(upgrade => {
-                    upgrade.count = 0;
-                    upgrade.effect = upgrade.baseEffect;
-                });
-                pps = 0;
-                passiveIncome = 0;
-                rebirthCost *= 4;
-                rebirthCount++;
-                updatePlants();
-                updateUpgrades();
-                updatePassiveIncome();
-                updateRebirthCount();
-                saveGame();
-                closeRebirthModal();
-                showMessage("Возрождение выполнено! Ваш множитель теперь x" + rebirthMultiplier.toFixed(2));
             } else {
-                showMessage("Недостаточно растений для возрождения!");
+                alert('Недостаточно монет для покупки этого улучшения!');
             }
         }
 
-        function showPrestigeModal() {
-            document.getElementById('prestigeModal').style.display = 'block';
+        function saveGame() {
+            const gameState = {
+                clicks,
+                coins,
+                maxClicks,
+                clickValue,
+                upgrades: upgrades.map(upgrade => ({ ...upgrade, effect: undefined }))
+            };
+            localStorage.setItem('clickerGameState', JSON.stringify(gameState));
         }
 
-        function closePrestigeModal() {
-            document.getElementById('prestigeModal').style.display = 'none';
-        }
-
-        function performPrestige() {
-            if (rebirthCount >= 10) {
-                plants = 0;
-                rebirthMultiplier = 1;
-                prestigeMultiplier *= 20;
-                upgrades.forEach(upgrade => {
-                    upgrade.count = 0;
-                    upgrade.effect = upgrade.baseEffect;
+        function loadGame() {
+            const savedState = localStorage.getItem('clickerGameState');
+            if (savedState) {
+                const gameState = JSON.parse(savedState);
+                clicks = gameState.clicks;
+                coins = gameState.coins;
+                maxClicks = gameState.maxClicks;
+                clickValue = gameState.clickValue;
+                upgrades.forEach((upgrade, index) => {
+                    upgrade.cost = gameState.upgrades[index].cost;
                 });
-                pps = 0;
-                passiveIncome = 0;
-                rebirthCost = 1000;
-                rebirthCount = 0;
-                updatePlants();
-                updateUpgrades();
-                updatePassiveIncome();
-                updateRebirthCount();
-                saveGame();
-                closePrestigeModal();
-                showMessage("Престиж выполнен! Ваш множитель теперь x" + prestigeMultiplier.toFixed(2));
-            } else {
-                showMessage("Недостаточно возрождений для выполнения престижа!");
+                updateDisplay();
+                renderUpgrades();
             }
         }
 
-        function showMessage(message) {
-            document.getElementById('message-display').textContent = message;
-            setTimeout(() => document.getElementById('message-display').textContent = '', 5000);
-        }
-
-        function goToGreenhouse() {
-            saveGame();
-            window.location.href = 'greenhouse.html';
-        }
-
-        window.onclick = function (event) {
-            const helpModal = document.getElementById('helpModal');
-            const rebirthModal = document.getElementById('rebirthModal');
-            const prestigeModal = document.getElementById('prestigeModal');
-            if (event.target == helpModal) {
-                helpModal.style.display = "none";
-            }
-            if (event.target == rebirthModal) {
-                rebirthModal.style.display = "none";
-            }
-            if (event.target == prestigeModal) {
-                prestigeModal.style.display = "none";
-            }
-        }
-
+        renderUpgrades();
         loadGame();
-        updateUpgrades();
-        setInterval(gameLoop, 100);
-
-        // Particle background
-        const canvas = document.getElementById('particles');
-        const ctx = canvas.getContext('2d');
-
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        const particlesArray = [];
-
-        class Particle {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 5 + 1;
-                this.speedX = Math.random() * 3 - 1.5;
-                this.speedY = Math.random() * 3 - 1.5;
-                this.color = `hsl(${Math.random() * 60 + 90}, 100%, 50%)`;
-            }
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                if (this.size > 0.2) this.size -= 0.1;
-            }
-            draw() {
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-
-        function handleParticles() {
-            for (let i = 0; i < particlesArray.length; i++) {
-                particlesArray[i].update();
-                particlesArray[i].draw();
-                if (particlesArray[i].size <= 0.2) {
-                    particlesArray.splice(i, 1);
-                    i--;
-                }
-            }
-        }
-
-        function createParticles() {
-            if (particlesArray.length < 100) {
-                particlesArray.push(new Particle());
-            }
-        }
-
-        function animateParticles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            handleParticles();
-            createParticles();
-            requestAnimationFrame(animateParticles);
-        }
-
-        animateParticles();
-
-        window.addEventListener('resize', function () {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        });
+        updateDisplay();
     </script>
 </body>
 
