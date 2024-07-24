@@ -61,6 +61,11 @@
             transform: translateY(-3px);
         }
 
+        .upgrade:active,
+        .special-action:active {
+            transform: translateY(1px);
+        }
+
         #particles {
             position: fixed;
             top: 0;
@@ -298,6 +303,37 @@
         let fairyDustActive = false;
         let timeWarpActive = false;
 
+        let lastClickTime = 0;
+        const clickDelay = 500; // 0.5 seconds in milliseconds
+
+        // Load saved game data
+        function loadGame() {
+            const savedGame = localStorage.getItem('ecoGardenSave');
+            if (savedGame) {
+                const gameData = JSON.parse(savedGame);
+                plants = gameData.plants;
+                pps = gameData.pps;
+                upgrades.forEach((upgrade, index) => {
+                    upgrade.count = gameData.upgrades[index].count;
+                    upgrade.effect = gameData.upgrades[index].effect;
+                });
+                autoClickerActive = gameData.autoClickerActive;
+                updatePlants();
+                updateUpgrades();
+            }
+        }
+
+        // Save game data
+        function saveGame() {
+            const gameData = {
+                plants: plants,
+                pps: pps,
+                upgrades: upgrades.map(upgrade => ({ count: upgrade.count, effect: upgrade.effect })),
+                autoClickerActive: autoClickerActive
+            };
+            localStorage.setItem('ecoGardenSave', JSON.stringify(gameData));
+        }
+
         function toggleMenu() {
             document.getElementById('menu').classList.toggle('open');
         }
@@ -308,6 +344,12 @@
         }
 
         function clickGarden() {
+            const currentTime = new Date().getTime();
+            if (currentTime - lastClickTime < clickDelay) {
+                return; // Ignore clicks that are too close together
+            }
+            lastClickTime = currentTime;
+
             let baseClick = 1 + upgrades[0].effect * upgrades[0].count;
             if (sunshineActive) baseClick *= 2;
             if (pollinatorsActive) baseClick *= 3;
@@ -319,6 +361,7 @@
             setTimeout(() => document.getElementById('garden').classList.remove('grow'), 500);
             createLeaf();
             showRandomMessage();
+            saveGame();
         }
 
         function buyUpgrade(index) {
@@ -331,6 +374,7 @@
                 updateUpgrades();
                 updatePlants();
                 pps = calculatePPS();
+                saveGame();
             }
         }
 
@@ -401,6 +445,7 @@
                 plants += upgrades[0].effect * upgrades[0].count / 10;
             }
             updatePlants();
+            saveGame();
         }
 
         function showRandomMessage() {
@@ -425,6 +470,7 @@
                     sunshineActive = false;
                     document.body.style.background = 'linear-gradient(135deg, #7cbb5e, #2e8b57)';
                 }, 30000);
+                saveGame();
             }
         }
 
@@ -439,6 +485,7 @@
                     pollinatorsActive = false;
                     weatherEvent.style.display = 'none';
                 }, 60000);
+                saveGame();
             }
         }
 
@@ -447,6 +494,7 @@
                 plants -= 1000;
                 autoClickerActive = true;
                 showMessage("Авто-Кликер активирован!");
+                saveGame();
             }
         }
 
@@ -459,6 +507,7 @@
                     goldenSeedsActive = false;
                     showMessage("Действие Золотых Семян закончилось.");
                 }, 120000);
+                saveGame();
             }
         }
 
@@ -473,6 +522,7 @@
                     document.body.style.background = 'linear-gradient(135deg, #7cbb5e, #2e8b57)';
                     showMessage("Дождь прекратился.");
                 }, 180000);
+                saveGame();
             }
         }
 
@@ -487,6 +537,7 @@
                     document.getElementById('garden').classList.remove('pulse');
                     showMessage("Действие Пыльцы Фей закончилось.");
                 }, 300000);
+                saveGame();
             }
         }
 
@@ -502,6 +553,7 @@
                     document.body.style.filter = 'none';
                     showMessage("Время вернулось в норму.");
                 }, 600000);
+                saveGame();
             }
         }
 
@@ -557,6 +609,7 @@
             }
         }
 
+        loadGame();
         updateUpgrades();
         setInterval(gameLoop, 100);
 
