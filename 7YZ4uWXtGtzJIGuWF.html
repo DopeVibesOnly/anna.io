@@ -1,0 +1,342 @@
+<html>
+
+<head>
+    <base href="greenhouse.html">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Эко-Теплица</title>
+    <style>
+        body {
+            font-family: 'Comfortaa', cursive;
+            background: linear-gradient(135deg, #4CAF50, #2E8B57);
+            color: #1a3a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .greenhouse-container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0, 100, 0, 0.3);
+            max-width: 800px;
+            width: 90%;
+        }
+
+        .plant {
+            width: 150px;
+            height: 150px;
+            margin: 20px;
+            cursor: pointer;
+            transition: transform 0.3s;
+            display: inline-block;
+        }
+
+        .plant:hover {
+            transform: scale(1.1);
+        }
+
+        .plant:active {
+            transform: scale(0.95);
+        }
+
+        .upgrade {
+            margin: 10px;
+            padding: 10px;
+            background: rgba(124, 187, 94, 0.3);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .upgrade:hover {
+            background: rgba(124, 187, 94, 0.5);
+            transform: translateY(-3px);
+        }
+
+        .upgrade:active {
+            transform: translateY(1px);
+        }
+
+        #message-display {
+            font-size: 18px;
+            margin: 20px 0;
+            min-height: 30px;
+            color: #4a7023;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(124, 187, 94, 0.8);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+        }
+
+        .back-button:hover {
+            background: rgba(124, 187, 94, 1);
+        }
+
+        .help-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(124, 187, 94, 0.8);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+        }
+
+        .help-button:hover {
+            background: rgba(124, 187, 94, 1);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 10px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <button class="back-button" onclick="goToGarden()">Вернуться в Сад</button>
+    <div class="greenhouse-container">
+        <h1>Эко-Теплица</h1>
+        <p>Растения: <span id="plantCount">0</span> 🌱</p>
+        <p>Растений в секунду: <span id="pps">0</span> 🌱</p>
+        <div id="plants">
+            <svg class="plant" viewBox="0 0 100 100" onclick="clickPlant(0)">
+                <rect x="45" y="80" width="10" height="20" fill="#8B4513" />
+                <circle cx="50" cy="50" r="30" fill="#228B22" />
+                <circle cx="50" cy="50" r="25" fill="#32CD32" />
+                <circle cx="50" cy="50" r="20" fill="#7CFC00" />
+            </svg>
+            <svg class="plant" viewBox="0 0 100 100" onclick="clickPlant(1)">
+                <rect x="45" y="80" width="10" height="20" fill="#8B4513" />
+                <path d="M50 20 L30 80 L70 80 Z" fill="#FF6347" />
+                <circle cx="50" cy="40" r="10" fill="#FFD700" />
+            </svg>
+            <svg class="plant" viewBox="0 0 100 100" onclick="clickPlant(2)">
+                <rect x="45" y="80" width="10" height="20" fill="#8B4513" />
+                <circle cx="50" cy="50" r="30" fill="#9932CC" />
+                <path d="M50 20 Q60 50 50 80 Q40 50 50 20 Z" fill="#8A2BE2" />
+            </svg>
+        </div>
+        <div id="message-display"></div>
+        <div id="upgrades"></div>
+    </div>
+    <button class="help-button" onclick="showHelp()">Помощь</button>
+
+    <div id="helpModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeHelp()">&times;</span>
+            <h2>Справка по Теплице</h2>
+            <div id="helpContent"></div>
+        </div>
+    </div>
+
+    <script>
+        let plants = 0;
+        let pps = 0;
+        let lastClickTime = 0;
+        const clickDelay = 500; // 0.5 seconds in milliseconds
+
+        const upgrades = [
+            { name: "Автополив", baseCost: 100, costMultiplier: 1.15, baseEffect: 1, effect: 1, count: 0, description: "Автоматически поливает растения, увеличивая их рост" },
+            { name: "Удобрение", baseCost: 500, costMultiplier: 1.2, baseEffect: 5, effect: 5, count: 0, description: "Ускоряет рост растений, добавляя питательные вещества" },
+            { name: "Система освещения", baseCost: 2000, costMultiplier: 1.25, baseEffect: 20, effect: 20, count: 0, description: "Обеспечивает оптимальное освещение для роста растений" }
+        ];
+
+        const plants_types = [
+            { name: "Стандартное растение", multiplier: 1 },
+            { name: "Томат", multiplier: 2 },
+            { name: "Экзотический цветок", multiplier: 5 }
+        ];
+
+        function loadGame() {
+            const savedGame = localStorage.getItem('ecoGreenhouseSave');
+            if (savedGame) {
+                const gameData = JSON.parse(savedGame);
+                plants = gameData.plants;
+                pps = gameData.pps;
+                upgrades.forEach((upgrade, index) => {
+                    upgrade.count = gameData.upgrades[index].count;
+                    upgrade.effect = gameData.upgrades[index].effect;
+                });
+                updatePlants();
+                updateUpgrades();
+            }
+        }
+
+        function saveGame() {
+            const gameData = {
+                plants: plants,
+                pps: pps,
+                upgrades: upgrades.map(upgrade => ({ count: upgrade.count, effect: upgrade.effect }))
+            };
+            localStorage.setItem('ecoGreenhouseSave', JSON.stringify(gameData));
+        }
+
+        function updatePlants() {
+            document.getElementById('plantCount').textContent = Math.floor(plants);
+            document.getElementById('pps').textContent = pps.toFixed(1);
+        }
+
+        function clickPlant(index) {
+            const currentTime = new Date().getTime();
+            if (currentTime - lastClickTime < clickDelay) {
+                return; // Ignore clicks that are too close together
+            }
+            lastClickTime = currentTime;
+
+            plants += 1 * plants_types[index].multiplier;
+            updatePlants();
+            document.getElementsByClassName('plant')[index].classList.add('clicked');
+            setTimeout(() => document.getElementsByClassName('plant')[index].classList.remove('clicked'), 300);
+            showRandomMessage(plants_types[index].name);
+            saveGame();
+        }
+
+        function buyUpgrade(index) {
+            const upgrade = upgrades[index];
+            const cost = Math.floor(upgrade.baseCost * Math.pow(upgrade.costMultiplier, upgrade.count));
+            if (plants >= cost) {
+                plants -= cost;
+                upgrade.count++;
+                upgrade.effect = upgrade.baseEffect * Math.pow(1.05, upgrade.count);
+                updateUpgrades();
+                updatePlants();
+                pps = calculatePPS();
+                saveGame();
+            }
+        }
+
+        function calculatePPS() {
+            return upgrades.reduce((sum, upgrade) => sum + upgrade.effect * upgrade.count, 0);
+        }
+
+        function updateUpgrades() {
+            const upgradesContainer = document.getElementById('upgrades');
+            upgradesContainer.innerHTML = '';
+            upgrades.forEach((upgrade, index) => {
+                const cost = Math.floor(upgrade.baseCost * Math.pow(upgrade.costMultiplier, upgrade.count));
+                const button = document.createElement('div');
+                button.className = 'upgrade';
+                button.textContent = `${upgrade.name} (${upgrade.count}) - Стоимость: ${cost} 🌱`;
+                button.onclick = () => buyUpgrade(index);
+                upgradesContainer.appendChild(button);
+            });
+        }
+
+        function gameLoop() {
+            plants += pps / 10;
+            updatePlants();
+            saveGame();
+        }
+
+        function showRandomMessage(plantType) {
+            const messages = [
+                `${plantType} растет прекрасно!`,
+                `Ваше ${plantType.toLowerCase()} процветает!`,
+                `${plantType} выглядит здоровым!`,
+                `${plantType} радует глаз!`,
+                `${plantType} набирает силу!`
+            ];
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+            document.getElementById('message-display').textContent = randomMessage;
+            setTimeout(() => document.getElementById('message-display').textContent = '', 3000);
+        }
+
+        function goToGarden() {
+            saveGame();
+            window.location.href = 'index.html';
+        }
+
+        function showHelp() {
+            const modal = document.getElementById('helpModal');
+            const helpContent = document.getElementById('helpContent');
+            helpContent.innerHTML = '';
+
+            plants_types.forEach(plant => {
+                const plantInfo = document.createElement('p');
+                plantInfo.innerHTML = `<strong>${plant.name}:</strong> Даёт ${plant.multiplier} ${plant.multiplier === 1 ? 'растение' : 'растения'} за клик`;
+                helpContent.appendChild(plantInfo);
+            });
+
+            helpContent.appendChild(document.createElement('hr'));
+
+            upgrades.forEach(upgrade => {
+                const upgradeInfo = document.createElement('p');
+                upgradeInfo.innerHTML = `<strong>${upgrade.name}:</strong> ${upgrade.description}`;
+                helpContent.appendChild(upgradeInfo);
+            });
+
+            modal.style.display = 'block';
+        }
+
+        function closeHelp() {
+            document.getElementById('helpModal').style.display = 'none';
+        }
+
+        window.onclick = function (event) {
+            const modal = document.getElementById('helpModal');
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        loadGame();
+        updateUpgrades();
+        setInterval(gameLoop, 100);
+    </script>
+</body>
+
+</html>
