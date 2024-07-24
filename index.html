@@ -4,7 +4,7 @@
     <base href="index.html">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Смачно Кликер </title>
+    <title>Симулятор кликер</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
 
@@ -14,6 +14,7 @@
             --background-color: #ecf0f1;
             --text-color: #34495e;
             --menu-bg-color: rgba(52, 73, 94, 0.95);
+            --potion-color: #9b59b6;
         }
 
         body {
@@ -39,7 +40,8 @@
             width: 100%;
         }
 
-        h1 {
+        h1,
+        h2 {
             color: var(--primary-color);
             margin-bottom: 1rem;
         }
@@ -67,18 +69,13 @@
             align-items: center;
             font-size: 2rem;
             color: white;
-            transition: transform 0.1s, box-shadow 0.1s, opacity 0.3s;
+            transition: transform 0.1s, box-shadow 0.1s;
             user-select: none;
         }
 
         .click-area:active {
             transform: scale(0.95);
             box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
-        }
-
-        .click-area.disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
         }
 
         .sell-button {
@@ -202,7 +199,8 @@
             left: 0;
         }
 
-        .upgrade-item {
+        .upgrade-item,
+        .potion-item {
             background-color: rgba(255, 255, 255, 0.1);
             border-radius: 10px;
             padding: 15px;
@@ -212,23 +210,100 @@
             transition: background-color 0.3s;
         }
 
-        .upgrade-item:hover {
+        .upgrade-item:hover,
+        .potion-item:hover {
             background-color: rgba(255, 255, 255, 0.2);
         }
 
-        .upgrade-item h3 {
+        .upgrade-item h3,
+        .potion-item h3 {
             margin: 0 0 10px 0;
         }
 
-        .upgrade-item p {
+        .upgrade-item p,
+        .potion-item p {
             margin: 0;
             font-size: 0.9em;
             opacity: 0.8;
         }
 
-        .upgrade-cost {
+        .upgrade-cost,
+        .potion-cost {
             font-weight: bold;
             color: #f1c40f;
+        }
+
+        .inventory {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .inventory-item {
+            width: 50px;
+            height: 50px;
+            background-color: var(--potion-color);
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 24px;
+            color: white;
+            transition: transform 0.2s;
+        }
+
+        .inventory-item:hover {
+            transform: scale(1.1);
+        }
+
+        .potion-info {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            z-index: 1001;
+            display: none;
+        }
+
+        .potion-info h3 {
+            margin-top: 0;
+        }
+
+        .close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--text-color);
+        }
+
+        .use-button {
+            background-color: var(--potion-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .use-button:hover {
+            background-color: #8e44ad;
+        }
+
+        .max-upgrade {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
     </style>
 </head>
@@ -238,9 +313,13 @@
     <div class="menu" id="menu">
         <h2 style="color: white;">Улучшения</h2>
         <div id="upgrades-list"></div>
+        <h2 style="color: white;">Зелья</h2>
+        <div id="potions-list"></div>
+        <h2 style="color: white;">Инвентарь</h2>
+        <div id="inventory" class="inventory"></div>
     </div>
     <div class="game-container">
-        <h1>Кликер Развития</h1>
+        <h1>Симулятор кликер</h1>
         <div class="stats">
             <div class="stat">Клики: <span id="clicks">0</span> / <span id="max-clicks">10</span></div>
             <div class="stat">Монеты: <span id="coins">0</span></div>
@@ -251,6 +330,12 @@
             <div class="progress" id="progress"></div>
         </div>
     </div>
+    <div id="potion-info" class="potion-info">
+        <button class="close-button" id="close-potion-info">&times;</button>
+        <h3 id="potion-name"></h3>
+        <p id="potion-description"></p>
+        <button class="use-button" id="use-potion">Использовать</button>
+    </div>
 
     <script>
         let clicks = 0;
@@ -258,11 +343,12 @@
         let maxClicks = 10;
         let clickValue = 1;
         let autoClickerInterval = null;
-        let canClick = true;
+        let potionActive = false;
+        let potionTimer = null;
 
         const upgrades = [
-            { name: "Больше места", description: "Увеличивает вместимость рюкзака", cost: 50, effect: () => { maxClicks += 5; } },
-            { name: "Улучшенный клик", description: "Увеличивает стоимость клика", cost: 100, effect: () => { clickValue++; } },
+            { name: "Больше места", description: "Увеличивает вместимость рюкзака", cost: 50, effect: () => { maxClicks += 5; }, maxLevel: Infinity },
+            { name: "Улучшенный клик", description: "Увеличивает стоимость клика", cost: 100, effect: () => { clickValue++; }, maxLevel: Infinity },
             {
                 name: "Автокликер", description: "Автоматически кликает каждую секунду", cost: 200, effect: () => {
                     if (!autoClickerInterval) {
@@ -270,11 +356,10 @@
                             if (clicks < maxClicks) {
                                 clicks = Math.min(clicks + 1, maxClicks);
                                 updateDisplay();
-                                saveGame();
                             }
                         }, 1000);
                     }
-                }
+                }, maxLevel: 1
             },
             {
                 name: "Эффективность продаж", description: "Увеличивает прибыль от продажи кликов", cost: 300, effect: () => {
@@ -284,12 +369,19 @@
                         coins += value;
                         clicks = 0;
                         updateDisplay();
-                        saveGame();
                         return value;
                     };
-                }
+                }, maxLevel: 1
             },
         ];
+
+        const potions = [
+            { name: "Малое зелье прибыли", description: "Увеличивает прибыль от продажи на 50% на 3 минуты", cost: 1000, boost: 1.5 },
+            { name: "Большое зелье прибыли", description: "Удваивает прибыль от продажи на 3 минуты", cost: 5000, boost: 2 },
+            { name: "Зелье сверхприбыли", description: "Утраивает прибыль от продажи на 3 минуты", cost: 15000, boost: 3 },
+        ];
+
+        const inventory = [];
 
         const clicksElement = document.getElementById('clicks');
         const maxClicksElement = document.getElementById('max-clicks');
@@ -300,6 +392,13 @@
         const menuButton = document.getElementById('menu-button');
         const menu = document.getElementById('menu');
         const upgradesList = document.getElementById('upgrades-list');
+        const potionsList = document.getElementById('potions-list');
+        const inventoryContainer = document.getElementById('inventory');
+        const potionInfo = document.getElementById('potion-info');
+        const potionName = document.getElementById('potion-name');
+        const potionDescription = document.getElementById('potion-description');
+        const usePotion = document.getElementById('use-potion');
+        const closePotionInfo = document.getElementById('close-potion-info');
 
         function updateDisplay() {
             clicksElement.textContent = clicks;
@@ -321,19 +420,11 @@
         }
 
         clickArea.addEventListener('click', (e) => {
-            if (canClick && clicks < maxClicks) {
-                canClick = false;
-                clickArea.classList.add('disabled');
-
-                setTimeout(() => {
-                    clicks = Math.min(clicks + clickValue, maxClicks);
-                    updateDisplay();
-                    createPopText(e.clientX, e.clientY, `+${clickValue}`);
-                    canClick = true;
-                    clickArea.classList.remove('disabled');
-                    saveGame();
-                }, 500);
-            } else if (clicks >= maxClicks) {
+            if (clicks < maxClicks) {
+                clicks = Math.min(clicks + clickValue, maxClicks);
+                updateDisplay();
+                createPopText(e.clientX, e.clientY, `+${clickValue}`);
+            } else {
                 clickArea.classList.add('shake');
                 setTimeout(() => {
                     clickArea.classList.remove('shake');
@@ -342,11 +433,10 @@
         });
 
         function sellClicks() {
-            const value = clicks;
+            const value = clicks * (potionActive ? potionActive : 1);
             coins += value;
             clicks = 0;
             updateDisplay();
-            saveGame();
             return value;
         }
 
@@ -370,59 +460,111 @@
             upgrades.forEach((upgrade, index) => {
                 const upgradeElement = document.createElement('div');
                 upgradeElement.classList.add('upgrade-item');
+                if (upgrade.maxLevel === 1 && upgrade.purchased) {
+                    upgradeElement.classList.add('max-upgrade');
+                }
                 upgradeElement.innerHTML = `
             <h3>${upgrade.name}</h3>
             <p>${upgrade.description}</p>
-            <p class="upgrade-cost">Стоимость: ${upgrade.cost} монет</p>
+            <p class="upgrade-cost">${upgrade.maxLevel === 1 && upgrade.purchased ? 'МАКС' : `Стоимость: ${upgrade.cost} монет`}</p>
         `;
-                upgradeElement.addEventListener('click', () => buyUpgrade(index));
+                if (!(upgrade.maxLevel === 1 && upgrade.purchased)) {
+                    upgradeElement.addEventListener('click', () => buyUpgrade(index));
+                }
                 upgradesList.appendChild(upgradeElement);
             });
         }
 
         function buyUpgrade(index) {
             const upgrade = upgrades[index];
-            if (coins >= upgrade.cost) {
+            if (coins >= upgrade.cost && (!upgrade.purchased || upgrade.maxLevel === Infinity)) {
                 coins -= upgrade.cost;
                 upgrade.effect();
-                upgrade.cost = Math.floor(upgrade.cost * 1.5);
+                if (upgrade.maxLevel === 1) {
+                    upgrade.purchased = true;
+                } else {
+                    upgrade.cost = Math.floor(upgrade.cost * 1.5);
+                }
                 updateDisplay();
                 renderUpgrades();
-                saveGame();
+            } else if (upgrade.purchased && upgrade.maxLevel === 1) {
+                alert('Это улучшение уже достигло максимального уровня!');
             } else {
                 alert('Недостаточно монет для покупки этого улучшения!');
             }
         }
 
-        function saveGame() {
-            const gameState = {
-                clicks,
-                coins,
-                maxClicks,
-                clickValue,
-                upgrades: upgrades.map(upgrade => ({ ...upgrade, effect: undefined }))
-            };
-            localStorage.setItem('clickerGameState', JSON.stringify(gameState));
+        function renderPotions() {
+            potionsList.innerHTML = '';
+            potions.forEach((potion, index) => {
+                const potionElement = document.createElement('div');
+                potionElement.classList.add('potion-item');
+                potionElement.innerHTML = `
+            <h3>${potion.name}</h3>
+            <p>${potion.description}</p>
+            <p class="potion-cost">Стоимость: ${potion.cost} монет</p>
+        `;
+                potionElement.addEventListener('click', () => buyPotion(index));
+                potionsList.appendChild(potionElement);
+            });
         }
 
-        function loadGame() {
-            const savedState = localStorage.getItem('clickerGameState');
-            if (savedState) {
-                const gameState = JSON.parse(savedState);
-                clicks = gameState.clicks;
-                coins = gameState.coins;
-                maxClicks = gameState.maxClicks;
-                clickValue = gameState.clickValue;
-                upgrades.forEach((upgrade, index) => {
-                    upgrade.cost = gameState.upgrades[index].cost;
-                });
+        function buyPotion(index) {
+            const potion = potions[index];
+            if (coins >= potion.cost) {
+                coins -= potion.cost;
+                inventory.push(potion);
                 updateDisplay();
-                renderUpgrades();
+                renderInventory();
+            } else {
+                alert('Недостаточно монет для покупки этого зелья!');
             }
         }
 
+        function renderInventory() {
+            inventoryContainer.innerHTML = '';
+            inventory.forEach((potion, index) => {
+                const potionElement = document.createElement('div');
+                potionElement.classList.add('inventory-item');
+                potionElement.textContent = '🧪';
+                potionElement.addEventListener('click', () => showPotionInfo(index));
+                inventoryContainer.appendChild(potionElement);
+            });
+        }
+
+        function showPotionInfo(index) {
+            const potion = inventory[index];
+            potionName.textContent = potion.name;
+            potionDescription.textContent = potion.description;
+            potionInfo.style.display = 'block';
+            usePotion.onclick = () => useInventoryPotion(index);
+        }
+
+        closePotionInfo.addEventListener('click', () => {
+            potionInfo.style.display = 'none';
+        });
+
+        function useInventoryPotion(index) {
+            if (potionActive) {
+                alert('Нельзя использовать несколько зелий одновременно!');
+                return;
+            }
+            const potion = inventory[index];
+            potionActive = potion.boost;
+            inventory.splice(index, 1);
+            renderInventory();
+            potionInfo.style.display = 'none';
+            if (potionTimer) clearTimeout(potionTimer);
+            potionTimer = setTimeout(() => {
+                potionActive = false;
+                alert('Действие зелья закончилось!');
+            }, 3 * 60 * 1000);
+            alert(`Зелье ${potion.name} активировано на 3 минуты!`);
+        }
+
         renderUpgrades();
-        loadGame();
+        renderPotions();
+        renderInventory();
         updateDisplay();
     </script>
 </body>
