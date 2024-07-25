@@ -1,11 +1,10 @@
 <html>
 
 <head>
-  <base href="https://fps-nexus.com/play/neohorizon">
-  <title>NeoHorizon - Multiplayer FPS</title>
+  <base href="https://fps-nexus.com/play/cs16tribute">
+  <title>CS16 Tribute - Multiplayer FPS</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
   <style>
     body,
@@ -13,9 +12,9 @@
       margin: 0;
       padding: 0;
       height: 100%;
-      font-family: 'Orbitron', sans-serif;
+      font-family: 'Arial', sans-serif;
       background-color: #000;
-      color: #0ff;
+      color: #fff;
       overflow: hidden;
     }
 
@@ -37,11 +36,11 @@
     }
 
     #health,
-    #ammo {
-      background: rgba(0, 255, 255, 0.1);
+    #ammo,
+    #money {
+      background: rgba(0, 0, 0, 0.5);
       padding: 10px;
       border-radius: 5px;
-      backdrop-filter: blur(5px);
     }
 
     #crosshair {
@@ -49,9 +48,9 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 20px;
-      height: 20px;
-      border: 2px solid #0ff;
+      width: 10px;
+      height: 10px;
+      border: 2px solid #fff;
       border-radius: 50%;
       pointer-events: none;
     }
@@ -68,8 +67,8 @@
     }
 
     #menu button {
-      background: #0ff;
-      color: #000;
+      background: #4CAF50;
+      color: white;
       border: none;
       padding: 10px 20px;
       margin: 10px;
@@ -79,7 +78,7 @@
     }
 
     #menu button:hover {
-      background: #00ffff;
+      background: #45a049;
     }
 
     #nickname-input {
@@ -118,6 +117,43 @@
       text-shadow: 0 0 3px #000000;
       pointer-events: none;
     }
+
+    #buy-menu {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.8);
+      padding: 20px;
+      border-radius: 10px;
+      display: none;
+    }
+
+    #buy-menu button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      margin: 5px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    #buy-menu button:hover {
+      background: #45a049;
+    }
+
+    #round-info {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.5);
+      padding: 10px;
+      border-radius: 5px;
+      text-align: center;
+    }
   </style>
 </head>
 
@@ -125,30 +161,52 @@
   <div id="game-container">
     <div id="hud">
       <div id="health">Health: 100</div>
-      <div id="ammo">Ammo: 30</div>
+      <div id="ammo">Ammo: 30 / 90</div>
+      <div id="money">$: 800</div>
     </div>
     <div id="crosshair"></div>
+    <div id="round-info">Round 1 - Terrorists: 0 | Counter-Terrorists: 0</div>
   </div>
   <div id="menu">
-    <h1>NeoHorizon</h1>
+    <h1>CS16 Tribute</h1>
     <input type="text" id="nickname-input" placeholder="Enter your nickname">
-    <button id="multiplayer-btn">Multiplayer</button>
+    <button id="terrorist-btn">Join Terrorists</button>
+    <button id="ct-btn">Join Counter-Terrorists</button>
   </div>
   <div id="chat">
     <div id="chat-messages"></div>
-    <input type="text" id="chat-input" placeholder="Press T to chat">
+    <input type="text" id="chat-input" placeholder="Press Enter to chat">
+  </div>
+  <div id="buy-menu">
+    <h2>Buy Menu</h2>
+    <button onclick="buyWeapon('ak47')">AK-47 ($2500)</button>
+    <button onclick="buyWeapon('m4a1')">M4A1 ($3100)</button>
+    <button onclick="buyWeapon('awp')">AWP ($4750)</button>
+    <button onclick="buyWeapon('deagle')">Desert Eagle ($650)</button>
+    <button onclick="buyArmor()">Kevlar + Helmet ($1000)</button>
   </div>
 
   <script>
-    let scene, camera, renderer, player, healthDisplay, ammoDisplay;
+    let scene, camera, renderer, player, healthDisplay, ammoDisplay, moneyDisplay;
     let players = {};
     let bullets = [];
-    let ammoPickups = [];
-    let cartridgePickups = [];
     let gameActive = false;
     let socket;
     let chatOpen = false;
-    let ammo = 30;
+    let team = '';
+    let money = 800;
+    let currentWeapon = 'pistol';
+    let weapons = {
+      pistol: { damage: 20, ammo: 12, maxAmmo: 24, fireRate: 400 },
+      ak47: { damage: 35, ammo: 30, maxAmmo: 90, fireRate: 600 },
+      m4a1: { damage: 33, ammo: 30, maxAmmo: 90, fireRate: 666 },
+      awp: { damage: 115, ammo: 10, maxAmmo: 30, fireRate: 1500 },
+      deagle: { damage: 50, ammo: 7, maxAmmo: 35, fireRate: 267 }
+    };
+    let buyTime = true;
+    let roundNumber = 1;
+    let terroristScore = 0;
+    let ctScore = 0;
 
     // Variables for improved camera control
     let pitchObject, yawObject;
@@ -161,14 +219,6 @@
     let canJump = false;
     let velocity = new THREE.Vector3();
 
-    // World generation
-    const WORLD_SIZE = 1000;
-    const CHUNK_SIZE = 50;
-    let chunks = {};
-
-    // Simplex noise
-    const simplex = new SimplexNoise();
-
     function init() {
       scene = new THREE.Scene();
       camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -177,10 +227,6 @@
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       document.getElementById('game-container').appendChild(renderer.domElement);
-
-      // Create blue sky
-      const skyColor = new THREE.Color(0x87CEEB);
-      scene.background = skyColor;
 
       // Create player (camera) with improved controls
       pitchObject = new THREE.Object3D();
@@ -192,8 +238,8 @@
 
       scene.add(yawObject);
 
-      // Create gun model
-      createGun();
+      // Create map
+      createMap();
 
       // Lighting
       const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -210,6 +256,7 @@
 
       healthDisplay = document.getElementById('health');
       ammoDisplay = document.getElementById('ammo');
+      moneyDisplay = document.getElementById('money');
 
       document.addEventListener('mousemove', onMouseMove);
       document.addEventListener('click', shoot);
@@ -223,15 +270,13 @@
         renderer.domElement.requestPointerLock();
       };
 
-      // Generate initial world chunks
-      generateInitialChunks();
-
-      // Multiplayer button
-      document.getElementById('multiplayer-btn').addEventListener('click', startMultiplayer);
+      // Team selection buttons
+      document.getElementById('terrorist-btn').addEventListener('click', () => joinGame('terrorist'));
+      document.getElementById('ct-btn').addEventListener('click', () => joinGame('ct'));
 
       // Chat
       document.addEventListener('keydown', (event) => {
-        if (event.key === 't' && !chatOpen) {
+        if (event.key === 'Enter' && !chatOpen) {
           openChat();
         } else if (event.key === 'Escape' && chatOpen) {
           closeChat();
@@ -243,12 +288,6 @@
           sendChatMessage();
         }
       });
-
-      // Spawn initial ammo pickups and cartridges
-      for (let i = 0; i < 10; i++) {
-        spawnAmmoPickup();
-        spawnCartridgePickup();
-      }
 
       // Initialize multiplayer
       initializeMultiplayer();
@@ -294,114 +333,81 @@
 
       socket.on('playerHit', (data) => {
         if (data.target === socket.id) {
-          health -= 10;
-          updateHealthDisplay();
-          if (health <= 0) {
-            gameOver();
-          }
+          takeDamage(data.damage);
         }
       });
 
       socket.on('chatMessage', (data) => {
         addChatMessage(`${data.nickname}: ${data.message}`);
       });
-    }
 
-    function startMultiplayer() {
-      const nickname = document.getElementById('nickname-input').value || 'Player';
-      document.getElementById('menu').style.display = 'none';
-      gameActive = true;
+      socket.on('roundStart', (data) => {
+        startRound(data.roundNumber);
+      });
 
-      socket.emit('join', {
-        nickname: nickname,
-        position: yawObject.position,
-        rotation: yawObject.rotation.y
+      socket.on('roundEnd', (data) => {
+        endRound(data.winner);
+      });
+
+      socket.on('updateScore', (data) => {
+        updateScore(data.terroristScore, data.ctScore);
       });
     }
 
+    function joinGame(selectedTeam) {
+      const nickname = document.getElementById('nickname-input').value || 'Player';
+      document.getElementById('menu').style.display = 'none';
+      gameActive = true;
+      team = selectedTeam;
+
+      socket.emit('join', {
+        nickname: nickname,
+        team: team,
+        position: yawObject.position,
+        rotation: yawObject.rotation.y
+      });
+
+      // Set initial spawn position based on team
+      if (team === 'terrorist') {
+        yawObject.position.set(-20, 2, -20);
+      } else {
+        yawObject.position.set(20, 2, 20);
+      }
+    }
+
     function createPlayer(id, playerData) {
-      const playerGroup = new THREE.Group();
+      const playerGeometry = new THREE.BoxGeometry(1, 2, 1);
+      const playerMaterial = new THREE.MeshPhongMaterial({ color: playerData.team === 'terrorist' ? 0xff0000 : 0x0000ff });
+      const playerMesh = new THREE.Mesh(playerGeometry, playerMaterial);
+      playerMesh.position.copy(playerData.position);
+      playerMesh.rotation.y = playerData.rotation;
+      scene.add(playerMesh);
 
-      // Body
-      const bodyGeometry = new THREE.BoxGeometry(0.5, 0.8, 0.3);
-      const bodyMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
-      const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
-      body.position.y = 0.4;
-      playerGroup.add(body);
-
-      // Head
-      const headGeometry = new THREE.SphereGeometry(0.2, 16, 16);
-      const headMaterial = new THREE.MeshPhongMaterial({ color: 0xffa500 });
-      const head = new THREE.Mesh(headGeometry, headMaterial);
-      head.position.y = 0.9;
-      playerGroup.add(head);
-
-      // Arms
-      const armGeometry = new THREE.BoxGeometry(0.1, 0.5, 0.1);
-      const armMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
-      const leftArm = new THREE.Mesh(armGeometry, armMaterial);
-      leftArm.position.set(-0.3, 0.4, 0);
-      playerGroup.add(leftArm);
-
-      const rightArm = leftArm.clone();
-      rightArm.position.set(0.3, 0.4, 0);
-      playerGroup.add(rightArm);
-
-      // Legs
-      const legGeometry = new THREE.BoxGeometry(0.15, 0.5, 0.15);
-      const legMaterial = new THREE.MeshPhongMaterial({ color: 0x0000ff });
-      const leftLeg = new THREE.Mesh(legGeometry, legMaterial);
-      leftLeg.position.set(-0.15, -0.4, 0);
-      playerGroup.add(leftLeg);
-
-      const rightLeg = leftLeg.clone();
-      rightLeg.position.set(0.15, -0.4, 0);
-      playerGroup.add(rightLeg);
-
-      // Gun
-      const gunGeometry = new THREE.BoxGeometry(0.1, 0.1, 0.3);
-      const gunMaterial = new THREE.MeshPhongMaterial({ color: 0x333333 });
-      const gun = new THREE.Mesh(gunGeometry, gunMaterial);
-      gun.position.set(0.3, 0.4, 0.2);
-      playerGroup.add(gun);
-
-      // Nickname
+      // Add nickname
       const nicknameDiv = document.createElement('div');
       nicknameDiv.className = 'nickname';
       nicknameDiv.textContent = playerData.nickname;
       const nicknameObject = new THREE.CSS2DObject(nicknameDiv);
-      nicknameObject.position.set(0, 1.5, 0);
-      playerGroup.add(nicknameObject);
+      nicknameObject.position.set(0, 2.5, 0);
+      playerMesh.add(nicknameObject);
 
-      playerGroup.position.copy(playerData.position);
-      playerGroup.rotation.y = playerData.rotation;
-      scene.add(playerGroup);
-      players[id] = playerGroup;
+      players[id] = {
+        mesh: playerMesh,
+        nickname: playerData.nickname,
+        team: playerData.team
+      };
     }
 
     function updatePlayerPosition(id, position, rotation) {
-      if (players[id]) {
-        players[id].position.copy(position);
-        players[id].rotation.y = rotation;
-
-        // Animate legs
-        const leftLeg = players[id].children[4];
-        const rightLeg = players[id].children[5];
-        const walkCycle = (Date.now() % 1000) / 1000;
-        leftLeg.rotation.x = Math.sin(walkCycle * Math.PI * 2) * 0.5;
-        rightLeg.rotation.x = Math.sin((walkCycle + 0.5) * Math.PI * 2) * 0.5;
-
-        // Animate arms
-        const leftArm = players[id].children[2];
-        const rightArm = players[id].children[3];
-        leftArm.rotation.x = Math.sin((walkCycle + 0.5) * Math.PI * 2) * 0.5;
-        rightArm.rotation.x = Math.sin(walkCycle * Math.PI * 2) * 0.5;
+      if (players[id] && players[id].mesh) {
+        players[id].mesh.position.copy(position);
+        players[id].mesh.rotation.y = rotation;
       }
     }
 
     function removePlayer(id) {
       if (players[id]) {
-        scene.remove(players[id]);
+        scene.remove(players[id].mesh);
         delete players[id];
       }
     }
@@ -421,8 +427,9 @@
     }
 
     function shoot() {
-      if (!gameActive || ammo <= 0) return;
-      ammo--;
+      if (!gameActive || chatOpen || weapons[currentWeapon].ammo <= 0) return;
+
+      weapons[currentWeapon].ammo--;
       updateAmmoDisplay();
 
       const bulletPosition = new THREE.Vector3();
@@ -432,7 +439,14 @@
 
       createBullet(bulletPosition, bulletDirection);
 
-      socket.emit('shoot', { position: bulletPosition, direction: bulletDirection });
+      socket.emit('shoot', {
+        position: bulletPosition,
+        direction: bulletDirection,
+        weapon: currentWeapon
+      });
+
+      // Play gunshot sound
+      playSound('gunshot');
     }
 
     function createBullet(position, direction) {
@@ -441,7 +455,7 @@
       const bullet = new THREE.Mesh(bulletGeometry, bulletMaterial);
 
       bullet.position.copy(position);
-      bullet.velocity = direction.multiplyScalar(0.5);
+      bullet.velocity = direction.multiplyScalar(1);
 
       scene.add(bullet);
       bullets.push(bullet);
@@ -471,28 +485,28 @@
       yawObject.translateY(velocity.y * delta);
       yawObject.translateZ(velocity.z * delta);
 
-      if (yawObject.position.y < getTerrainHeight(yawObject.position.x, yawObject.position.z) + 1.6) {
+      if (yawObject.position.y < 2) {
         velocity.y = 0;
-        yawObject.position.y = getTerrainHeight(yawObject.position.x, yawObject.position.z) + 1.6;
+        yawObject.position.y = 2;
         canJump = true;
       }
-
-      // Update chunks based on player position
-      updateChunks();
 
       // Update bullets
       for (let i = bullets.length - 1; i >= 0; i--) {
         const bullet = bullets[i];
         bullet.position.add(bullet.velocity);
 
-        // Check for collisions with other players
+        // Check for collisions with players
         Object.keys(players).forEach((id) => {
           if (id !== socket.id) {
-            const playerPosition = players[id].position;
-            if (bullet.position.distanceTo(playerPosition) < 0.5) {
+            const playerPosition = players[id].mesh.position;
+            if (bullet.position.distanceTo(playerPosition) < 1) {
               scene.remove(bullet);
               bullets.splice(i, 1);
-              socket.emit('hit', { target: id });
+              socket.emit('hit', {
+                target: id,
+                damage: weapons[currentWeapon].damage
+              });
             }
           }
         });
@@ -503,28 +517,6 @@
           bullets.splice(i, 1);
         }
       }
-
-      // Check for ammo pickup collisions
-      ammoPickups.forEach((pickup, index) => {
-        if (yawObject.position.distanceTo(pickup.position) < 1) {
-          ammo += 10;
-          updateAmmoDisplay();
-          scene.remove(pickup);
-          ammoPickups.splice(index, 1);
-          spawnAmmoPickup();
-        }
-      });
-
-      // Check for cartridge pickup collisions
-      cartridgePickups.forEach((pickup, index) => {
-        if (yawObject.position.distanceTo(pickup.position) < 1) {
-          ammo += 1;
-          updateAmmoDisplay();
-          scene.remove(pickup);
-          cartridgePickups.splice(index, 1);
-          spawnCartridgePickup();
-        }
-      });
 
       // Emit player movement to server
       socket.emit('move', { position: yawObject.position, rotation: yawObject.rotation.y });
@@ -540,195 +532,60 @@
       renderer.render(scene, camera);
     }
 
-    function createGun() {
-      const gunGroup = new THREE.Group();
+    function createMap() {
+      // Floor
+      const floorGeometry = new THREE.PlaneGeometry(100, 100);
+      const floorMaterial = new THREE.MeshPhongMaterial({ color: 0x808080 });
+      const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+      floor.rotation.x = -Math.PI / 2;
+      floor.receiveShadow = true;
+      scene.add(floor);
 
-      // Gun body
-      const gunBodyGeometry = new THREE.BoxGeometry(0.1, 0.1, 0.3);
-      const gunBodyMaterial = new THREE.MeshPhongMaterial({ color: 0x333333 });
-      const gunBody = new THREE.Mesh(gunBodyGeometry, gunBodyMaterial);
-      gunGroup.add(gunBody);
+      // Walls
+      const wallGeometry = new THREE.BoxGeometry(100, 10, 1);
+      const wallMaterial = new THREE.MeshPhongMaterial({ color: 0xa0a0a0 });
 
-      // Gun handle
-      const gunHandleGeometry = new THREE.BoxGeometry(0.05, 0.1, 0.1);
-      const gunHandleMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513 });
-      const gunHandle = new THREE.Mesh(gunHandleGeometry, gunHandleMaterial);
-      gunHandle.position.set(0, -0.08, 0.05);
-      gunGroup.add(gunHandle);
+      const wall1 = new THREE.Mesh(wallGeometry, wallMaterial);
+      wall1.position.set(0, 5, 50);
+      wall1.castShadow = true;
+      wall1.receiveShadow = true;
+      scene.add(wall1);
 
-      // Gun barrel
-      const gunBarrelGeometry = new THREE.CylinderGeometry(0.02, 0.02, 0.3, 16);
-      const gunBarrelMaterial = new THREE.MeshPhongMaterial({ color: 0x666666 });
-      const gunBarrel = new THREE.Mesh(gunBarrelGeometry, gunBarrelMaterial);
-      gunBarrel.rotation.x = Math.PI / 2;
-      gunBarrel.position.set(0, 0.02, 0.15);
-      gunGroup.add(gunBarrel);
+      const wall2 = new THREE.Mesh(wallGeometry, wallMaterial);
+      wall2.position.set(0, 5, -50);
+      wall2.castShadow = true;
+      wall2.receiveShadow = true;
+      scene.add(wall2);
 
-      // Position the gun in front of the camera
-      gunGroup.position.set(0.2, -0.2, -0.5);
-      camera.add(gunGroup);
-    }
+      const wall3 = new THREE.Mesh(wallGeometry, wallMaterial);
+      wall3.position.set(50, 5, 0);
+      wall3.rotation.y = Math.PI / 2;
+      wall3.castShadow = true;
+      wall3.receiveShadow = true;
+      scene.add(wall3);
 
-    function updateHealthDisplay() {
-      healthDisplay.textContent = `Health: ${health}`;
-    }
+      const wall4 = new THREE.Mesh(wallGeometry, wallMaterial);
+      wall4.position.set(-50, 5, 0);
+      wall4.rotation.y = Math.PI / 2;
+      wall4.castShadow = true;
+      wall4.receiveShadow = true;
+      scene.add(wall4);
 
-    function updateAmmoDisplay() {
-      ammoDisplay.textContent = `Ammo: ${ammo}`;
-    }
+      // Add some crates for cover
+      const crateGeometry = new THREE.BoxGeometry(2, 2, 2);
+      const crateMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513 });
 
-    function gameOver() {
-      gameActive = false;
-      document.exitPointerLock();
-      alert('Game Over! You were eliminated.');
-      location.reload(); // Reload the page to restart
-    }
-
-    function generateTerrain(chunkX, chunkZ) {
-      const geometry = new THREE.PlaneGeometry(CHUNK_SIZE, CHUNK_SIZE, 16, 16);
-      geometry.rotateX(-Math.PI / 2);
-
-      const vertices = geometry.attributes.position.array;
-      for (let i = 0; i < vertices.length; i += 3) {
-        const x = vertices[i] + chunkX * CHUNK_SIZE;
-        const z = vertices[i + 2] + chunkZ * CHUNK_SIZE;
-        vertices[i + 1] = getTerrainHeight(x, z);
+      for (let i = 0; i < 10; i++) {
+        const crate = new THREE.Mesh(crateGeometry, crateMaterial);
+        crate.position.set(
+          Math.random() * 80 - 40,
+          1,
+          Math.random() * 80 - 40
+        );
+        crate.castShadow = true;
+        crate.receiveShadow = true;
+        scene.add(crate);
       }
-
-      geometry.computeVertexNormals();
-
-      const material = new THREE.MeshPhongMaterial({ color: 0x228B22, wireframe: false });
-      const terrain = new THREE.Mesh(geometry, material);
-      terrain.receiveShadow = true;
-      terrain.position.set(chunkX * CHUNK_SIZE, 0, chunkZ * CHUNK_SIZE);
-
-      return terrain;
-    }
-
-    function getTerrainHeight(x, z) {
-      const scale = 0.02;
-      const height = simplex.noise2D(x * scale, z * scale);
-      return height * 10;
-    }
-
-    function generateChunk(chunkX, chunkZ) {
-      const chunk = new THREE.Group();
-      chunk.add(generateTerrain(chunkX, chunkZ));
-
-      // Add trees
-      for (let i = 0; i < 5; i++) {
-        const x = Math.random() * CHUNK_SIZE + chunkX * CHUNK_SIZE;
-        const z = Math.random() * CHUNK_SIZE + chunkZ * CHUNK_SIZE;
-        const y = getTerrainHeight(x, z);
-        const tree = createTree();
-        tree.position.set(x, y, z);
-        chunk.add(tree);
-      }
-
-      return chunk;
-    }
-
-    function createTree() {
-      const treeGroup = new THREE.Group();
-
-      // Tree trunk
-      const trunkGeometry = new THREE.CylinderGeometry(0.2, 0.2, 2, 8);
-      const trunkMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513 });
-      const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
-      trunk.position.y = 1;
-      trunk.castShadow = true;
-      trunk.receiveShadow = true;
-      treeGroup.add(trunk);
-
-      // Tree top
-      const topGeometry = new THREE.ConeGeometry(1, 2, 8);
-      const topMaterial = new THREE.MeshPhongMaterial({ color: 0x228B22 });
-      const top = new THREE.Mesh(topGeometry, topMaterial);
-      top.position.y = 3;
-      top.castShadow = true;
-      top.receiveShadow = true;
-      treeGroup.add(top);
-
-      return treeGroup;
-    }
-
-    function generateInitialChunks() {
-      const playerChunkX = Math.floor(yawObject.position.x / CHUNK_SIZE);
-      const playerChunkZ = Math.floor(yawObject.position.z / CHUNK_SIZE);
-
-      for (let x = -1; x <= 1; x++) {
-        for (let z = -1; z <= 1; z++) {
-          const chunkX = playerChunkX + x;
-          const chunkZ = playerChunkZ + z;
-          const chunkId = `${chunkX},${chunkZ}`;
-
-          if (!chunks[chunkId]) {
-            const chunk = generateChunk(chunkX, chunkZ);
-            chunks[chunkId] = chunk;
-            scene.add(chunk);
-          }
-        }
-      }
-    }
-
-    function updateChunks() {
-      const playerChunkX = Math.floor(yawObject.position.x / CHUNK_SIZE);
-      const playerChunkZ = Math.floor(yawObject.position.z / CHUNK_SIZE);
-
-      for (let x = -1; x <= 1; x++) {
-        for (let z = -1; z <= 1; z++) {
-          const chunkX = playerChunkX + x;
-          const chunkZ = playerChunkZ + z;
-          const chunkId = `${chunkX},${chunkZ}`;
-
-          if (!chunks[chunkId]) {
-            const chunk = generateChunk(chunkX, chunkZ);
-            chunks[chunkId] = chunk;
-            scene.add(chunk);
-          }
-        }
-      }
-
-      // Remove far chunks
-      for (const chunkId in chunks) {
-        const [chunkX, chunkZ] = chunkId.split(',').map(Number);
-        if (
-          Math.abs(chunkX - playerChunkX) > 1 ||
-          Math.abs(chunkZ - playerChunkZ) > 1
-        ) {
-          scene.remove(chunks[chunkId]);
-          delete chunks[chunkId];
-        }
-      }
-    }
-
-    function spawnAmmoPickup() {
-      const ammoGeometry = new THREE.BoxGeometry(0.3, 0.3, 0.3);
-      const ammoMaterial = new THREE.MeshPhongMaterial({ color: 0xffff00 });
-      const ammoPickup = new THREE.Mesh(ammoGeometry, ammoMaterial);
-
-      const x = Math.random() * WORLD_SIZE - WORLD_SIZE / 2;
-      const z = Math.random() * WORLD_SIZE - WORLD_SIZE / 2;
-      const y = getTerrainHeight(x, z) + 0.5;
-
-      ammoPickup.position.set(x, y, z);
-      scene.add(ammoPickup);
-      ammoPickups.push(ammoPickup);
-    }
-
-    function spawnCartridgePickup() {
-      const cartridgeGeometry = new THREE.CylinderGeometry(0.02, 0.02, 0.1, 8);
-      const cartridgeMaterial = new THREE.MeshPhongMaterial({ color: 0xB87333 }); // Brass color
-      const cartridgePickup = new THREE.Mesh(cartridgeGeometry, cartridgeMaterial);
-
-      const x = Math.random() * WORLD_SIZE - WORLD_SIZE / 2;
-      const z = Math.random() * WORLD_SIZE - WORLD_SIZE / 2;
-      const y = getTerrainHeight(x, z) + 0.05;
-
-      cartridgePickup.position.set(x, y, z);
-      cartridgePickup.rotation.x = Math.PI / 2; // Lay flat on the ground
-      scene.add(cartridgePickup);
-      cartridgePickups.push(cartridgePickup);
     }
 
     function openChat() {
@@ -765,19 +622,15 @@
       if (chatOpen) return;
 
       switch (event.keyCode) {
-        case 38: // up
         case 87: // w
           moveForward = true;
           break;
-        case 37: // left
         case 65: // a
           moveLeft = true;
           break;
-        case 40: // down
         case 83: // s
           moveBackward = true;
           break;
-        case 39: // right
         case 68: // d
           moveRight = true;
           break;
@@ -785,28 +638,140 @@
           if (canJump === true) velocity.y += 350;
           canJump = false;
           break;
+        case 66: // b
+          if (buyTime) toggleBuyMenu();
+          break;
+        case 82: // r
+          reload();
+          break;
       }
     }
 
     function onKeyUp(event) {
       switch (event.keyCode) {
-        case 38: // up
         case 87: // w
           moveForward = false;
           break;
-        case 37: // left
         case 65: // a
           moveLeft = false;
           break;
-        case 40: // down
         case 83: // s
           moveBackward = false;
           break;
-        case 39: // right
         case 68: // d
           moveRight = false;
           break;
       }
+    }
+
+    function toggleBuyMenu() {
+      const buyMenu = document.getElementById('buy-menu');
+      if (buyMenu.style.display === 'none') {
+        buyMenu.style.display = 'block';
+      } else {
+        buyMenu.style.display = 'none';
+      }
+    }
+
+    function buyWeapon(weapon) {
+      const prices = {
+        ak47: 2500,
+        m4a1: 3100,
+        awp: 4750,
+        deagle: 650
+      };
+
+      if (money >= prices[weapon]) {
+        money -= prices[weapon];
+        currentWeapon = weapon;
+        weapons[currentWeapon].ammo = weapons[currentWeapon].maxAmmo;
+        updateMoneyDisplay();
+        updateAmmoDisplay();
+        toggleBuyMenu();
+        playSound('purchase');
+      } else {
+        playSound('error');
+      }
+    }
+
+    function buyArmor() {
+      if (money >= 1000) {
+        money -= 1000;
+        // Implement armor logic here
+        updateMoneyDisplay();
+        toggleBuyMenu();
+        playSound('purchase');
+      } else {
+        playSound('error');
+      }
+    }
+
+    function reload() {
+      if (weapons[currentWeapon].ammo < weapons[currentWeapon].maxAmmo) {
+        weapons[currentWeapon].ammo = weapons[currentWeapon].maxAmmo;
+        updateAmmoDisplay();
+        playSound('reload');
+      }
+    }
+
+    function updateHealthDisplay() {
+      healthDisplay.textContent = `Health: ${health}`;
+    }
+
+    function updateAmmoDisplay() {
+      ammoDisplay.textContent = `Ammo: ${weapons[currentWeapon].ammo} / ${weapons[currentWeapon].maxAmmo}`;
+    }
+
+    function updateMoneyDisplay() {
+      moneyDisplay.textContent = `$: ${money}`;
+    }
+
+    function takeDamage(damage) {
+      health -= damage;
+      updateHealthDisplay();
+      playSound('hit');
+      if (health <= 0) {
+        die();
+      }
+    }
+
+    function die() {
+      health = 100;
+      updateHealthDisplay();
+      // Implement respawn logic here
+      playSound('death');
+    }
+
+    function startRound(round) {
+      roundNumber = round;
+      buyTime = true;
+      setTimeout(() => {
+        buyTime = false;
+        document.getElementById('buy-menu').style.display = 'none';
+      }, 15000); // 15 seconds buy time
+      updateRoundInfo();
+    }
+
+    function endRound(winner) {
+      buyTime = false;
+      document.getElementById('buy-menu').style.display = 'none';
+      // Implement round end logic here (e.g., display winner, update scores)
+      playSound(winner === team ? 'roundWin' : 'roundLose');
+    }
+
+    function updateScore(tScore, ctScore) {
+      terroristScore = tScore;
+      ctScore = ctScore;
+      updateRoundInfo();
+    }
+
+    function updateRoundInfo() {
+      document.getElementById('round-info').textContent = `Round ${roundNumber} - Terrorists: ${terroristScore} | Counter-Terrorists: ${ctScore}`;
+    }
+
+    function playSound(soundName) {
+      // Implement sound playing logic here
+      console.log(`Playing sound: ${soundName}`);
     }
 
     let prevTime = performance.now();
