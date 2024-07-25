@@ -2,7 +2,7 @@
 
 <head>
   <base href="https://fps-nexus.com/play/neohorizon">
-  <title>тест - Multiplayer FPS</title>
+  <title>NeoHorizon - Multiplayer FPS</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
@@ -130,7 +130,7 @@
     <div id="crosshair"></div>
   </div>
   <div id="menu">
-    <h1>тест</h1>
+    <h1>NeoHorizon</h1>
     <input type="text" id="nickname-input" placeholder="Enter your nickname">
     <button id="multiplayer-btn">Multiplayer</button>
   </div>
@@ -250,21 +250,17 @@
         spawnCartridgePickup();
       }
 
+      // Initialize multiplayer
+      initializeMultiplayer();
+
       animate();
     }
 
-    function startMultiplayer() {
-      const nickname = document.getElementById('nickname-input').value || 'Player';
-      document.getElementById('menu').style.display = 'none';
-      gameActive = true;
-
-      // Connect to server (replace with your server address)
+    function initializeMultiplayer() {
       socket = io('https://your-server-address.com');
 
       socket.on('connect', () => {
         console.log('Connected to server');
-        socket.emit('join', { nickname, position: yawObject.position });
-        addChatMessage(`${nickname} joined the game`);
       });
 
       socket.on('players', (serverPlayers) => {
@@ -282,24 +278,22 @@
 
       socket.on('playerMoved', (player) => {
         if (players[player.id]) {
-          players[player.id].position.copy(player.position);
-          players[player.id].rotation.y = player.rotation;
+          updatePlayerPosition(player.id, player.position, player.rotation);
         }
       });
 
       socket.on('playerLeft', (id) => {
-        if (players[id]) {
-          scene.remove(players[id]);
-          delete players[id];
-        }
+        removePlayer(id);
       });
 
       socket.on('playerShot', (data) => {
         if (data.shooter !== socket.id) {
-          createBullet(data.position, data.velocity);
+          createBullet(new THREE.Vector3().copy(data.position), new THREE.Vector3().copy(data.direction));
         }
-        if (data.hit === socket.id) {
-          // Player got hit
+      });
+
+      socket.on('playerHit', (data) => {
+        if (data.target === socket.id) {
           health -= 10;
           updateHealthDisplay();
           if (health <= 0) {
@@ -310,6 +304,18 @@
 
       socket.on('chatMessage', (data) => {
         addChatMessage(`${data.nickname}: ${data.message}`);
+      });
+    }
+
+    function startMultiplayer() {
+      const nickname = document.getElementById('nickname-input').value || 'Player';
+      document.getElementById('menu').style.display = 'none';
+      gameActive = true;
+
+      socket.emit('join', {
+        nickname: nickname,
+        position: yawObject.position,
+        rotation: yawObject.rotation.y
       });
     }
 
@@ -352,6 +358,13 @@
       rightLeg.position.set(0.15, -0.4, 0);
       playerGroup.add(rightLeg);
 
+      // Gun
+      const gunGeometry = new THREE.BoxGeometry(0.1, 0.1, 0.3);
+      const gunMaterial = new THREE.MeshPhongMaterial({ color: 0x333333 });
+      const gun = new THREE.Mesh(gunGeometry, gunMaterial);
+      gun.position.set(0.3, 0.4, 0.2);
+      playerGroup.add(gun);
+
       // Nickname
       const nicknameDiv = document.createElement('div');
       nicknameDiv.className = 'nickname';
@@ -361,8 +374,36 @@
       playerGroup.add(nicknameObject);
 
       playerGroup.position.copy(playerData.position);
+      playerGroup.rotation.y = playerData.rotation;
       scene.add(playerGroup);
       players[id] = playerGroup;
+    }
+
+    function updatePlayerPosition(id, position, rotation) {
+      if (players[id]) {
+        players[id].position.copy(position);
+        players[id].rotation.y = rotation;
+
+        // Animate legs
+        const leftLeg = players[id].children[4];
+        const rightLeg = players[id].children[5];
+        const walkCycle = (Date.now() % 1000) / 1000;
+        leftLeg.rotation.x = Math.sin(walkCycle * Math.PI * 2) * 0.5;
+        rightLeg.rotation.x = Math.sin((walkCycle + 0.5) * Math.PI * 2) * 0.5;
+
+        // Animate arms
+        const leftArm = players[id].children[2];
+        const rightArm = players[id].children[3];
+        leftArm.rotation.x = Math.sin((walkCycle + 0.5) * Math.PI * 2) * 0.5;
+        rightArm.rotation.x = Math.sin(walkCycle * Math.PI * 2) * 0.5;
+      }
+    }
+
+    function removePlayer(id) {
+      if (players[id]) {
+        scene.remove(players[id]);
+        delete players[id];
+      }
     }
 
     function onMouseMove(event) {
@@ -376,57 +417,7 @@
 
       pitchObject.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, pitchObject.rotation.x));
 
-      if (socket) {
-        socket.emit('move', { position: yawObject.position, rotation: yawObject.rotation.y });
-      }
-    }
-
-    function onKeyDown(event) {
-      if (chatOpen) return;
-
-      switch (event.keyCode) {
-        case 38: // up
-        case 87: // w
-          moveForward = true;
-          break;
-        case 37: // left
-        case 65: // a
-          moveLeft = true;
-          break;
-        case 40: // down
-        case 83: // s
-          moveBackward = true;
-          break;
-        case 39: // right
-        case 68: // d
-          moveRight = true;
-          break;
-        case 32: // space
-          if (canJump === true) velocity.y += 350;
-          canJump = false;
-          break;
-      }
-    }
-
-    function onKeyUp(event) {
-      switch (event.keyCode) {
-        case 38: // up
-        case 87: // w
-          moveForward = false;
-          break;
-        case 37: // left
-        case 65: // a
-          moveLeft = false;
-          break;
-        case 40: // down
-        case 83: // s
-          moveBackward = false;
-          break;
-        case 39: // right
-        case 68: // d
-          moveRight = false;
-          break;
-      }
+      socket.emit('move', { position: yawObject.position, rotation: yawObject.rotation.y });
     }
 
     function shoot() {
@@ -434,11 +425,14 @@
       ammo--;
       updateAmmoDisplay();
 
-      const bullet = createBullet(camera.getWorldPosition(new THREE.Vector3()), camera.getWorldDirection(new THREE.Vector3()));
+      const bulletPosition = new THREE.Vector3();
+      const bulletDirection = new THREE.Vector3();
+      camera.getWorldPosition(bulletPosition);
+      camera.getWorldDirection(bulletDirection);
 
-      if (socket) {
-        socket.emit('shoot', { position: bullet.position, velocity: bullet.velocity });
-      }
+      createBullet(bulletPosition, bulletDirection);
+
+      socket.emit('shoot', { position: bulletPosition, direction: bulletDirection });
     }
 
     function createBullet(position, direction) {
@@ -468,9 +462,6 @@
 
       const speed = 100.0;
 
-      // Update gun position
-      updateGunPosition();
-
       if (moveForward) velocity.z -= speed * delta;
       if (moveBackward) velocity.z += speed * delta;
       if (moveLeft) velocity.x -= speed * delta;
@@ -489,16 +480,19 @@
       // Update chunks based on player position
       updateChunks();
 
-      bullets.forEach((bullet, index) => {
+      // Update bullets
+      for (let i = bullets.length - 1; i >= 0; i--) {
+        const bullet = bullets[i];
         bullet.position.add(bullet.velocity);
 
         // Check for collisions with other players
-        Object.values(players).forEach((player) => {
-          if (bullet.position.distanceTo(player.position) < 0.5) {
-            scene.remove(bullet);
-            bullets.splice(index, 1);
-            if (socket) {
-              socket.emit('hit', { hit: player.id });
+        Object.keys(players).forEach((id) => {
+          if (id !== socket.id) {
+            const playerPosition = players[id].position;
+            if (bullet.position.distanceTo(playerPosition) < 0.5) {
+              scene.remove(bullet);
+              bullets.splice(i, 1);
+              socket.emit('hit', { target: id });
             }
           }
         });
@@ -506,9 +500,9 @@
         // Remove bullets that have traveled too far
         if (bullet.position.distanceTo(yawObject.position) > 100) {
           scene.remove(bullet);
-          bullets.splice(index, 1);
+          bullets.splice(i, 1);
         }
-      });
+      }
 
       // Check for ammo pickup collisions
       ammoPickups.forEach((pickup, index) => {
@@ -531,6 +525,9 @@
           spawnCartridgePickup();
         }
       });
+
+      // Emit player movement to server
+      socket.emit('move', { position: yawObject.position, rotation: yawObject.rotation.y });
 
       prevTime = time;
     }
@@ -570,16 +567,6 @@
       // Position the gun in front of the camera
       gunGroup.position.set(0.2, -0.2, -0.5);
       camera.add(gunGroup);
-    }
-
-    function updateGunPosition() {
-      // Add slight movement to the gun based on player movement
-      const gunMovement = new THREE.Vector3(
-        Math.sin(Date.now() * 0.01) * 0.002,
-        Math.cos(Date.now() * 0.01) * 0.002,
-        0
-      );
-      camera.children[0].position.copy(new THREE.Vector3(0.2, -0.2, -0.5).add(gunMovement));
     }
 
     function updateHealthDisplay() {
@@ -772,6 +759,54 @@
       messageElement.textContent = message;
       chatMessages.appendChild(messageElement);
       chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function onKeyDown(event) {
+      if (chatOpen) return;
+
+      switch (event.keyCode) {
+        case 38: // up
+        case 87: // w
+          moveForward = true;
+          break;
+        case 37: // left
+        case 65: // a
+          moveLeft = true;
+          break;
+        case 40: // down
+        case 83: // s
+          moveBackward = true;
+          break;
+        case 39: // right
+        case 68: // d
+          moveRight = true;
+          break;
+        case 32: // space
+          if (canJump === true) velocity.y += 350;
+          canJump = false;
+          break;
+      }
+    }
+
+    function onKeyUp(event) {
+      switch (event.keyCode) {
+        case 38: // up
+        case 87: // w
+          moveForward = false;
+          break;
+        case 37: // left
+        case 65: // a
+          moveLeft = false;
+          break;
+        case 40: // down
+        case 83: // s
+          moveBackward = false;
+          break;
+        case 39: // right
+        case 68: // d
+          moveRight = false;
+          break;
+      }
     }
 
     let prevTime = performance.now();
