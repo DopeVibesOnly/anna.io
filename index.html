@@ -87,6 +87,37 @@
       font-size: 16px;
       margin-bottom: 10px;
     }
+
+    #chat {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      width: 300px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 5px;
+      padding: 10px;
+      display: none;
+    }
+
+    #chat-messages {
+      height: 150px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+
+    #chat-input {
+      width: 100%;
+      padding: 5px;
+      box-sizing: border-box;
+    }
+
+    .nickname {
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: bold;
+      text-shadow: 0 0 3px #000000;
+      pointer-events: none;
+    }
   </style>
 </head>
 
@@ -103,13 +134,21 @@
     <input type="text" id="nickname-input" placeholder="Enter your nickname">
     <button id="multiplayer-btn">Multiplayer</button>
   </div>
+  <div id="chat">
+    <div id="chat-messages"></div>
+    <input type="text" id="chat-input" placeholder="Press T to chat">
+  </div>
 
   <script>
     let scene, camera, renderer, player, healthDisplay, ammoDisplay;
     let players = {};
     let bullets = [];
+    let ammoPickups = [];
+    let cartridgePickups = [];
     let gameActive = false;
     let socket;
+    let chatOpen = false;
+    let ammo = 30;
 
     // Variables for improved camera control
     let pitchObject, yawObject;
@@ -189,6 +228,29 @@
 
       // Multiplayer button
       document.getElementById('multiplayer-btn').addEventListener('click', startMultiplayer);
+
+      // Chat
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 't' && !chatOpen) {
+          openChat();
+        } else if (event.key === 'Escape' && chatOpen) {
+          closeChat();
+        }
+      });
+
+      document.getElementById('chat-input').addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          sendChatMessage();
+        }
+      });
+
+      // Spawn initial ammo pickups and cartridges
+      for (let i = 0; i < 10; i++) {
+        spawnAmmoPickup();
+        spawnCartridgePickup();
+      }
+
+      animate();
     }
 
     function startMultiplayer() {
@@ -202,6 +264,7 @@
       socket.on('connect', () => {
         console.log('Connected to server');
         socket.emit('join', { nickname, position: yawObject.position });
+        addChatMessage(`${nickname} joined the game`);
       });
 
       socket.on('players', (serverPlayers) => {
@@ -214,6 +277,7 @@
 
       socket.on('playerJoined', (player) => {
         createPlayer(player.id, player);
+        addChatMessage(`${player.nickname} joined the game`);
       });
 
       socket.on('playerMoved', (player) => {
@@ -231,6 +295,9 @@
       });
 
       socket.on('playerShot', (data) => {
+        if (data.shooter !== socket.id) {
+          createBullet(data.position, data.velocity);
+        }
         if (data.hit === socket.id) {
           // Player got hit
           health -= 10;
@@ -241,7 +308,9 @@
         }
       });
 
-      animate();
+      socket.on('chatMessage', (data) => {
+        addChatMessage(`${data.nickname}: ${data.message}`);
+      });
     }
 
     function createPlayer(id, playerData) {
@@ -261,26 +330,32 @@
       head.position.y = 0.9;
       playerGroup.add(head);
 
+      // Arms
+      const armGeometry = new THREE.BoxGeometry(0.1, 0.5, 0.1);
+      const armMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
+      const leftArm = new THREE.Mesh(armGeometry, armMaterial);
+      leftArm.position.set(-0.3, 0.4, 0);
+      playerGroup.add(leftArm);
+
+      const rightArm = leftArm.clone();
+      rightArm.position.set(0.3, 0.4, 0);
+      playerGroup.add(rightArm);
+
       // Legs
-      const legGeometry = new THREE.BoxGeometry(0.2, 0.6, 0.2);
+      const legGeometry = new THREE.BoxGeometry(0.15, 0.5, 0.15);
       const legMaterial = new THREE.MeshPhongMaterial({ color: 0x0000ff });
       const leftLeg = new THREE.Mesh(legGeometry, legMaterial);
-      leftLeg.position.set(-0.15, -0.5, 0);
+      leftLeg.position.set(-0.15, -0.4, 0);
       playerGroup.add(leftLeg);
 
       const rightLeg = leftLeg.clone();
-      rightLeg.position.set(0.15, -0.5, 0);
+      rightLeg.position.set(0.15, -0.4, 0);
       playerGroup.add(rightLeg);
 
       // Nickname
       const nicknameDiv = document.createElement('div');
       nicknameDiv.className = 'nickname';
       nicknameDiv.textContent = playerData.nickname;
-      nicknameDiv.style.position = 'absolute';
-      nicknameDiv.style.color = '#ffffff';
-      nicknameDiv.style.fontSize = '14px';
-      nicknameDiv.style.fontWeight = 'bold';
-      nicknameDiv.style.textShadow = '0 0 3px #000000';
       const nicknameObject = new THREE.CSS2DObject(nicknameDiv);
       nicknameObject.position.set(0, 1.5, 0);
       playerGroup.add(nicknameObject);
@@ -307,6 +382,8 @@
     }
 
     function onKeyDown(event) {
+      if (chatOpen) return;
+
       switch (event.keyCode) {
         case 38: // up
         case 87: // w
@@ -353,25 +430,29 @@
     }
 
     function shoot() {
-      if (!gameActive) return;
+      if (!gameActive || ammo <= 0) return;
+      ammo--;
+      updateAmmoDisplay();
 
+      const bullet = createBullet(camera.getWorldPosition(new THREE.Vector3()), camera.getWorldDirection(new THREE.Vector3()));
+
+      if (socket) {
+        socket.emit('shoot', { position: bullet.position, velocity: bullet.velocity });
+      }
+    }
+
+    function createBullet(position, direction) {
       const bulletGeometry = new THREE.SphereGeometry(0.05, 8, 8);
       const bulletMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
       const bullet = new THREE.Mesh(bulletGeometry, bulletMaterial);
 
-      bullet.position.setFromMatrixPosition(camera.matrixWorld);
-
-      const direction = new THREE.Vector3();
-      camera.getWorldDirection(direction);
-
+      bullet.position.copy(position);
       bullet.velocity = direction.multiplyScalar(0.5);
 
       scene.add(bullet);
       bullets.push(bullet);
 
-      if (socket) {
-        socket.emit('shoot', { position: bullet.position, velocity: bullet.velocity });
-      }
+      return bullet;
     }
 
     function updateGame() {
@@ -429,13 +510,36 @@
         }
       });
 
+      // Check for ammo pickup collisions
+      ammoPickups.forEach((pickup, index) => {
+        if (yawObject.position.distanceTo(pickup.position) < 1) {
+          ammo += 10;
+          updateAmmoDisplay();
+          scene.remove(pickup);
+          ammoPickups.splice(index, 1);
+          spawnAmmoPickup();
+        }
+      });
+
+      // Check for cartridge pickup collisions
+      cartridgePickups.forEach((pickup, index) => {
+        if (yawObject.position.distanceTo(pickup.position) < 1) {
+          ammo += 1;
+          updateAmmoDisplay();
+          scene.remove(pickup);
+          cartridgePickups.splice(index, 1);
+          spawnCartridgePickup();
+        }
+      });
+
       prevTime = time;
     }
 
     function animate() {
-      if (!gameActive) return;
       requestAnimationFrame(animate);
-      updateGame();
+      if (gameActive) {
+        updateGame();
+      }
       renderer.render(scene, camera);
     }
 
@@ -480,6 +584,10 @@
 
     function updateHealthDisplay() {
       healthDisplay.textContent = `Health: ${health}`;
+    }
+
+    function updateAmmoDisplay() {
+      ammoDisplay.textContent = `Ammo: ${ammo}`;
     }
 
     function gameOver() {
@@ -605,6 +713,65 @@
           delete chunks[chunkId];
         }
       }
+    }
+
+    function spawnAmmoPickup() {
+      const ammoGeometry = new THREE.BoxGeometry(0.3, 0.3, 0.3);
+      const ammoMaterial = new THREE.MeshPhongMaterial({ color: 0xffff00 });
+      const ammoPickup = new THREE.Mesh(ammoGeometry, ammoMaterial);
+
+      const x = Math.random() * WORLD_SIZE - WORLD_SIZE / 2;
+      const z = Math.random() * WORLD_SIZE - WORLD_SIZE / 2;
+      const y = getTerrainHeight(x, z) + 0.5;
+
+      ammoPickup.position.set(x, y, z);
+      scene.add(ammoPickup);
+      ammoPickups.push(ammoPickup);
+    }
+
+    function spawnCartridgePickup() {
+      const cartridgeGeometry = new THREE.CylinderGeometry(0.02, 0.02, 0.1, 8);
+      const cartridgeMaterial = new THREE.MeshPhongMaterial({ color: 0xB87333 }); // Brass color
+      const cartridgePickup = new THREE.Mesh(cartridgeGeometry, cartridgeMaterial);
+
+      const x = Math.random() * WORLD_SIZE - WORLD_SIZE / 2;
+      const z = Math.random() * WORLD_SIZE - WORLD_SIZE / 2;
+      const y = getTerrainHeight(x, z) + 0.05;
+
+      cartridgePickup.position.set(x, y, z);
+      cartridgePickup.rotation.x = Math.PI / 2; // Lay flat on the ground
+      scene.add(cartridgePickup);
+      cartridgePickups.push(cartridgePickup);
+    }
+
+    function openChat() {
+      chatOpen = true;
+      document.getElementById('chat').style.display = 'block';
+      document.getElementById('chat-input').focus();
+    }
+
+    function closeChat() {
+      chatOpen = false;
+      document.getElementById('chat').style.display = 'none';
+      document.getElementById('chat-input').value = '';
+    }
+
+    function sendChatMessage() {
+      const message = document.getElementById('chat-input').value.trim();
+      if (message && socket) {
+        socket.emit('chatMessage', message);
+        addChatMessage(`You: ${message}`);
+        document.getElementById('chat-input').value = '';
+      }
+      closeChat();
+    }
+
+    function addChatMessage(message) {
+      const chatMessages = document.getElementById('chat-messages');
+      const messageElement = document.createElement('div');
+      messageElement.textContent = message;
+      chatMessages.appendChild(messageElement);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
     let prevTime = performance.now();
