@@ -325,6 +325,32 @@
             top: 10px;
             opacity: 1;
         }
+
+        .auto-sell-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .auto-sell-toggle:hover {
+            background-color: #27ae60;
+        }
+
+        .auto-sell-toggle.off {
+            background-color: var(--error-color);
+        }
+
+        .auto-sell-toggle.off:hover {
+            background-color: #c0392b;
+        }
     </style>
 </head>
 
@@ -357,6 +383,7 @@
         <p id="potion-description"></p>
         <button class="use-button" id="use-potion">Использовать</button>
     </div>
+    <button class="auto-sell-toggle" id="auto-sell-toggle">Выключить автопродажу</button>
 
     <script>
         let clicks = 0;
@@ -372,6 +399,7 @@
         let comboTimer = null;
         let sellMultiplier = 1;
         let autoClickerActive = false;
+        let autoSellActive = false;
 
         const upgrades = [
             {
@@ -466,7 +494,7 @@
             {
                 name: "Автокликер",
                 description: "Автоматически кликает 2 раза в секунду",
-                cost: 2500,
+                cost: 2000,
                 effect: () => {
                     if (!autoClickerActive) {
                         autoClickerActive = true;
@@ -477,6 +505,17 @@
                         return "Автокликер активирован!";
                     }
                     return "Автокликер уже активен!";
+                },
+                maxLevel: 1
+            },
+            {
+                name: "Автопродажа",
+                description: "Автоматически продает клики, когда рюкзак заполнен",
+                cost: 2500,
+                effect: () => {
+                    autoSellActive = true;
+                    document.getElementById('auto-sell-toggle').style.display = 'block';
+                    return "Автопродажа активирована!";
                 },
                 maxLevel: 1
             }
@@ -507,6 +546,7 @@
         const usePotion = document.getElementById('use-potion');
         const closePotionInfo = document.getElementById('close-potion-info');
         const errorMessage = document.getElementById('error-message');
+        const autoSellToggle = document.getElementById('auto-sell-toggle');
 
         function updateDisplay() {
             clicksElement.textContent = clicks;
@@ -579,6 +619,10 @@
                 if (upgrades[3].purchased && clicks % 50 === 0) {
                     const bonusClicks = Math.floor(recentSoldClicks * 0.1);
                     clicks = Math.min(clicks + bonusClicks, maxClicks);
+                }
+
+                if (autoSellActive && clicks >= maxClicks) {
+                    sellClicks();
                 }
             }
         }
@@ -761,6 +805,13 @@
             showErrorMessage(`Зелье ${potion.name} активировано на 3 минуты!`);
         }
 
+        autoSellToggle.addEventListener('click', () => {
+            autoSellActive = !autoSellActive;
+            autoSellToggle.textContent = autoSellActive ? 'Выключить автопродажу' : 'Включить автопродажу';
+            autoSellToggle.classList.toggle('off');
+            showErrorMessage(autoSellActive ? 'Автопродажа включена' : 'Автопродажа выключена');
+        });
+
         function saveGameData() {
             const gameData = {
                 clicks: clicks,
@@ -775,7 +826,8 @@
                 inventory: inventory,
                 clickDelay: clickDelay,
                 sellMultiplier: sellMultiplier,
-                autoClickerActive: autoClickerActive
+                autoClickerActive: autoClickerActive,
+                autoSellActive: autoSellActive
             };
             localStorage.setItem('clickerGameData', JSON.stringify(gameData));
         }
@@ -791,6 +843,7 @@
                 clickDelay = gameData.clickDelay || 500;
                 sellMultiplier = gameData.sellMultiplier || 1;
                 autoClickerActive = gameData.autoClickerActive || false;
+                autoSellActive = gameData.autoSellActive || false;
                 upgrades.forEach((upgrade, index) => {
                     if (gameData.upgrades[index]) {
                         upgrade.purchased = gameData.upgrades[index].purchased;
@@ -808,6 +861,13 @@
                         simulateClick();
                     }, 1000);
                 }
+                if (autoSellActive) {
+                    document.getElementById('auto-sell-toggle').style.display = 'block';
+                    autoSellToggle.textContent = 'Выключить автопродажу';
+                } else {
+                    autoSellToggle.textContent = 'Включить автопродажу';
+                    autoSellToggle.classList.add('off');
+                }
             }
         }
 
@@ -816,6 +876,11 @@
         renderInventory();
         loadGameData();
         updateDisplay();
+
+        // Скрываем кнопку автопродажи, если улучшение не куплено
+        if (!upgrades[11].purchased) {
+            document.getElementById('auto-sell-toggle').style.display = 'none';
+        }
     </script>
 </body>
 
