@@ -4,7 +4,7 @@
     <base href="index.html">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Кликер Симулятор</title>
+    <title>Смачный Кликер</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
 
@@ -319,7 +319,7 @@
         <div id="inventory" class="inventory"></div>
     </div>
     <div class="game-container">
-        <h1>Кликер Развития</h1>
+        <h1>Смачный Кликер</h1>
         <div class="stats">
             <div class="stat">Клики: <span id="clicks">0</span> / <span id="max-clicks">10</span></div>
             <div class="stat">Монеты: <span id="coins">0</span></div>
@@ -346,7 +346,7 @@
         let potionActive = false;
         let potionTimer = null;
         let lastClickTime = 0;
-        const clickDelay = 500; // 0.5 seconds in milliseconds
+        const clickDelay = 500; // 0.5 секунды в миллисекундах
 
         const upgrades = [
             { name: "Больше места", description: "Увеличивает вместимость рюкзака", cost: 50, effect: () => { maxClicks += 5; }, maxLevel: Infinity },
@@ -379,11 +379,11 @@
 
         const potions = [
             { name: "Малое зелье прибыли", description: "Увеличивает прибыль от продажи на 50% на 3 минуты", cost: 1000, boost: 1.5 },
-            { name: "Большое зелье прибыли", description: "Удваивает прибыль от продажи на 3 минуты", cost: 6900, boost: 2 },
+            { name: "Большое зелье прибыли", description: "Удваивает прибыль от продажи на 3 минуты", cost: 5000, boost: 2 },
             { name: "Зелье сверхприбыли", description: "Утраивает прибыль от продажи на 3 минуты", cost: 15000, boost: 3 },
         ];
 
-        const inventory = [];
+        let inventory = [];
 
         const clicksElement = document.getElementById('clicks');
         const maxClicksElement = document.getElementById('max-clicks');
@@ -407,6 +407,7 @@
             maxClicksElement.textContent = maxClicks;
             coinsElement.textContent = coins;
             progressBar.style.width = `${(clicks / maxClicks) * 100}%`;
+            saveGameData();
         }
 
         function createPopText(x, y, text) {
@@ -422,7 +423,7 @@
         }
 
         clickArea.addEventListener('click', (e) => {
-            const currentTime = new Date().getTime();
+            const currentTime = Date.now();
             if (currentTime - lastClickTime >= clickDelay) {
                 if (clicks < maxClicks) {
                     clicks = Math.min(clicks + clickValue, maxClicks);
@@ -568,10 +569,49 @@
             alert(`Зелье ${potion.name} активировано на 3 минуты!`);
         }
 
+        function saveGameData() {
+            const gameData = {
+                clicks: clicks,
+                coins: coins,
+                maxClicks: maxClicks,
+                clickValue: clickValue,
+                upgrades: upgrades.map(upgrade => ({
+                    purchased: upgrade.purchased,
+                    cost: upgrade.cost
+                })),
+                inventory: inventory
+            };
+            localStorage.setItem('clickerGameData', JSON.stringify(gameData));
+        }
+
+        function loadGameData() {
+            const savedData = localStorage.getItem('clickerGameData');
+            if (savedData) {
+                const gameData = JSON.parse(savedData);
+                clicks = gameData.clicks;
+                coins = gameData.coins;
+                maxClicks = gameData.maxClicks;
+                clickValue = gameData.clickValue;
+                upgrades.forEach((upgrade, index) => {
+                    if (gameData.upgrades[index]) {
+                        upgrade.purchased = gameData.upgrades[index].purchased;
+                        upgrade.cost = gameData.upgrades[index].cost;
+                    }
+                });
+                inventory = gameData.inventory;
+                updateDisplay();
+                renderUpgrades();
+                renderInventory();
+            }
+        }
+
+        // Инициализация игры
         renderUpgrades();
         renderPotions();
         renderInventory();
+        loadGameData();
         updateDisplay();
+
     </script>
 </body>
 
