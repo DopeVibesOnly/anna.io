@@ -376,38 +376,85 @@
     }
 
     function createPlayer(id, playerData) {
-      const playerGeometry = new THREE.BoxGeometry(1, 2, 1);
-      const playerMaterial = new THREE.MeshPhongMaterial({ color: playerData.team === 'terrorist' ? 0xff0000 : 0x0000ff });
-      const playerMesh = new THREE.Mesh(playerGeometry, playerMaterial);
-      playerMesh.position.copy(playerData.position);
-      playerMesh.rotation.y = playerData.rotation;
-      scene.add(playerMesh);
+      const playerGroup = new THREE.Group();
+
+      // Body
+      const bodyGeometry = new THREE.BoxGeometry(0.6, 1.6, 0.6);
+      const bodyMaterial = new THREE.MeshPhongMaterial({ color: playerData.team === 'terrorist' ? 0xff0000 : 0x0000ff });
+      const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+      body.position.y = 0.8;
+      playerGroup.add(body);
+
+      // Head
+      const headGeometry = new THREE.SphereGeometry(0.3, 32, 32);
+      const headMaterial = new THREE.MeshPhongMaterial({ color: 0xffdab9 });
+      const head = new THREE.Mesh(headGeometry, headMaterial);
+      head.position.y = 1.7;
+      playerGroup.add(head);
+
+      // Arms
+      const armGeometry = new THREE.BoxGeometry(0.2, 0.6, 0.2);
+      const armMaterial = new THREE.MeshPhongMaterial({ color: playerData.team === 'terrorist' ? 0xcc0000 : 0x0000cc });
+      const leftArm = new THREE.Mesh(armGeometry, armMaterial);
+      leftArm.position.set(-0.4, 0.8, 0);
+      playerGroup.add(leftArm);
+
+      const rightArm = leftArm.clone();
+      rightArm.position.set(0.4, 0.8, 0);
+      playerGroup.add(rightArm);
+
+      // Legs
+      const legGeometry = new THREE.BoxGeometry(0.2, 0.8, 0.2);
+      const legMaterial = new THREE.MeshPhongMaterial({ color: 0x000000 });
+      const leftLeg = new THREE.Mesh(legGeometry, legMaterial);
+      leftLeg.position.set(-0.2, -0.4, 0);
+      playerGroup.add(leftLeg);
+
+      const rightLeg = leftLeg.clone();
+      rightLeg.position.set(0.2, -0.4, 0);
+      playerGroup.add(rightLeg);
+
+      playerGroup.position.copy(playerData.position);
+      playerGroup.rotation.y = playerData.rotation;
+      scene.add(playerGroup);
 
       // Add nickname
       const nicknameDiv = document.createElement('div');
       nicknameDiv.className = 'nickname';
       nicknameDiv.textContent = playerData.nickname;
       const nicknameObject = new THREE.CSS2DObject(nicknameDiv);
-      nicknameObject.position.set(0, 2.5, 0);
-      playerMesh.add(nicknameObject);
+      nicknameObject.position.set(0, 2.2, 0);
+      playerGroup.add(nicknameObject);
 
       players[id] = {
-        mesh: playerMesh,
+        group: playerGroup,
         nickname: playerData.nickname,
         team: playerData.team
       };
     }
 
     function updatePlayerPosition(id, position, rotation) {
-      if (players[id] && players[id].mesh) {
-        players[id].mesh.position.copy(position);
-        players[id].mesh.rotation.y = rotation;
+      if (players[id] && players[id].group) {
+        players[id].group.position.copy(position);
+        players[id].group.rotation.y = rotation;
+
+        // Animate legs and arms
+        const leftLeg = players[id].group.children[4];
+        const rightLeg = players[id].group.children[5];
+        const leftArm = players[id].group.children[2];
+        const rightArm = players[id].group.children[3];
+
+        const walkCycle = Date.now() * 0.005;
+        leftLeg.rotation.x = Math.sin(walkCycle) * 0.5;
+        rightLeg.rotation.x = Math.sin(walkCycle + Math.PI) * 0.5;
+        leftArm.rotation.x = Math.sin(walkCycle + Math.PI) * 0.5;
+        rightArm.rotation.x = Math.sin(walkCycle) * 0.5;
       }
     }
 
     function removePlayer(id) {
       if (players[id]) {
-        scene.remove(players[id].mesh);
+        scene.remove(players[id].group);
         delete players[id];
       }
     }
@@ -499,7 +546,7 @@
         // Check for collisions with players
         Object.keys(players).forEach((id) => {
           if (id !== socket.id) {
-            const playerPosition = players[id].mesh.position;
+            const playerPosition = players[id].group.position;
             if (bullet.position.distanceTo(playerPosition) < 1) {
               scene.remove(bullet);
               bullets.splice(i, 1);
