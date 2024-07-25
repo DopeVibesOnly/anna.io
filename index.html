@@ -371,12 +371,13 @@
         let comboClicks = 0;
         let comboTimer = null;
         let sellMultiplier = 1;
+        let autoClickerActive = false;
 
         const upgrades = [
             {
                 name: "Квантовый рюкзак",
                 description: "Увеличивает вместимость рюкзака на случайное число от 1 до 10",
-                cost: 150,
+                cost: 100,
                 effect: () => {
                     const increase = Math.floor(Math.random() * 10) + 1;
                     maxClicks += increase;
@@ -452,6 +453,33 @@
                 effect: () => { },
                 maxLevel: 1
             },
+            {
+                name: "Ускорение клика",
+                description: "Уменьшает задержку между кликами до 0.2 секунд",
+                cost: 4000,
+                effect: () => {
+                    clickDelay = 200;
+                    return "Задержка между кликами уменьшена до 0.2 секунд!";
+                },
+                maxLevel: 1
+            },
+            {
+                name: "Автокликер",
+                description: "Автоматически кликает 2 раза в секунду",
+                cost: 2500,
+                effect: () => {
+                    if (!autoClickerActive) {
+                        autoClickerActive = true;
+                        autoClickerInterval = setInterval(() => {
+                            simulateClick();
+                            simulateClick();
+                        }, 1000);
+                        return "Автокликер активирован!";
+                    }
+                    return "Автокликер уже активен!";
+                },
+                maxLevel: 1
+            }
         ];
 
         const potions = [
@@ -508,69 +536,65 @@
             }, 3000);
         }
 
+        function simulateClick() {
+            if (clicks < maxClicks || upgrades[5].purchased) {
+                let clicksToAdd = clickValue;
+
+                if (upgrades[2].purchased && Math.random() < 0.1) {
+                    clicksToAdd *= 5;
+                }
+
+                if (upgrades[7].purchased && Math.random() < 0.05) {
+                    setTimeout(() => {
+                        clickValue *= 2;
+                        setTimeout(() => {
+                            clickValue /= 2;
+                        }, 3000);
+                    }, 0);
+                }
+
+                if (upgrades[8].purchased) {
+                    const superposition = Math.random();
+                    if (superposition < 0.4) {
+                        clicksToAdd = 0;
+                    } else if (superposition >= 0.8) {
+                        clicksToAdd *= 2;
+                    }
+                }
+
+                comboClicks++;
+                if (comboTimer) clearTimeout(comboTimer);
+                comboTimer = setTimeout(() => {
+                    comboClicks = 0;
+                }, 5000);
+
+                if (upgrades[6].purchased && comboClicks === 20) {
+                    clicksToAdd *= 10;
+                    comboClicks = 0;
+                }
+
+                clicks = Math.min(clicks + clicksToAdd, maxClicks);
+                updateDisplay();
+
+                if (upgrades[3].purchased && clicks % 50 === 0) {
+                    const bonusClicks = Math.floor(recentSoldClicks * 0.1);
+                    clicks = Math.min(clicks + bonusClicks, maxClicks);
+                }
+            }
+        }
+
         clickArea.addEventListener('click', (e) => {
             const currentTime = Date.now();
             if (currentTime - lastClickTime >= clickDelay) {
-                if (clicks < maxClicks || upgrades[5].purchased) {
-                    let clicksToAdd = clickValue;
-
-                    if (upgrades[2].purchased && Math.random() < 0.1) {
-                        clicksToAdd *= 5;
-                        createPopText(e.clientX, e.clientY - 20, "Мультивселенная!");
-                    }
-
-                    if (upgrades[7].purchased && Math.random() < 0.05) {
-                        setTimeout(() => {
-                            clickValue *= 2;
-                            setTimeout(() => {
-                                clickValue /= 2;
-                            }, 3000);
-                        }, 0);
-                        createPopText(e.clientX, e.clientY - 40, "Червоточина!");
-                    }
-
-                    if (upgrades[8].purchased) {
-                        const superposition = Math.random();
-                        if (superposition < 0.4) {
-                            clicksToAdd = 0;
-                            createPopText(e.clientX, e.clientY - 20, "Квант исчез!");
-                        } else if (superposition < 0.8) {
-                            // ничего не меняем
-                        } else {
-                            clicksToAdd *= 2;
-                            createPopText(e.clientX, e.clientY - 20, "Двойной квант!");
-                        }
-                    }
-
-                    comboClicks++;
-                    if (comboTimer) clearTimeout(comboTimer);
-                    comboTimer = setTimeout(() => {
-                        comboClicks = 0;
-                    }, 5000);
-
-                    if (upgrades[6].purchased && comboClicks === 20) {
-                        clicksToAdd *= 10;
-                        createPopText(e.clientX, e.clientY - 60, "КОМБО x10!");
-                        comboClicks = 0;
-                    }
-
-                    clicks = Math.min(clicks + clicksToAdd, maxClicks);
-                    updateDisplay();
-                    createPopText(e.clientX, e.clientY, `+${clicksToAdd}`);
-                    lastClickTime = currentTime;
-
-                    if (upgrades[3].purchased && clicks % 50 === 0) {
-                        const bonusClicks = Math.floor(recentSoldClicks * 0.1);
-                        clicks = Math.min(clicks + bonusClicks, maxClicks);
-                        createPopText(e.clientX - 30, e.clientY, `+${bonusClicks} из прошлого!`);
-                    }
-                } else {
-                    clickArea.classList.add('shake');
-                    setTimeout(() => {
-                        clickArea.classList.remove('shake');
-                    }, 500);
-                    showErrorMessage("Рюкзак полон! Продайте клики или улучшите вместимость.");
-                }
+                simulateClick();
+                createPopText(e.clientX, e.clientY, `+${clickValue}`);
+                lastClickTime = currentTime;
+            } else {
+                clickArea.classList.add('shake');
+                setTimeout(() => {
+                    clickArea.classList.remove('shake');
+                }, 500);
+                showErrorMessage("Слишком быстро! Подождите немного перед следующим кликом.");
             }
         });
 
@@ -750,7 +774,8 @@
                 })),
                 inventory: inventory,
                 clickDelay: clickDelay,
-                sellMultiplier: sellMultiplier
+                sellMultiplier: sellMultiplier,
+                autoClickerActive: autoClickerActive
             };
             localStorage.setItem('clickerGameData', JSON.stringify(gameData));
         }
@@ -765,6 +790,7 @@
                 clickValue = gameData.clickValue;
                 clickDelay = gameData.clickDelay || 500;
                 sellMultiplier = gameData.sellMultiplier || 1;
+                autoClickerActive = gameData.autoClickerActive || false;
                 upgrades.forEach((upgrade, index) => {
                     if (gameData.upgrades[index]) {
                         upgrade.purchased = gameData.upgrades[index].purchased;
@@ -776,6 +802,12 @@
                 updateDisplay();
                 renderUpgrades();
                 renderInventory();
+                if (autoClickerActive) {
+                    autoClickerInterval = setInterval(() => {
+                        simulateClick();
+                        simulateClick();
+                    }, 1000);
+                }
             }
         }
 
