@@ -15,6 +15,7 @@
             --text-color: #34495e;
             --menu-bg-color: rgba(52, 73, 94, 0.95);
             --potion-color: #9b59b6;
+            --error-color: #e74c3c;
         }
 
         body {
@@ -38,6 +39,7 @@
             text-align: center;
             max-width: 400px;
             width: 100%;
+            position: relative;
         }
 
         h1,
@@ -305,6 +307,24 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
+
+        .error-message {
+            position: absolute;
+            top: -50px;
+            left: 0;
+            right: 0;
+            background-color: var(--error-color);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            opacity: 0;
+            transition: top 0.3s ease-out, opacity 0.3s ease-out;
+        }
+
+        .error-message.show {
+            top: 10px;
+            opacity: 1;
+        }
     </style>
 </head>
 
@@ -319,6 +339,7 @@
         <div id="inventory" class="inventory"></div>
     </div>
     <div class="game-container">
+        <div id="error-message" class="error-message"></div>
         <h1>Смачный Кликер</h1>
         <div class="stats">
             <div class="stat">Клики: <span id="clicks">0</span> / <span id="max-clicks">10</span></div>
@@ -346,40 +367,96 @@
         let potionActive = false;
         let potionTimer = null;
         let lastClickTime = 0;
-        const clickDelay = 500; // 0.5 секунды в миллисекундах
+        let clickDelay = 500; // 0.5 секунды в миллисекундах
+        let comboClicks = 0;
+        let comboTimer = null;
+        let sellMultiplier = 1;
 
         const upgrades = [
-            { name: "Больше места", description: "Увеличивает вместимость рюкзака", cost: 50, effect: () => { maxClicks += 5; }, maxLevel: Infinity },
-            { name: "Улучшенный клик", description: "Увеличивает стоимость клика", cost: 100, effect: () => { clickValue++; }, maxLevel: Infinity },
             {
-                name: "Автокликер", description: "Автоматически кликает каждую секунду", cost: 200, effect: () => {
-                    if (!autoClickerInterval) {
-                        autoClickerInterval = setInterval(() => {
-                            if (clicks < maxClicks) {
-                                clicks = Math.min(clicks + 1, maxClicks);
-                                updateDisplay();
-                            }
-                        }, 1000);
-                    }
-                }, maxLevel: 1
+                name: "Квантовый рюкзак",
+                description: "Увеличивает вместимость рюкзака на случайное число от 1 до 10",
+                cost: 150,
+                effect: () => {
+                    const increase = Math.floor(Math.random() * 10) + 1;
+                    maxClicks += increase;
+                    return `Вместимость увеличена на ${increase}!`;
+                },
+                maxLevel: Infinity
             },
             {
-                name: "Эффективность продаж", description: "Увеличивает прибыль от продажи кликов", cost: 300, effect: () => {
-                    const oldSellValue = sellClicks;
-                    sellClicks = () => {
-                        const value = clicks * 2;
-                        coins += value;
-                        clicks = 0;
-                        updateDisplay();
-                        return value;
-                    };
-                }, maxLevel: 1
+                name: "Тройная прибыль",
+                description: "Утраивает прибыль от продажи кликов",
+                cost: 300,
+                effect: () => {
+                    sellMultiplier *= 3;
+                    return "Прибыль от продажи утроена!";
+                },
+                maxLevel: 1
+            },
+            {
+                name: "Мультивселенный клик",
+                description: "Каждый клик имеет 10% шанс активировать клики во всех параллельных вселенных (х5 кликов)",
+                cost: 500,
+                effect: () => { },
+                maxLevel: 1
+            },
+            {
+                name: "Временная петля",
+                description: "Каждые 50 кликов возвращают 10% от проданных за последнюю минуту кликов",
+                cost: 1000,
+                effect: () => { },
+                maxLevel: 1
+            },
+            {
+                name: "Алхимическое превращение",
+                description: "1% шанс при продаже превратить клик в золотую монету (х10 стоимость)",
+                cost: 2000,
+                effect: () => { },
+                maxLevel: 5
+            },
+            {
+                name: "Квантовый туннель",
+                description: "Позволяет преодолеть максимальную вместимость рюкзака на 5 секунд каждые 2 минуты",
+                cost: 3000,
+                effect: () => {
+                    setInterval(() => {
+                        const oldMaxClicks = maxClicks;
+                        maxClicks = Infinity;
+                        setTimeout(() => {
+                            maxClicks = oldMaxClicks;
+                            updateDisplay();
+                        }, 5000);
+                    }, 120000);
+                },
+                maxLevel: 1
+            },
+            {
+                name: "Комбо-множитель",
+                description: "Серия из 20 кликов за 5 секунд увеличивает стоимость следующего клика в 10 раз",
+                cost: 5000,
+                effect: () => { },
+                maxLevel: 1
+            },
+            {
+                name: "Пространственная аномалия",
+                description: "5% шанс при клике создать временную червоточину, удваивающую все клики на 3 секунды",
+                cost: 7500,
+                effect: () => { },
+                maxLevel: 1
+            },
+            {
+                name: "Квантовая суперпозиция",
+                description: "Каждый клик имеет шанс быть в двух состояниях одновременно, либо не произойти, либо случиться дважды",
+                cost: 10000,
+                effect: () => { },
+                maxLevel: 1
             },
         ];
 
         const potions = [
             { name: "Малое зелье прибыли", description: "Увеличивает прибыль от продажи на 50% на 3 минуты", cost: 1000, boost: 1.5 },
-            { name: "Большое зелье прибыли", description: "Удваивает прибыль от продажи на 3 минуты", cost: 5000, boost: 2 },
+            { name: "Большое зелье прибыли", description: "Удваивает прибыль от продажи на 3 минуты", cost: 6900, boost: 2 },
             { name: "Зелье сверхприбыли", description: "Утраивает прибыль от продажи на 3 минуты", cost: 15000, boost: 3 },
         ];
 
@@ -401,6 +478,7 @@
         const potionDescription = document.getElementById('potion-description');
         const usePotion = document.getElementById('use-potion');
         const closePotionInfo = document.getElementById('close-potion-info');
+        const errorMessage = document.getElementById('error-message');
 
         function updateDisplay() {
             clicksElement.textContent = clicks;
@@ -422,26 +500,106 @@
             }, 500);
         }
 
+        function showErrorMessage(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('show');
+            setTimeout(() => {
+                errorMessage.classList.remove('show');
+            }, 3000);
+        }
+
         clickArea.addEventListener('click', (e) => {
             const currentTime = Date.now();
             if (currentTime - lastClickTime >= clickDelay) {
-                if (clicks < maxClicks) {
-                    clicks = Math.min(clicks + clickValue, maxClicks);
+                if (clicks < maxClicks || upgrades[5].purchased) {
+                    let clicksToAdd = clickValue;
+
+                    if (upgrades[2].purchased && Math.random() < 0.1) {
+                        clicksToAdd *= 5;
+                        createPopText(e.clientX, e.clientY - 20, "Мультивселенная!");
+                    }
+
+                    if (upgrades[7].purchased && Math.random() < 0.05) {
+                        setTimeout(() => {
+                            clickValue *= 2;
+                            setTimeout(() => {
+                                clickValue /= 2;
+                            }, 3000);
+                        }, 0);
+                        createPopText(e.clientX, e.clientY - 40, "Червоточина!");
+                    }
+
+                    if (upgrades[8].purchased) {
+                        const superposition = Math.random();
+                        if (superposition < 0.4) {
+                            clicksToAdd = 0;
+                            createPopText(e.clientX, e.clientY - 20, "Квант исчез!");
+                        } else if (superposition < 0.8) {
+                            // ничего не меняем
+                        } else {
+                            clicksToAdd *= 2;
+                            createPopText(e.clientX, e.clientY - 20, "Двойной квант!");
+                        }
+                    }
+
+                    comboClicks++;
+                    if (comboTimer) clearTimeout(comboTimer);
+                    comboTimer = setTimeout(() => {
+                        comboClicks = 0;
+                    }, 5000);
+
+                    if (upgrades[6].purchased && comboClicks === 20) {
+                        clicksToAdd *= 10;
+                        createPopText(e.clientX, e.clientY - 60, "КОМБО x10!");
+                        comboClicks = 0;
+                    }
+
+                    clicks = Math.min(clicks + clicksToAdd, maxClicks);
                     updateDisplay();
-                    createPopText(e.clientX, e.clientY, `+${clickValue}`);
+                    createPopText(e.clientX, e.clientY, `+${clicksToAdd}`);
                     lastClickTime = currentTime;
+
+                    if (upgrades[3].purchased && clicks % 50 === 0) {
+                        const bonusClicks = Math.floor(recentSoldClicks * 0.1);
+                        clicks = Math.min(clicks + bonusClicks, maxClicks);
+                        createPopText(e.clientX - 30, e.clientY, `+${bonusClicks} из прошлого!`);
+                    }
                 } else {
                     clickArea.classList.add('shake');
                     setTimeout(() => {
                         clickArea.classList.remove('shake');
                     }, 500);
+                    showErrorMessage("Рюкзак полон! Продайте клики или улучшите вместимость.");
                 }
             }
         });
 
+        let recentSoldClicks = 0;
+        let soldClicksHistory = [];
+
         function sellClicks() {
-            const value = clicks * (potionActive ? potionActive : 1);
+            let value = clicks * sellMultiplier * (potionActive ? potionActive : 1);
+
+            const alchemyLevel = upgrades[4].level || 0;
+            for (let i = 0; i < clicks; i++) {
+                if (Math.random() < alchemyLevel * 0.01) {
+                    value += 9 * sellMultiplier;
+                    createPopText(
+                        sellButton.offsetLeft + Math.random() * sellButton.offsetWidth,
+                        sellButton.offsetTop + Math.random() * sellButton.offsetHeight,
+                        "Золото!"
+                    );
+                }
+            }
+
             coins += value;
+            recentSoldClicks += clicks;
+            soldClicksHistory.push({ time: Date.now(), amount: clicks });
+
+            const oneMinuteAgo = Date.now() - 60000;
+            soldClicksHistory = soldClicksHistory.filter(record => record.time > oneMinuteAgo);
+            recentSoldClicks = soldClicksHistory.reduce((sum, record) => sum + record.amount, 0);
+
             clicks = 0;
             updateDisplay();
             return value;
@@ -455,6 +613,8 @@
                     sellButton.offsetTop,
                     `+${soldValue} монет`
                 );
+            } else {
+                showErrorMessage("Нет кликов для продажи!");
             }
         });
 
@@ -486,18 +646,25 @@
             const upgrade = upgrades[index];
             if (coins >= upgrade.cost && (!upgrade.purchased || upgrade.maxLevel === Infinity)) {
                 coins -= upgrade.cost;
-                upgrade.effect();
+                const message = upgrade.effect();
                 if (upgrade.maxLevel === 1) {
                     upgrade.purchased = true;
                 } else {
+                    upgrade.level = (upgrade.level || 0) + 1;
+                    if (upgrade.level === upgrade.maxLevel) {
+                        upgrade.purchased = true;
+                    }
                     upgrade.cost = Math.floor(upgrade.cost * 1.5);
                 }
                 updateDisplay();
                 renderUpgrades();
+                if (message) {
+                    showErrorMessage(message);
+                }
             } else if (upgrade.purchased && upgrade.maxLevel === 1) {
-                alert('Это улучшение уже достигло максимального уровня!');
+                showErrorMessage('Это улучшение уже достигло максимального уровня!');
             } else {
-                alert('Недостаточно монет для покупки этого улучшения!');
+                showErrorMessage('Недостаточно монет для покупки этого улучшения!');
             }
         }
 
@@ -523,8 +690,9 @@
                 inventory.push(potion);
                 updateDisplay();
                 renderInventory();
+                showErrorMessage(`Вы купили ${potion.name}!`);
             } else {
-                alert('Недостаточно монет для покупки этого зелья!');
+                showErrorMessage('Недостаточно монет для покупки этого зелья!');
             }
         }
 
@@ -553,7 +721,7 @@
 
         function useInventoryPotion(index) {
             if (potionActive) {
-                alert('Нельзя использовать несколько зелий одновременно!');
+                showErrorMessage('Нельзя использовать несколько зелий одновременно!');
                 return;
             }
             const potion = inventory[index];
@@ -564,9 +732,9 @@
             if (potionTimer) clearTimeout(potionTimer);
             potionTimer = setTimeout(() => {
                 potionActive = false;
-                alert('Действие зелья закончилось!');
+                showErrorMessage('Действие зелья закончилось!');
             }, 3 * 60 * 1000);
-            alert(`Зелье ${potion.name} активировано на 3 минуты!`);
+            showErrorMessage(`Зелье ${potion.name} активировано на 3 минуты!`);
         }
 
         function saveGameData() {
@@ -577,9 +745,12 @@
                 clickValue: clickValue,
                 upgrades: upgrades.map(upgrade => ({
                     purchased: upgrade.purchased,
-                    cost: upgrade.cost
+                    cost: upgrade.cost,
+                    level: upgrade.level || 0
                 })),
-                inventory: inventory
+                inventory: inventory,
+                clickDelay: clickDelay,
+                sellMultiplier: sellMultiplier
             };
             localStorage.setItem('clickerGameData', JSON.stringify(gameData));
         }
@@ -592,10 +763,13 @@
                 coins = gameData.coins;
                 maxClicks = gameData.maxClicks;
                 clickValue = gameData.clickValue;
+                clickDelay = gameData.clickDelay || 500;
+                sellMultiplier = gameData.sellMultiplier || 1;
                 upgrades.forEach((upgrade, index) => {
                     if (gameData.upgrades[index]) {
                         upgrade.purchased = gameData.upgrades[index].purchased;
                         upgrade.cost = gameData.upgrades[index].cost;
+                        upgrade.level = gameData.upgrades[index].level;
                     }
                 });
                 inventory = gameData.inventory;
@@ -605,13 +779,11 @@
             }
         }
 
-        // Инициализация игры
         renderUpgrades();
         renderPotions();
         renderInventory();
         loadGameData();
         updateDisplay();
-
     </script>
 </body>
 
