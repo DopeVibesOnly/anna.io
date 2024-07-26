@@ -1,832 +1,887 @@
 <html>
 
 <head>
-  <base href="https://fps-nexus.com/play/cs16tribute">
-  <title>CS16 Tribute - Multiplayer FPS</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
-  <style>
-    body,
-    html {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      font-family: 'Arial', sans-serif;
-      background-color: #000;
-      color: #fff;
-      overflow: hidden;
-    }
+    <base href="index.html">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Смачный Кликер</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
 
-    #game-container {
-      width: 100%;
-      height: 100%;
-      position: relative;
-    }
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --background-color: #ecf0f1;
+            --text-color: #34495e;
+            --menu-bg-color: rgba(52, 73, 94, 0.95);
+            --potion-color: #9b59b6;
+            --error-color: #e74c3c;
+        }
 
-    #hud {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      padding: 20px;
-      display: flex;
-      justify-content: space-between;
-      pointer-events: none;
-    }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
 
-    #health,
-    #ammo,
-    #money {
-      background: rgba(0, 0, 0, 0.5);
-      padding: 10px;
-      border-radius: 5px;
-    }
+        .game-container {
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+            position: relative;
+        }
 
-    #crosshair {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 10px;
-      height: 10px;
-      border: 2px solid #fff;
-      border-radius: 50%;
-      pointer-events: none;
-    }
+        h1,
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
 
-    #menu {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(0, 0, 0, 0.8);
-      padding: 20px;
-      border-radius: 10px;
-      text-align: center;
-    }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
 
-    #menu button {
-      background: #4CAF50;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      margin: 10px;
-      font-size: 18px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
+        .stat {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
 
-    #menu button:hover {
-      background: #45a049;
-    }
+        .click-area {
+            width: 200px;
+            height: 200px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            margin: 2rem auto;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            color: white;
+            transition: transform 0.1s, box-shadow 0.1s;
+            user-select: none;
+        }
 
-    #nickname-input {
-      padding: 10px;
-      font-size: 16px;
-      margin-bottom: 10px;
-    }
+        .click-area:active {
+            transform: scale(0.95);
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+        }
 
-    #chat {
-      position: absolute;
-      bottom: 20px;
-      left: 20px;
-      width: 300px;
-      background: rgba(0, 0, 0, 0.5);
-      border-radius: 5px;
-      padding: 10px;
-      display: none;
-    }
+        .sell-button {
+            background-color: var(--secondary-color);
+            border: none;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+        }
 
-    #chat-messages {
-      height: 150px;
-      overflow-y: auto;
-      margin-bottom: 10px;
-    }
+        .sell-button:hover {
+            background-color: #27ae60;
+        }
 
-    #chat-input {
-      width: 100%;
-      padding: 5px;
-      box-sizing: border-box;
-    }
+        .sell-button:active {
+            transform: scale(0.98);
+        }
 
-    .nickname {
-      color: #ffffff;
-      font-size: 14px;
-      font-weight: bold;
-      text-shadow: 0 0 3px #000000;
-      pointer-events: none;
-    }
+        @keyframes pop {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
 
-    #buy-menu {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(0, 0, 0, 0.8);
-      padding: 20px;
-      border-radius: 10px;
-      display: none;
-    }
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
 
-    #buy-menu button {
-      background: #4CAF50;
-      color: white;
-      border: none;
-      padding: 5px 10px;
-      margin: 5px;
-      font-size: 14px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
+        .pop-text {
+            position: absolute;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            pointer-events: none;
+            animation: pop 0.5s ease-out;
+        }
 
-    #buy-menu button:hover {
-      background: #45a049;
-    }
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
 
-    #round-info {
-      position: absolute;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.5);
-      padding: 10px;
-      border-radius: 5px;
-      text-align: center;
-    }
-  </style>
+        .progress {
+            width: 0%;
+            height: 100%;
+            background-color: var(--secondary-color);
+            transition: width 0.3s ease-out;
+        }
+
+        @keyframes shake {
+            0% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            50% {
+                transform: translateX(5px);
+            }
+
+            75% {
+                transform: translateX(-5px);
+            }
+
+            100% {
+                transform: translateX(0);
+            }
+        }
+
+        .shake {
+            animation: shake 0.5s;
+        }
+
+        .menu-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            transition: transform 0.3s, background-color 0.3s;
+            z-index: 1000;
+        }
+
+        .menu-button:hover {
+            transform: scale(1.1);
+            background-color: #2980b9;
+        }
+
+        .menu {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 300px;
+            height: 100%;
+            background-color: var(--menu-bg-color);
+            transition: left 0.3s ease-out;
+            z-index: 999;
+            overflow-y: auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .menu.open {
+            left: 0;
+        }
+
+        .upgrade-item,
+        .potion-item {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .upgrade-item:hover,
+        .potion-item:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .upgrade-item h3,
+        .potion-item h3 {
+            margin: 0 0 10px 0;
+        }
+
+        .upgrade-item p,
+        .potion-item p {
+            margin: 0;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .upgrade-cost,
+        .potion-cost {
+            font-weight: bold;
+            color: #f1c40f;
+        }
+
+        .inventory {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .inventory-item {
+            width: 50px;
+            height: 50px;
+            background-color: var(--potion-color);
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 24px;
+            color: white;
+            transition: transform 0.2s;
+        }
+
+        .inventory-item:hover {
+            transform: scale(1.1);
+        }
+
+        .potion-info {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            z-index: 1001;
+            display: none;
+        }
+
+        .potion-info h3 {
+            margin-top: 0;
+        }
+
+        .close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--text-color);
+        }
+
+        .use-button {
+            background-color: var(--potion-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .use-button:hover {
+            background-color: #8e44ad;
+        }
+
+        .max-upgrade {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            position: absolute;
+            top: -50px;
+            left: 0;
+            right: 0;
+            background-color: var(--error-color);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            opacity: 0;
+            transition: top 0.3s ease-out, opacity 0.3s ease-out;
+        }
+
+        .error-message.show {
+            top: 10px;
+            opacity: 1;
+        }
+
+        .auto-sell-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .auto-sell-toggle:hover {
+            background-color: #27ae60;
+        }
+
+        .auto-sell-toggle.off {
+            background-color: var(--error-color);
+        }
+
+        .auto-sell-toggle.off:hover {
+            background-color: #c0392b;
+        }
+    </style>
 </head>
 
 <body>
-  <div id="game-container">
-    <div id="hud">
-      <div id="health">Health: 100</div>
-      <div id="ammo">Ammo: 30 / 90</div>
-      <div id="money">$: 800</div>
+    <button class="menu-button" id="menu-button">☰</button>
+    <div class="menu" id="menu">
+        <h2 style="color: white;">Улучшения</h2>
+        <div id="upgrades-list"></div>
+        <h2 style="color: white;">Зелья</h2>
+        <div id="potions-list"></div>
+        <h2 style="color: white;">Инвентарь</h2>
+        <div id="inventory" class="inventory"></div>
     </div>
-    <div id="crosshair"></div>
-    <div id="round-info">Round 1 - Terrorists: 0 | Counter-Terrorists: 0</div>
-  </div>
-  <div id="menu">
-    <h1>CS16 Tribute</h1>
-    <input type="text" id="nickname-input" placeholder="Enter your nickname">
-    <button id="terrorist-btn">Join Terrorists</button>
-    <button id="ct-btn">Join Counter-Terrorists</button>
-  </div>
-  <div id="chat">
-    <div id="chat-messages"></div>
-    <input type="text" id="chat-input" placeholder="Press Enter to chat">
-  </div>
-  <div id="buy-menu">
-    <h2>Buy Menu</h2>
-    <button onclick="buyWeapon('ak47')">AK-47 ($2500)</button>
-    <button onclick="buyWeapon('m4a1')">M4A1 ($3100)</button>
-    <button onclick="buyWeapon('awp')">AWP ($4750)</button>
-    <button onclick="buyWeapon('deagle')">Desert Eagle ($650)</button>
-    <button onclick="buyArmor()">Kevlar + Helmet ($1000)</button>
-  </div>
-
-  <script>
-    let scene, camera, renderer, player, healthDisplay, ammoDisplay, moneyDisplay;
-    let players = {};
-    let bullets = [];
-    let gameActive = false;
-    let socket;
-    let chatOpen = false;
-    let team = '';
-    let money = 800;
-    let currentWeapon = 'pistol';
-    let weapons = {
-      pistol: { damage: 20, ammo: 12, maxAmmo: 24, fireRate: 400 },
-      ak47: { damage: 35, ammo: 30, maxAmmo: 90, fireRate: 600 },
-      m4a1: { damage: 33, ammo: 30, maxAmmo: 90, fireRate: 666 },
-      awp: { damage: 115, ammo: 10, maxAmmo: 30, fireRate: 1500 },
-      deagle: { damage: 50, ammo: 7, maxAmmo: 35, fireRate: 267 }
-    };
-    let buyTime = true;
-    let roundNumber = 1;
-    let terroristScore = 0;
-    let ctScore = 0;
-
-    // Variables for improved camera control
-    let pitchObject, yawObject;
-
-    // Variables for movement
-    let moveForward = false;
-    let moveBackward = false;
-    let moveLeft = false;
-    let moveRight = false;
-    let canJump = false;
-    let velocity = new THREE.Vector3();
-
-    function init() {
-      scene = new THREE.Scene();
-      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-      renderer = new THREE.WebGLRenderer({ antialias: true });
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.shadowMap.enabled = true;
-      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-      document.getElementById('game-container').appendChild(renderer.domElement);
-
-      // Create player (camera) with improved controls
-      pitchObject = new THREE.Object3D();
-      pitchObject.add(camera);
-
-      yawObject = new THREE.Object3D();
-      yawObject.position.y = 10;
-      yawObject.add(pitchObject);
-
-      scene.add(yawObject);
-
-      // Create map
-      createMap();
-
-      // Lighting
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-      scene.add(ambientLight);
-
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-      directionalLight.position.set(100, 100, 100);
-      directionalLight.castShadow = true;
-      directionalLight.shadow.mapSize.width = 2048;
-      directionalLight.shadow.mapSize.height = 2048;
-      directionalLight.shadow.camera.near = 0.5;
-      directionalLight.shadow.camera.far = 500;
-      scene.add(directionalLight);
-
-      healthDisplay = document.getElementById('health');
-      ammoDisplay = document.getElementById('ammo');
-      moneyDisplay = document.getElementById('money');
-
-      document.addEventListener('mousemove', onMouseMove);
-      document.addEventListener('click', shoot);
-      document.addEventListener('keydown', onKeyDown);
-      document.addEventListener('keyup', onKeyUp);
-
-      // Lock pointer
-      renderer.domElement.requestPointerLock = renderer.domElement.requestPointerLock ||
-        renderer.domElement.mozRequestPointerLock;
-      renderer.domElement.onclick = function () {
-        renderer.domElement.requestPointerLock();
-      };
-
-      // Team selection buttons
-      document.getElementById('terrorist-btn').addEventListener('click', () => joinGame('terrorist'));
-      document.getElementById('ct-btn').addEventListener('click', () => joinGame('ct'));
-
-      // Chat
-      document.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter' && !chatOpen) {
-          openChat();
-        } else if (event.key === 'Escape' && chatOpen) {
-          closeChat();
-        }
-      });
-
-      document.getElementById('chat-input').addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') {
-          sendChatMessage();
-        }
-      });
-
-      // Initialize multiplayer
-      initializeMultiplayer();
-
-      animate();
-    }
-
-    function initializeMultiplayer() {
-      socket = io('https://your-server-address.com');
-
-      socket.on('connect', () => {
-        console.log('Connected to server');
-      });
-
-      socket.on('players', (serverPlayers) => {
-        Object.keys(serverPlayers).forEach((id) => {
-          if (id !== socket.id && !players[id]) {
-            createPlayer(id, serverPlayers[id]);
-          }
-        });
-      });
-
-      socket.on('playerJoined', (player) => {
-        createPlayer(player.id, player);
-        addChatMessage(`${player.nickname} joined the game`);
-      });
-
-      socket.on('playerMoved', (player) => {
-        if (players[player.id]) {
-          updatePlayerPosition(player.id, player.position, player.rotation);
-        }
-      });
-
-      socket.on('playerLeft', (id) => {
-        removePlayer(id);
-      });
-
-      socket.on('playerShot', (data) => {
-        if (data.shooter !== socket.id) {
-          createBullet(new THREE.Vector3().copy(data.position), new THREE.Vector3().copy(data.direction));
-        }
-      });
-
-      socket.on('playerHit', (data) => {
-        if (data.target === socket.id) {
-          takeDamage(data.damage);
-        }
-      });
-
-      socket.on('chatMessage', (data) => {
-        addChatMessage(`${data.nickname}: ${data.message}`);
-      });
-
-      socket.on('roundStart', (data) => {
-        startRound(data.roundNumber);
-      });
-
-      socket.on('roundEnd', (data) => {
-        endRound(data.winner);
-      });
-
-      socket.on('updateScore', (data) => {
-        updateScore(data.terroristScore, data.ctScore);
-      });
-    }
-
-    function joinGame(selectedTeam) {
-      const nickname = document.getElementById('nickname-input').value || 'Player';
-      document.getElementById('menu').style.display = 'none';
-      gameActive = true;
-      team = selectedTeam;
-
-      socket.emit('join', {
-        nickname: nickname,
-        team: team,
-        position: yawObject.position,
-        rotation: yawObject.rotation.y
-      });
-
-      // Set initial spawn position based on team
-      if (team === 'terrorist') {
-        yawObject.position.set(-20, 2, -20);
-      } else {
-        yawObject.position.set(20, 2, 20);
-      }
-    }
-
-    function createPlayer(id, playerData) {
-      const playerGroup = new THREE.Group();
-
-      // Body
-      const bodyGeometry = new THREE.BoxGeometry(0.6, 1.6, 0.6);
-      const bodyMaterial = new THREE.MeshPhongMaterial({ color: playerData.team === 'terrorist' ? 0xff0000 : 0x0000ff });
-      const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
-      body.position.y = 0.8;
-      playerGroup.add(body);
-
-      // Head
-      const headGeometry = new THREE.SphereGeometry(0.3, 32, 32);
-      const headMaterial = new THREE.MeshPhongMaterial({ color: 0xffdab9 });
-      const head = new THREE.Mesh(headGeometry, headMaterial);
-      head.position.y = 1.7;
-      playerGroup.add(head);
-
-      // Arms
-      const armGeometry = new THREE.BoxGeometry(0.2, 0.6, 0.2);
-      const armMaterial = new THREE.MeshPhongMaterial({ color: playerData.team === 'terrorist' ? 0xcc0000 : 0x0000cc });
-      const leftArm = new THREE.Mesh(armGeometry, armMaterial);
-      leftArm.position.set(-0.4, 0.8, 0);
-      playerGroup.add(leftArm);
-
-      const rightArm = leftArm.clone();
-      rightArm.position.set(0.4, 0.8, 0);
-      playerGroup.add(rightArm);
-
-      // Legs
-      const legGeometry = new THREE.BoxGeometry(0.2, 0.8, 0.2);
-      const legMaterial = new THREE.MeshPhongMaterial({ color: 0x000000 });
-      const leftLeg = new THREE.Mesh(legGeometry, legMaterial);
-      leftLeg.position.set(-0.2, -0.4, 0);
-      playerGroup.add(leftLeg);
-
-      const rightLeg = leftLeg.clone();
-      rightLeg.position.set(0.2, -0.4, 0);
-      playerGroup.add(rightLeg);
-
-      playerGroup.position.copy(playerData.position);
-      playerGroup.rotation.y = playerData.rotation;
-      scene.add(playerGroup);
-
-      // Add nickname
-      const nicknameDiv = document.createElement('div');
-      nicknameDiv.className = 'nickname';
-      nicknameDiv.textContent = playerData.nickname;
-      const nicknameObject = new THREE.CSS2DObject(nicknameDiv);
-      nicknameObject.position.set(0, 2.2, 0);
-      playerGroup.add(nicknameObject);
-
-      players[id] = {
-        group: playerGroup,
-        nickname: playerData.nickname,
-        team: playerData.team
-      };
-    }
-
-    function updatePlayerPosition(id, position, rotation) {
-      if (players[id] && players[id].group) {
-        players[id].group.position.copy(position);
-        players[id].group.rotation.y = rotation;
-
-        // Animate legs and arms
-        const leftLeg = players[id].group.children[4];
-        const rightLeg = players[id].group.children[5];
-        const leftArm = players[id].group.children[2];
-        const rightArm = players[id].group.children[3];
-
-        const walkCycle = Date.now() * 0.005;
-        leftLeg.rotation.x = Math.sin(walkCycle) * 0.5;
-        rightLeg.rotation.x = Math.sin(walkCycle + Math.PI) * 0.5;
-        leftArm.rotation.x = Math.sin(walkCycle + Math.PI) * 0.5;
-        rightArm.rotation.x = Math.sin(walkCycle) * 0.5;
-      }
-    }
-
-    function removePlayer(id) {
-      if (players[id]) {
-        scene.remove(players[id].group);
-        delete players[id];
-      }
-    }
-
-    function onMouseMove(event) {
-      if (!gameActive || !document.pointerLockElement) return;
-
-      const movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
-      const movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
-
-      yawObject.rotation.y -= movementX * 0.002;
-      pitchObject.rotation.x -= movementY * 0.002;
-
-      pitchObject.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, pitchObject.rotation.x));
-
-      socket.emit('move', { position: yawObject.position, rotation: yawObject.rotation.y });
-    }
-
-    function shoot() {
-      if (!gameActive || chatOpen || weapons[currentWeapon].ammo <= 0) return;
-
-      weapons[currentWeapon].ammo--;
-      updateAmmoDisplay();
-
-      const bulletPosition = new THREE.Vector3();
-      const bulletDirection = new THREE.Vector3();
-      camera.getWorldPosition(bulletPosition);
-      camera.getWorldDirection(bulletDirection);
-
-      createBullet(bulletPosition, bulletDirection);
-
-      socket.emit('shoot', {
-        position: bulletPosition,
-        direction: bulletDirection,
-        weapon: currentWeapon
-      });
-
-      // Play gunshot sound
-      playSound('gunshot');
-    }
-
-    function createBullet(position, direction) {
-      const bulletGeometry = new THREE.SphereGeometry(0.05, 8, 8);
-      const bulletMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
-      const bullet = new THREE.Mesh(bulletGeometry, bulletMaterial);
-
-      bullet.position.copy(position);
-      bullet.velocity = direction.multiplyScalar(1);
-
-      scene.add(bullet);
-      bullets.push(bullet);
-
-      return bullet;
-    }
-
-    function updateGame() {
-      if (!gameActive) return;
-
-      const time = performance.now();
-      const delta = (time - prevTime) / 1000;
-
-      velocity.x -= velocity.x * 10.0 * delta;
-      velocity.z -= velocity.z * 10.0 * delta;
-
-      velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
-
-      const speed = 100.0;
-
-      if (moveForward) velocity.z -= speed * delta;
-      if (moveBackward) velocity.z += speed * delta;
-      if (moveLeft) velocity.x -= speed * delta;
-      if (moveRight) velocity.x += speed * delta;
-
-      yawObject.translateX(velocity.x * delta);
-      yawObject.translateY(velocity.y * delta);
-      yawObject.translateZ(velocity.z * delta);
-
-      if (yawObject.position.y < 2) {
-        velocity.y = 0;
-        yawObject.position.y = 2;
-        canJump = true;
-      }
-
-      // Update bullets
-      for (let i = bullets.length - 1; i >= 0; i--) {
-        const bullet = bullets[i];
-        bullet.position.add(bullet.velocity);
-
-        // Check for collisions with players
-        Object.keys(players).forEach((id) => {
-          if (id !== socket.id) {
-            const playerPosition = players[id].group.position;
-            if (bullet.position.distanceTo(playerPosition) < 1) {
-              scene.remove(bullet);
-              bullets.splice(i, 1);
-              socket.emit('hit', {
-                target: id,
-                damage: weapons[currentWeapon].damage
-              });
+    <div class="game-container">
+        <div id="error-message" class="error-message"></div>
+        <h1>Смачный Кликер</h1>
+        <div class="stats">
+            <div class="stat">Клики: <span id="clicks">0</span> / <span id="max-clicks">10</span></div>
+            <div class="stat">Монеты: <span id="coins">0</span></div>
+        </div>
+        <div class="click-area" id="click-area">Клик!</div>
+        <button class="sell-button" id="sell-button">Продать клики</button>
+        <div class="progress-bar">
+            <div class="progress" id="progress"></div>
+        </div>
+    </div>
+    <div id="potion-info" class="potion-info">
+        <button class="close-button" id="close-potion-info">&times;</button>
+        <h3 id="potion-name"></h3>
+        <p id="potion-description"></p>
+        <button class="use-button" id="use-potion">Использовать</button>
+    </div>
+    <button class="auto-sell-toggle" id="auto-sell-toggle">Выключить автопродажу</button>
+
+    <script>
+        let clicks = 0;
+        let coins = 0;
+        let maxClicks = 10;
+        let clickValue = 1;
+        let autoClickerInterval = null;
+        let potionActive = false;
+        let potionTimer = null;
+        let lastClickTime = 0;
+        let clickDelay = 500; // 0.5 секунды в миллисекундах
+        let comboClicks = 0;
+        let comboTimer = null;
+        let sellMultiplier = 1;
+        let autoClickerActive = false;
+        let autoSellActive = false;
+
+        const upgrades = [
+            {
+                name: "Квантовый рюкзак",
+                description: "Увеличивает вместимость рюкзака на случайное число от 1 до 10",
+                cost: 100,
+                effect: () => {
+                    const increase = Math.floor(Math.random() * 10) + 1;
+                    maxClicks += increase;
+                    return `Вместимость увеличена на ${increase}!`;
+                },
+                maxLevel: Infinity
+            },
+            {
+                name: "Тройная прибыль",
+                description: "Утраивает прибыль от продажи кликов",
+                cost: 300,
+                effect: () => {
+                    sellMultiplier *= 3;
+                    return "Прибыль от продажи утроена!";
+                },
+                maxLevel: 1
+            },
+            {
+                name: "Мультивселенный клик",
+                description: "Каждый клик имеет 10% шанс активировать клики во всех параллельных вселенных (х5 кликов)",
+                cost: 500,
+                effect: () => { },
+                maxLevel: 1
+            },
+            {
+                name: "Временная петля",
+                description: "Каждые 50 кликов возвращают 10% от проданных за последнюю минуту кликов",
+                cost: 1000,
+                effect: () => { },
+                maxLevel: 1
+            },
+            {
+                name: "Алхимическое превращение",
+                description: "1% шанс при продаже превратить клик в золотую монету (х10 стоимость)",
+                cost: 2000,
+                effect: () => { },
+                maxLevel: 5
+            },
+            {
+                name: "Квантовый туннель",
+                description: "Позволяет преодолеть максимальную вместимость рюкзака на 5 секунд каждые 2 минуты",
+                cost: 3000,
+                effect: () => {
+                    setInterval(() => {
+                        const oldMaxClicks = maxClicks;
+                        maxClicks = Infinity;
+                        setTimeout(() => {
+                            maxClicks = oldMaxClicks;
+                            updateDisplay();
+                        }, 5000);
+                    }, 120000);
+                },
+                maxLevel: 1
+            },
+            {
+                name: "Комбо-множитель",
+                description: "Серия из 20 кликов за 5 секунд увеличивает стоимость следующего клика в 10 раз",
+                cost: 5000,
+                effect: () => { },
+                maxLevel: 1
+            },
+            {
+                name: "Пространственная аномалия",
+                description: "5% шанс при клике создать временную червоточину, удваивающую все клики на 3 секунды",
+                cost: 7500,
+                effect: () => { },
+                maxLevel: 1
+            },
+            {
+                name: "Квантовая суперпозиция",
+                description: "Каждый клик имеет шанс быть в двух состояниях одновременно, либо не произойти, либо случиться дважды",
+                cost: 10000,
+                effect: () => { },
+                maxLevel: 1
+            },
+            {
+                name: "Ускорение клика",
+                description: "Уменьшает задержку между кликами до 0.2 секунд",
+                cost: 4000,
+                effect: () => {
+                    clickDelay = 200;
+                    return "Задержка между кликами уменьшена до 0.2 секунд!";
+                },
+                maxLevel: 1
+            },
+            {
+                name: "Автокликер",
+                description: "Автоматически кликает 2 раза в секунду",
+                cost: 2000,
+                effect: () => {
+                    if (!autoClickerActive) {
+                        autoClickerActive = true;
+                        autoClickerInterval = setInterval(() => {
+                            simulateClick();
+                            simulateClick();
+                        }, 1000);
+                        return "Автокликер активирован!";
+                    }
+                    return "Автокликер уже активен!";
+                },
+                maxLevel: 1
+            },
+            {
+                name: "Автопродажа",
+                description: "Автоматически продает клики, когда рюкзак заполнен",
+                cost: 2500,
+                effect: () => {
+                    autoSellActive = true;
+                    document.getElementById('auto-sell-toggle').style.display = 'block';
+                    return "Автопродажа активирована!";
+                },
+                maxLevel: 1
             }
-          }
+        ];
+
+        const potions = [
+            { name: "Малое зелье прибыли", description: "Увеличивает прибыль от продажи на 50% на 3 минуты", cost: 1000, boost: 1.5 },
+            { name: "Большое зелье прибыли", description: "Удваивает прибыль от продажи на 3 минуты", cost: 6900, boost: 2 },
+            { name: "Зелье сверхприбыли", description: "Утраивает прибыль от продажи на 3 минуты", cost: 15000, boost: 3 },
+        ];
+
+        let inventory = [];
+
+        const clicksElement = document.getElementById('clicks');
+        const maxClicksElement = document.getElementById('max-clicks');
+        const coinsElement = document.getElementById('coins');
+        const clickArea = document.getElementById('click-area');
+        const sellButton = document.getElementById('sell-button');
+        const progressBar = document.getElementById('progress');
+        const menuButton = document.getElementById('menu-button');
+        const menu = document.getElementById('menu');
+        const upgradesList = document.getElementById('upgrades-list');
+        const potionsList = document.getElementById('potions-list');
+        const inventoryContainer = document.getElementById('inventory');
+        const potionInfo = document.getElementById('potion-info');
+        const potionName = document.getElementById('potion-name');
+        const potionDescription = document.getElementById('potion-description');
+        const usePotion = document.getElementById('use-potion');
+        const closePotionInfo = document.getElementById('close-potion-info');
+        const errorMessage = document.getElementById('error-message');
+        const autoSellToggle = document.getElementById('auto-sell-toggle');
+
+        function updateDisplay() {
+            clicksElement.textContent = clicks;
+            maxClicksElement.textContent = maxClicks;
+            coinsElement.textContent = coins;
+            progressBar.style.width = `${(clicks / maxClicks) * 100}%`;
+            saveGameData();
+        }
+
+        function createPopText(x, y, text) {
+            const popText = document.createElement('div');
+            popText.classList.add('pop-text');
+            popText.style.left = `${x}px`;
+            popText.style.top = `${y}px`;
+            popText.textContent = text;
+            document.body.appendChild(popText);
+            setTimeout(() => {
+                document.body.removeChild(popText);
+            }, 500);
+        }
+
+        function showErrorMessage(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('show');
+            setTimeout(() => {
+                errorMessage.classList.remove('show');
+            }, 3000);
+        }
+
+        function simulateClick() {
+            if (clicks < maxClicks || upgrades[5].purchased) {
+                let clicksToAdd = clickValue;
+
+                if (upgrades[2].purchased && Math.random() < 0.1) {
+                    clicksToAdd *= 5;
+                }
+
+                if (upgrades[7].purchased && Math.random() < 0.05) {
+                    setTimeout(() => {
+                        clickValue *= 2;
+                        setTimeout(() => {
+                            clickValue /= 2;
+                        }, 3000);
+                    }, 0);
+                }
+
+                if (upgrades[8].purchased) {
+                    const superposition = Math.random();
+                    if (superposition < 0.4) {
+                        clicksToAdd = 0;
+                    } else if (superposition >= 0.8) {
+                        clicksToAdd *= 2;
+                    }
+                }
+
+                comboClicks++;
+                if (comboTimer) clearTimeout(comboTimer);
+                comboTimer = setTimeout(() => {
+                    comboClicks = 0;
+                }, 5000);
+
+                if (upgrades[6].purchased && comboClicks === 20) {
+                    clicksToAdd *= 10;
+                    comboClicks = 0;
+                }
+
+                clicks = Math.min(clicks + clicksToAdd, maxClicks);
+                updateDisplay();
+
+                if (upgrades[3].purchased && clicks % 50 === 0) {
+                    const bonusClicks = Math.floor(recentSoldClicks * 0.1);
+                    clicks = Math.min(clicks + bonusClicks, maxClicks);
+                }
+
+                if (autoSellActive && clicks >= maxClicks) {
+                    sellClicks();
+                }
+            }
+        }
+
+        clickArea.addEventListener('click', (e) => {
+            const currentTime = Date.now();
+            if (currentTime - lastClickTime >= clickDelay) {
+                simulateClick();
+                createPopText(e.clientX, e.clientY, `+${clickValue}`);
+                lastClickTime = currentTime;
+            } else {
+                clickArea.classList.add('shake');
+                setTimeout(() => {
+                    clickArea.classList.remove('shake');
+                }, 500);
+                showErrorMessage("Слишком быстро! Подождите немного перед следующим кликом.");
+            }
         });
 
-        // Remove bullets that have traveled too far
-        if (bullet.position.distanceTo(yawObject.position) > 100) {
-          scene.remove(bullet);
-          bullets.splice(i, 1);
+        let recentSoldClicks = 0;
+        let soldClicksHistory = [];
+
+        function sellClicks() {
+            let value = clicks * sellMultiplier * (potionActive ? potionActive : 1);
+
+            const alchemyLevel = upgrades[4].level || 0;
+            for (let i = 0; i < clicks; i++) {
+                if (Math.random() < alchemyLevel * 0.01) {
+                    value += 9 * sellMultiplier;
+                    createPopText(
+                        sellButton.offsetLeft + Math.random() * sellButton.offsetWidth,
+                        sellButton.offsetTop + Math.random() * sellButton.offsetHeight,
+                        "Золото!"
+                    );
+                }
+            }
+
+            coins += value;
+            recentSoldClicks += clicks;
+            soldClicksHistory.push({ time: Date.now(), amount: clicks });
+
+            const oneMinuteAgo = Date.now() - 60000;
+            soldClicksHistory = soldClicksHistory.filter(record => record.time > oneMinuteAgo);
+            recentSoldClicks = soldClicksHistory.reduce((sum, record) => sum + record.amount, 0);
+
+            clicks = 0;
+            updateDisplay();
+            return value;
         }
-      }
 
-      // Emit player movement to server
-      socket.emit('move', { position: yawObject.position, rotation: yawObject.rotation.y });
+        sellButton.addEventListener('click', () => {
+            if (clicks > 0) {
+                const soldValue = sellClicks();
+                createPopText(
+                    sellButton.offsetLeft + sellButton.offsetWidth / 2,
+                    sellButton.offsetTop,
+                    `+${soldValue} монет`
+                );
+            } else {
+                showErrorMessage("Нет кликов для продажи!");
+            }
+        });
 
-      prevTime = time;
-    }
+        menuButton.addEventListener('click', () => {
+            menu.classList.toggle('open');
+        });
 
-    function animate() {
-      requestAnimationFrame(animate);
-      if (gameActive) {
-        updateGame();
-      }
-      renderer.render(scene, camera);
-    }
+        function renderUpgrades() {
+            upgradesList.innerHTML = '';
+            upgrades.forEach((upgrade, index) => {
+                const upgradeElement = document.createElement('div');
+                upgradeElement.classList.add('upgrade-item');
+                if (upgrade.maxLevel === 1 && upgrade.purchased) {
+                    upgradeElement.classList.add('max-upgrade');
+                }
+                upgradeElement.innerHTML = `
+            <h3>${upgrade.name}</h3>
+            <p>${upgrade.description}</p>
+            <p class="upgrade-cost">${upgrade.maxLevel === 1 && upgrade.purchased ? 'МАКС' : `Стоимость: ${upgrade.cost} монет`}</p>
+        `;
+                if (!(upgrade.maxLevel === 1 && upgrade.purchased)) {
+                    upgradeElement.addEventListener('click', () => buyUpgrade(index));
+                }
+                upgradesList.appendChild(upgradeElement);
+            });
+        }
 
-    function createMap() {
-      // Floor
-      const floorGeometry = new THREE.PlaneGeometry(100, 100);
-      const floorMaterial = new THREE.MeshPhongMaterial({ color: 0x808080 });
-      const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-      floor.rotation.x = -Math.PI / 2;
-      floor.receiveShadow = true;
-      scene.add(floor);
+        function buyUpgrade(index) {
+            const upgrade = upgrades[index];
+            if (coins >= upgrade.cost && (!upgrade.purchased || upgrade.maxLevel === Infinity)) {
+                coins -= upgrade.cost;
+                const message = upgrade.effect();
+                if (upgrade.maxLevel === 1) {
+                    upgrade.purchased = true;
+                } else {
+                    upgrade.level = (upgrade.level || 0) + 1;
+                    if (upgrade.level === upgrade.maxLevel) {
+                        upgrade.purchased = true;
+                    }
+                    upgrade.cost = Math.floor(upgrade.cost * 1.5);
+                }
+                updateDisplay();
+                renderUpgrades();
+                if (message) {
+                    showErrorMessage(message);
+                }
+            } else if (upgrade.purchased && upgrade.maxLevel === 1) {
+                showErrorMessage('Это улучшение уже достигло максимального уровня!');
+            } else {
+                showErrorMessage('Недостаточно монет для покупки этого улучшения!');
+            }
+        }
 
-      // Walls
-      const wallGeometry = new THREE.BoxGeometry(100, 10, 1);
-      const wallMaterial = new THREE.MeshPhongMaterial({ color: 0xa0a0a0 });
+        function renderPotions() {
+            potionsList.innerHTML = '';
+            potions.forEach((potion, index) => {
+                const potionElement = document.createElement('div');
+                potionElement.classList.add('potion-item');
+                potionElement.innerHTML = `
+            <h3>${potion.name}</h3>
+            <p>${potion.description}</p>
+            <p class="potion-cost">Стоимость: ${potion.cost} монет</p>
+        `;
+                potionElement.addEventListener('click', () => buyPotion(index));
+                potionsList.appendChild(potionElement);
+            });
+        }
 
-      const wall1 = new THREE.Mesh(wallGeometry, wallMaterial);
-      wall1.position.set(0, 5, 50);
-      wall1.castShadow = true;
-      wall1.receiveShadow = true;
-      scene.add(wall1);
+        function buyPotion(index) {
+            const potion = potions[index];
+            if (coins >= potion.cost) {
+                coins -= potion.cost;
+                inventory.push(potion);
+                updateDisplay();
+                renderInventory();
+                showErrorMessage(`Вы купили ${potion.name}!`);
+            } else {
+                showErrorMessage('Недостаточно монет для покупки этого зелья!');
+            }
+        }
 
-      const wall2 = new THREE.Mesh(wallGeometry, wallMaterial);
-      wall2.position.set(0, 5, -50);
-      wall2.castShadow = true;
-      wall2.receiveShadow = true;
-      scene.add(wall2);
+        function renderInventory() {
+            inventoryContainer.innerHTML = '';
+            inventory.forEach((potion, index) => {
+                const potionElement = document.createElement('div');
+                potionElement.classList.add('inventory-item');
+                potionElement.textContent = '🧪';
+                potionElement.addEventListener('click', () => showPotionInfo(index));
+                inventoryContainer.appendChild(potionElement);
+            });
+        }
 
-      const wall3 = new THREE.Mesh(wallGeometry, wallMaterial);
-      wall3.position.set(50, 5, 0);
-      wall3.rotation.y = Math.PI / 2;
-      wall3.castShadow = true;
-      wall3.receiveShadow = true;
-      scene.add(wall3);
+        function showPotionInfo(index) {
+            const potion = inventory[index];
+            potionName.textContent = potion.name;
+            potionDescription.textContent = potion.description;
+            potionInfo.style.display = 'block';
+            usePotion.onclick = () => useInventoryPotion(index);
+        }
 
-      const wall4 = new THREE.Mesh(wallGeometry, wallMaterial);
-      wall4.position.set(-50, 5, 0);
-      wall4.rotation.y = Math.PI / 2;
-      wall4.castShadow = true;
-      wall4.receiveShadow = true;
-      scene.add(wall4);
+        closePotionInfo.addEventListener('click', () => {
+            potionInfo.style.display = 'none';
+        });
 
-      // Add some crates for cover
-      const crateGeometry = new THREE.BoxGeometry(2, 2, 2);
-      const crateMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513 });
+        function useInventoryPotion(index) {
+            if (potionActive) {
+                showErrorMessage('Нельзя использовать несколько зелий одновременно!');
+                return;
+            }
+            const potion = inventory[index];
+            potionActive = potion.boost;
+            inventory.splice(index, 1);
+            renderInventory();
+            potionInfo.style.display = 'none';
+            if (potionTimer) clearTimeout(potionTimer);
+            potionTimer = setTimeout(() => {
+                potionActive = false;
+                showErrorMessage('Действие зелья закончилось!');
+            }, 3 * 60 * 1000);
+            showErrorMessage(`Зелье ${potion.name} активировано на 3 минуты!`);
+        }
 
-      for (let i = 0; i < 10; i++) {
-        const crate = new THREE.Mesh(crateGeometry, crateMaterial);
-        crate.position.set(
-          Math.random() * 80 - 40,
-          1,
-          Math.random() * 80 - 40
-        );
-        crate.castShadow = true;
-        crate.receiveShadow = true;
-        scene.add(crate);
-      }
-    }
+        autoSellToggle.addEventListener('click', () => {
+            autoSellActive = !autoSellActive;
+            autoSellToggle.textContent = autoSellActive ? 'Выключить автопродажу' : 'Включить автопродажу';
+            autoSellToggle.classList.toggle('off');
+            showErrorMessage(autoSellActive ? 'Автопродажа включена' : 'Автопродажа выключена');
+        });
 
-    function openChat() {
-      chatOpen = true;
-      document.getElementById('chat').style.display = 'block';
-      document.getElementById('chat-input').focus();
-    }
+        function saveGameData() {
+            const gameData = {
+                clicks: clicks,
+                coins: coins,
+                maxClicks: maxClicks,
+                clickValue: clickValue,
+                upgrades: upgrades.map(upgrade => ({
+                    purchased: upgrade.purchased,
+                    cost: upgrade.cost,
+                    level: upgrade.level || 0
+                })),
+                inventory: inventory,
+                clickDelay: clickDelay,
+                sellMultiplier: sellMultiplier,
+                autoClickerActive: autoClickerActive,
+                autoSellActive: autoSellActive
+            };
+            localStorage.setItem('clickerGameData', JSON.stringify(gameData));
+        }
 
-    function closeChat() {
-      chatOpen = false;
-      document.getElementById('chat').style.display = 'none';
-      document.getElementById('chat-input').value = '';
-    }
+        function loadGameData() {
+            const savedData = localStorage.getItem('clickerGameData');
+            if (savedData) {
+                const gameData = JSON.parse(savedData);
+                clicks = gameData.clicks;
+                coins = gameData.coins;
+                maxClicks = gameData.maxClicks;
+                clickValue = gameData.clickValue;
+                clickDelay = gameData.clickDelay || 500;
+                sellMultiplier = gameData.sellMultiplier || 1;
+                autoClickerActive = gameData.autoClickerActive || false;
+                autoSellActive = gameData.autoSellActive || false;
+                upgrades.forEach((upgrade, index) => {
+                    if (gameData.upgrades[index]) {
+                        upgrade.purchased = gameData.upgrades[index].purchased;
+                        upgrade.cost = gameData.upgrades[index].cost;
+                        upgrade.level = gameData.upgrades[index].level;
+                    }
+                });
+                inventory = gameData.inventory;
+                updateDisplay();
+                renderUpgrades();
+                renderInventory();
+                if (autoClickerActive) {
+                    autoClickerInterval = setInterval(() => {
+                        simulateClick();
+                        simulateClick();
+                    }, 1000);
+                }
+                if (autoSellActive) {
+                    document.getElementById('auto-sell-toggle').style.display = 'block';
+                    autoSellToggle.textContent = 'Выключить автопродажу';
+                } else {
+                    autoSellToggle.textContent = 'Включить автопродажу';
+                    autoSellToggle.classList.add('off');
+                }
+            }
+        }
 
-    function sendChatMessage() {
-      const message = document.getElementById('chat-input').value.trim();
-      if (message && socket) {
-        socket.emit('chatMessage', message);
-        addChatMessage(`You: ${message}`);
-        document.getElementById('chat-input').value = '';
-      }
-      closeChat();
-    }
+        renderUpgrades();
+        renderPotions();
+        renderInventory();
+        loadGameData();
+        updateDisplay();
 
-    function addChatMessage(message) {
-      const chatMessages = document.getElementById('chat-messages');
-      const messageElement = document.createElement('div');
-      messageElement.textContent = message;
-      chatMessages.appendChild(messageElement);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-
-    function onKeyDown(event) {
-      if (chatOpen) return;
-
-      switch (event.keyCode) {
-        case 87: // w
-          moveForward = true;
-          break;
-        case 65: // a
-          moveLeft = true;
-          break;
-        case 83: // s
-          moveBackward = true;
-          break;
-        case 68: // d
-          moveRight = true;
-          break;
-        case 32: // space
-          if (canJump === true) velocity.y += 350;
-          canJump = false;
-          break;
-        case 66: // b
-          if (buyTime) toggleBuyMenu();
-          break;
-        case 82: // r
-          reload();
-          break;
-      }
-    }
-
-    function onKeyUp(event) {
-      switch (event.keyCode) {
-        case 87: // w
-          moveForward = false;
-          break;
-        case 65: // a
-          moveLeft = false;
-          break;
-        case 83: // s
-          moveBackward = false;
-          break;
-        case 68: // d
-          moveRight = false;
-          break;
-      }
-    }
-
-    function toggleBuyMenu() {
-      const buyMenu = document.getElementById('buy-menu');
-      if (buyMenu.style.display === 'none') {
-        buyMenu.style.display = 'block';
-      } else {
-        buyMenu.style.display = 'none';
-      }
-    }
-
-    function buyWeapon(weapon) {
-      const prices = {
-        ak47: 2500,
-        m4a1: 3100,
-        awp: 4750,
-        deagle: 650
-      };
-
-      if (money >= prices[weapon]) {
-        money -= prices[weapon];
-        currentWeapon = weapon;
-        weapons[currentWeapon].ammo = weapons[currentWeapon].maxAmmo;
-        updateMoneyDisplay();
-        updateAmmoDisplay();
-        toggleBuyMenu();
-        playSound('purchase');
-      } else {
-        playSound('error');
-      }
-    }
-
-    function buyArmor() {
-      if (money >= 1000) {
-        money -= 1000;
-        // Implement armor logic here
-        updateMoneyDisplay();
-        toggleBuyMenu();
-        playSound('purchase');
-      } else {
-        playSound('error');
-      }
-    }
-
-    function reload() {
-      if (weapons[currentWeapon].ammo < weapons[currentWeapon].maxAmmo) {
-        weapons[currentWeapon].ammo = weapons[currentWeapon].maxAmmo;
-        updateAmmoDisplay();
-        playSound('reload');
-      }
-    }
-
-    function updateHealthDisplay() {
-      healthDisplay.textContent = `Health: ${health}`;
-    }
-
-    function updateAmmoDisplay() {
-      ammoDisplay.textContent = `Ammo: ${weapons[currentWeapon].ammo} / ${weapons[currentWeapon].maxAmmo}`;
-    }
-
-    function updateMoneyDisplay() {
-      moneyDisplay.textContent = `$: ${money}`;
-    }
-
-    function takeDamage(damage) {
-      health -= damage;
-      updateHealthDisplay();
-      playSound('hit');
-      if (health <= 0) {
-        die();
-      }
-    }
-
-    function die() {
-      health = 100;
-      updateHealthDisplay();
-      // Implement respawn logic here
-      playSound('death');
-    }
-
-    function startRound(round) {
-      roundNumber = round;
-      buyTime = true;
-      setTimeout(() => {
-        buyTime = false;
-        document.getElementById('buy-menu').style.display = 'none';
-      }, 15000); // 15 seconds buy time
-      updateRoundInfo();
-    }
-
-    function endRound(winner) {
-      buyTime = false;
-      document.getElementById('buy-menu').style.display = 'none';
-      // Implement round end logic here (e.g., display winner, update scores)
-      playSound(winner === team ? 'roundWin' : 'roundLose');
-    }
-
-    function updateScore(tScore, ctScore) {
-      terroristScore = tScore;
-      ctScore = ctScore;
-      updateRoundInfo();
-    }
-
-    function updateRoundInfo() {
-      document.getElementById('round-info').textContent = `Round ${roundNumber} - Terrorists: ${terroristScore} | Counter-Terrorists: ${ctScore}`;
-    }
-
-    function playSound(soundName) {
-      // Implement sound playing logic here
-      console.log(`Playing sound: ${soundName}`);
-    }
-
-    let prevTime = performance.now();
-    let health = 100;
-
-    init();
-  </script>
-
+        // Скрываем кнопку автопродажи, если улучшение не куплено
+        if (!upgrades[11].purchased) {
+            document.getElementById('auto-sell-toggle').style.display = 'none';
+        }
+    </script>
 </body>
 
 </html>
