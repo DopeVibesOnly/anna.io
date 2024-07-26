@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -334,553 +335,242 @@
             color: white;
             border: none;
             padding: 10px 20px;
-            font-size: 1rem;
-            border-radius: 5px;
+            border-radius: 50px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, transform 0.1s;
         }
 
         .auto-sell-toggle:hover {
             background-color: #27ae60;
         }
 
-        .auto-sell-toggle.off {
-            background-color: var(--error-color);
+        .auto-sell-toggle:active {
+            transform: scale(0.98);
         }
 
-        .auto-sell-toggle.off:hover {
-            background-color: #c0392b;
+        .location-button {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+
+        .location-button:hover {
+            background-color: #2980b9;
+        }
+
+        .location-button:active {
+            transform: scale(0.98);
         }
     </style>
 </head>
 
 <body>
-    <button class="menu-button" id="menu-button">☰</button>
-    <div class="menu" id="menu">
-        <h2 style="color: white;">Улучшения</h2>
-        <div id="upgrades-list"></div>
-        <h2 style="color: white;">Зелья</h2>
-        <div id="potions-list"></div>
-        <h2 style="color: white;">Инвентарь</h2>
-        <div id="inventory" class="inventory"></div>
-    </div>
-    <div class="game-container">
-        <div id="error-message" class="error-message"></div>
+    <div class="game-container" id="mainLocation">
         <h1>Смачный Кликер</h1>
         <div class="stats">
-            <div class="stat">Клики: <span id="clicks">0</span> / <span id="max-clicks">10</span></div>
-            <div class="stat">Монеты: <span id="coins">0</span></div>
+            <div class="stat" id="clicks">Клики: 0</div>
+            <div class="stat" id="coins">Монеты: 0</div>
         </div>
-        <div class="click-area" id="click-area">Клик!</div>
-        <button class="sell-button" id="sell-button">Продать клики</button>
+        <div class="click-area" id="clickArea">🍪</div>
+        <button class="sell-button" id="sellButton">Продать все клики</button>
         <div class="progress-bar">
-            <div class="progress" id="progress"></div>
+            <div class="progress" id="progressBar"></div>
+        </div>
+        <button class="menu-button" id="menuButton">☰</button>
+        <button class="location-button" id="locationButton">Новая Локация</button>
+        <div class="menu" id="menu">
+            <h2>Меню</h2>
+            <div class="upgrade-item" id="clickUpgrade">
+                <h3>Улучшение Клика</h3>
+                <p>+1 клик за клик</p>
+                <p class="upgrade-cost" id="clickUpgradeCost">Стоимость: 10 монет</p>
+            </div>
+            <div class="upgrade-item" id="coinUpgrade">
+                <h3>Улучшение Монет</h3>
+                <p>+1 монета за продажу</p>
+                <p class="upgrade-cost" id="coinUpgradeCost">Стоимость: 20 монет</p>
+            </div>
+            <h2>Зелья</h2>
+            <div class="potion-item" id="potion1">
+                <h3>Зелье Удачи</h3>
+                <p class="potion-cost" id="potion1Cost">Стоимость: 50 монет</p>
+            </div>
+            <div class="potion-item" id="potion2">
+                <h3>Зелье Времени</h3>
+                <p class="potion-cost" id="potion2Cost">Стоимость: 100 монет</p>
+            </div>
         </div>
     </div>
-    <div id="potion-info" class="potion-info">
-        <button class="close-button" id="close-potion-info">&times;</button>
-        <h3 id="potion-name"></h3>
-        <p id="potion-description"></p>
-        <button class="use-button" id="use-potion">Использовать</button>
+
+    <div class="game-container" id="newLocation" style="display: none;">
+        <h1>Новая Локация</h1>
+        <div class="stats">
+            <div class="stat" id="newCurrency">Новая Валюта: 0</div>
+        </div>
+        <div class="click-area" id="newClickArea">🌟</div>
+        <button class="sell-button" id="newSellButton">Продать все новую валюту</button>
+        <div class="progress-bar">
+            <div class="progress" id="newProgressBar"></div>
+        </div>
+        <button class="menu-button" id="newMenuButton">☰</button>
+        <button class="location-button" id="backToMainButton">Назад</button>
+        <div class="menu" id="newMenu">
+            <h2>Меню</h2>
+            <div class="upgrade-item" id="newCurrencyUpgrade">
+                <h3>Улучшение Новой Валюты</h3>
+                <p>+1 новая валюта за клик</p>
+                <p class="upgrade-cost" id="newCurrencyUpgradeCost">Стоимость: 100 монет</p>
+            </div>
+            <div class="upgrade-item" id="convertToOldCurrency">
+                <h3>Конвертация в Клики и Монеты</h3>
+                <p>Конвертация новой валюты в старую</p>
+                <p class="upgrade-cost" id="convertToOldCurrencyCost">Стоимость: 200 новой валюты</p>
+            </div>
+        </div>
     </div>
-    <button class="auto-sell-toggle" id="auto-sell-toggle">Выключить автопродажу</button>
 
     <script>
         let clicks = 0;
         let coins = 0;
-        let maxClicks = 10;
         let clickValue = 1;
-        let autoClickerInterval = null;
-        let potionActive = false;
-        let potionTimer = null;
-        let lastClickTime = 0;
-        let clickDelay = 500; // 0.5 секунды в миллисекундах
-        let comboClicks = 0;
-        let comboTimer = null;
-        let sellMultiplier = 1;
-        let autoClickerActive = false;
-        let autoSellActive = false;
+        let coinValue = 1;
+        let clickUpgradeCost = 10;
+        let coinUpgradeCost = 20;
 
-        const upgrades = [
-            {
-                name: "Квантовый рюкзак",
-                description: "Увеличивает вместимость рюкзака на случайное число от 1 до 10",
-                cost: 100,
-                effect: () => {
-                    const increase = Math.floor(Math.random() * 10) + 1;
-                    maxClicks += increase;
-                    return `Вместимость увеличена на ${increase}!`;
-                },
-                maxLevel: Infinity
-            },
-            {
-                name: "Тройная прибыль",
-                description: "Утраивает прибыль от продажи кликов",
-                cost: 300,
-                effect: () => {
-                    sellMultiplier *= 3;
-                    return "Прибыль от продажи утроена!";
-                },
-                maxLevel: 1
-            },
-            {
-                name: "Мультивселенный клик",
-                description: "Каждый клик имеет 10% шанс активировать клики во всех параллельных вселенных (х5 кликов)",
-                cost: 500,
-                effect: () => { },
-                maxLevel: 1
-            },
-            {
-                name: "Временная петля",
-                description: "Каждые 50 кликов возвращают 10% от проданных за последнюю минуту кликов",
-                cost: 1000,
-                effect: () => { },
-                maxLevel: 1
-            },
-            {
-                name: "Алхимическое превращение",
-                description: "1% шанс при продаже превратить клик в золотую монету (х10 стоимость)",
-                cost: 2000,
-                effect: () => { },
-                maxLevel: 5
-            },
-            {
-                name: "Квантовый туннель",
-                description: "Позволяет преодолеть максимальную вместимость рюкзака на 5 секунд каждые 2 минуты",
-                cost: 3000,
-                effect: () => {
-                    setInterval(() => {
-                        const oldMaxClicks = maxClicks;
-                        maxClicks = Infinity;
-                        setTimeout(() => {
-                            maxClicks = oldMaxClicks;
-                            updateDisplay();
-                        }, 5000);
-                    }, 120000);
-                },
-                maxLevel: 1
-            },
-            {
-                name: "Комбо-множитель",
-                description: "Серия из 20 кликов за 5 секунд увеличивает стоимость следующего клика в 10 раз",
-                cost: 5000,
-                effect: () => { },
-                maxLevel: 1
-            },
-            {
-                name: "Пространственная аномалия",
-                description: "5% шанс при клике создать временную червоточину, удваивающую все клики на 3 секунды",
-                cost: 7500,
-                effect: () => { },
-                maxLevel: 1
-            },
-            {
-                name: "Квантовая суперпозиция",
-                description: "Каждый клик имеет шанс быть в двух состояниях одновременно, либо не произойти, либо случиться дважды",
-                cost: 10000,
-                effect: () => { },
-                maxLevel: 1
-            },
-            {
-                name: "Ускорение клика",
-                description: "Уменьшает задержку между кликами до 0.2 секунд",
-                cost: 4000,
-                effect: () => {
-                    clickDelay = 200;
-                    return "Задержка между кликами уменьшена до 0.2 секунд!";
-                },
-                maxLevel: 1
-            },
-            {
-                name: "Автокликер",
-                description: "Автоматически кликает 2 раза в секунду",
-                cost: 2000,
-                effect: () => {
-                    if (!autoClickerActive) {
-                        autoClickerActive = true;
-                        autoClickerInterval = setInterval(() => {
-                            simulateClick();
-                            simulateClick();
-                        }, 1000);
-                        return "Автокликер активирован!";
-                    }
-                    return "Автокликер уже активен!";
-                },
-                maxLevel: 1
-            },
-            {
-                name: "Автопродажа",
-                description: "Автоматически продает клики, когда рюкзак заполнен",
-                cost: 2500,
-                effect: () => {
-                    autoSellActive = true;
-                    document.getElementById('auto-sell-toggle').style.display = 'block';
-                    return "Автопродажа активирована!";
-                },
-                maxLevel: 1
-            }
-        ];
+        let newCurrency = 0;
+        let newCurrencyValue = 1;
+        let newCurrencyUpgradeCost = 100;
+        let convertToOldCurrencyCost = 200;
 
-        const potions = [
-            { name: "Малое зелье прибыли", description: "Увеличивает прибыль от продажи на 50% на 3 минуты", cost: 1000, boost: 1.5 },
-            { name: "Большое зелье прибыли", description: "Удваивает прибыль от продажи на 3 минуты", cost: 6900, boost: 2 },
-            { name: "Зелье сверхприбыли", description: "Утраивает прибыль от продажи на 3 минуты", cost: 15000, boost: 3 },
-        ];
-
-        let inventory = [];
-
-        const clicksElement = document.getElementById('clicks');
-        const maxClicksElement = document.getElementById('max-clicks');
-        const coinsElement = document.getElementById('coins');
-        const clickArea = document.getElementById('click-area');
-        const sellButton = document.getElementById('sell-button');
-        const progressBar = document.getElementById('progress');
-        const menuButton = document.getElementById('menu-button');
+        const clickArea = document.getElementById('clickArea');
+        const sellButton = document.getElementById('sellButton');
+        const progressBar = document.getElementById('progressBar');
+        const menuButton = document.getElementById('menuButton');
         const menu = document.getElementById('menu');
-        const upgradesList = document.getElementById('upgrades-list');
-        const potionsList = document.getElementById('potions-list');
-        const inventoryContainer = document.getElementById('inventory');
-        const potionInfo = document.getElementById('potion-info');
-        const potionName = document.getElementById('potion-name');
-        const potionDescription = document.getElementById('potion-description');
-        const usePotion = document.getElementById('use-potion');
-        const closePotionInfo = document.getElementById('close-potion-info');
-        const errorMessage = document.getElementById('error-message');
-        const autoSellToggle = document.getElementById('auto-sell-toggle');
+        const locationButton = document.getElementById('locationButton');
+        const mainLocation = document.getElementById('mainLocation');
+        const newLocation = document.getElementById('newLocation');
+        const backToMainButton = document.getElementById('backToMainButton');
+        const newClickArea = document.getElementById('newClickArea');
+        const newSellButton = document.getElementById('newSellButton');
+        const newProgressBar = document.getElementById('newProgressBar');
+        const newMenuButton = document.getElementById('newMenuButton');
+        const newMenu = document.getElementById('newMenu');
 
-        function updateDisplay() {
-            clicksElement.textContent = clicks;
-            maxClicksElement.textContent = maxClicks;
-            coinsElement.textContent = coins;
-            progressBar.style.width = `${(clicks / maxClicks) * 100}%`;
-            saveGameData();
-        }
-
-        function createPopText(x, y, text) {
-            const popText = document.createElement('div');
-            popText.classList.add('pop-text');
-            popText.style.left = `${x}px`;
-            popText.style.top = `${y}px`;
-            popText.textContent = text;
-            document.body.appendChild(popText);
-            setTimeout(() => {
-                document.body.removeChild(popText);
-            }, 500);
-        }
-
-        function showErrorMessage(message) {
-            errorMessage.textContent = message;
-            errorMessage.classList.add('show');
-            setTimeout(() => {
-                errorMessage.classList.remove('show');
-            }, 3000);
-        }
-
-        function simulateClick() {
-            if (clicks < maxClicks || upgrades[5].purchased) {
-                let clicksToAdd = clickValue;
-
-                if (upgrades[2].purchased && Math.random() < 0.1) {
-                    clicksToAdd *= 5;
-                }
-
-                if (upgrades[7].purchased && Math.random() < 0.05) {
-                    setTimeout(() => {
-                        clickValue *= 2;
-                        setTimeout(() => {
-                            clickValue /= 2;
-                        }, 3000);
-                    }, 0);
-                }
-
-                if (upgrades[8].purchased) {
-                    const superposition = Math.random();
-                    if (superposition < 0.4) {
-                        clicksToAdd = 0;
-                    } else if (superposition >= 0.8) {
-                        clicksToAdd *= 2;
-                    }
-                }
-
-                comboClicks++;
-                if (comboTimer) clearTimeout(comboTimer);
-                comboTimer = setTimeout(() => {
-                    comboClicks = 0;
-                }, 5000);
-
-                if (upgrades[6].purchased && comboClicks === 20) {
-                    clicksToAdd *= 10;
-                    comboClicks = 0;
-                }
-
-                clicks = Math.min(clicks + clicksToAdd, maxClicks);
-                updateDisplay();
-
-                if (upgrades[3].purchased && clicks % 50 === 0) {
-                    const bonusClicks = Math.floor(recentSoldClicks * 0.1);
-                    clicks = Math.min(clicks + bonusClicks, maxClicks);
-                }
-
-                if (autoSellActive && clicks >= maxClicks) {
-                    sellClicks();
-                }
-            }
-        }
-
-        clickArea.addEventListener('click', (e) => {
-            const currentTime = Date.now();
-            if (currentTime - lastClickTime >= clickDelay) {
-                simulateClick();
-                createPopText(e.clientX, e.clientY, `+${clickValue}`);
-                lastClickTime = currentTime;
-            } else {
-                clickArea.classList.add('shake');
-                setTimeout(() => {
-                    clickArea.classList.remove('shake');
-                }, 500);
-                showErrorMessage("Слишком быстро! Подождите немного перед следующим кликом.");
-            }
+        clickArea.addEventListener('click', () => {
+            clicks += clickValue;
+            updateUI();
+            animateClick(clickArea);
         });
 
-        let recentSoldClicks = 0;
-        let soldClicksHistory = [];
-
-        function sellClicks() {
-            let value = clicks * sellMultiplier * (potionActive ? potionActive : 1);
-
-            const alchemyLevel = upgrades[4].level || 0;
-            for (let i = 0; i < clicks; i++) {
-                if (Math.random() < alchemyLevel * 0.01) {
-                    value += 9 * sellMultiplier;
-                    createPopText(
-                        sellButton.offsetLeft + Math.random() * sellButton.offsetWidth,
-                        sellButton.offsetTop + Math.random() * sellButton.offsetHeight,
-                        "Золото!"
-                    );
-                }
-            }
-
-            coins += value;
-            recentSoldClicks += clicks;
-            soldClicksHistory.push({ time: Date.now(), amount: clicks });
-
-            const oneMinuteAgo = Date.now() - 60000;
-            soldClicksHistory = soldClicksHistory.filter(record => record.time > oneMinuteAgo);
-            recentSoldClicks = soldClicksHistory.reduce((sum, record) => sum + record.amount, 0);
-
-            clicks = 0;
-            updateDisplay();
-            return value;
-        }
-
         sellButton.addEventListener('click', () => {
-            if (clicks > 0) {
-                const soldValue = sellClicks();
-                createPopText(
-                    sellButton.offsetLeft + sellButton.offsetWidth / 2,
-                    sellButton.offsetTop,
-                    `+${soldValue} монет`
-                );
-            } else {
-                showErrorMessage("Нет кликов для продажи!");
-            }
+            coins += clicks * coinValue;
+            clicks = 0;
+            updateUI();
         });
 
         menuButton.addEventListener('click', () => {
             menu.classList.toggle('open');
         });
 
-        function renderUpgrades() {
-            upgradesList.innerHTML = '';
-            upgrades.forEach((upgrade, index) => {
-                const upgradeElement = document.createElement('div');
-                upgradeElement.classList.add('upgrade-item');
-                if (upgrade.maxLevel === 1 && upgrade.purchased) {
-                    upgradeElement.classList.add('max-upgrade');
-                }
-                upgradeElement.innerHTML = `
-            <h3>${upgrade.name}</h3>
-            <p>${upgrade.description}</p>
-            <p class="upgrade-cost">${upgrade.maxLevel === 1 && upgrade.purchased ? 'МАКС' : `Стоимость: ${upgrade.cost} монет`}</p>
-        `;
-                if (!(upgrade.maxLevel === 1 && upgrade.purchased)) {
-                    upgradeElement.addEventListener('click', () => buyUpgrade(index));
-                }
-                upgradesList.appendChild(upgradeElement);
-            });
-        }
-
-        function buyUpgrade(index) {
-            const upgrade = upgrades[index];
-            if (coins >= upgrade.cost && (!upgrade.purchased || upgrade.maxLevel === Infinity)) {
-                coins -= upgrade.cost;
-                const message = upgrade.effect();
-                if (upgrade.maxLevel === 1) {
-                    upgrade.purchased = true;
-                } else {
-                    upgrade.level = (upgrade.level || 0) + 1;
-                    if (upgrade.level === upgrade.maxLevel) {
-                        upgrade.purchased = true;
-                    }
-                    upgrade.cost = Math.floor(upgrade.cost * 1.5);
-                }
-                updateDisplay();
-                renderUpgrades();
-                if (message) {
-                    showErrorMessage(message);
-                }
-            } else if (upgrade.purchased && upgrade.maxLevel === 1) {
-                showErrorMessage('Это улучшение уже достигло максимального уровня!');
-            } else {
-                showErrorMessage('Недостаточно монет для покупки этого улучшения!');
-            }
-        }
-
-        function renderPotions() {
-            potionsList.innerHTML = '';
-            potions.forEach((potion, index) => {
-                const potionElement = document.createElement('div');
-                potionElement.classList.add('potion-item');
-                potionElement.innerHTML = `
-            <h3>${potion.name}</h3>
-            <p>${potion.description}</p>
-            <p class="potion-cost">Стоимость: ${potion.cost} монет</p>
-        `;
-                potionElement.addEventListener('click', () => buyPotion(index));
-                potionsList.appendChild(potionElement);
-            });
-        }
-
-        function buyPotion(index) {
-            const potion = potions[index];
-            if (coins >= potion.cost) {
-                coins -= potion.cost;
-                inventory.push(potion);
-                updateDisplay();
-                renderInventory();
-                showErrorMessage(`Вы купили ${potion.name}!`);
-            } else {
-                showErrorMessage('Недостаточно монет для покупки этого зелья!');
-            }
-        }
-
-        function renderInventory() {
-            inventoryContainer.innerHTML = '';
-            inventory.forEach((potion, index) => {
-                const potionElement = document.createElement('div');
-                potionElement.classList.add('inventory-item');
-                potionElement.textContent = '🧪';
-                potionElement.addEventListener('click', () => showPotionInfo(index));
-                inventoryContainer.appendChild(potionElement);
-            });
-        }
-
-        function showPotionInfo(index) {
-            const potion = inventory[index];
-            potionName.textContent = potion.name;
-            potionDescription.textContent = potion.description;
-            potionInfo.style.display = 'block';
-            usePotion.onclick = () => useInventoryPotion(index);
-        }
-
-        closePotionInfo.addEventListener('click', () => {
-            potionInfo.style.display = 'none';
+        locationButton.addEventListener('click', () => {
+            mainLocation.style.display = 'none';
+            newLocation.style.display = 'block';
         });
 
-        function useInventoryPotion(index) {
-            if (potionActive) {
-                showErrorMessage('Нельзя использовать несколько зелий одновременно!');
-                return;
-            }
-            const potion = inventory[index];
-            potionActive = potion.boost;
-            inventory.splice(index, 1);
-            renderInventory();
-            potionInfo.style.display = 'none';
-            if (potionTimer) clearTimeout(potionTimer);
-            potionTimer = setTimeout(() => {
-                potionActive = false;
-                showErrorMessage('Действие зелья закончилось!');
-            }, 3 * 60 * 1000);
-            showErrorMessage(`Зелье ${potion.name} активировано на 3 минуты!`);
-        }
-
-        autoSellToggle.addEventListener('click', () => {
-            autoSellActive = !autoSellActive;
-            autoSellToggle.textContent = autoSellActive ? 'Выключить автопродажу' : 'Включить автопродажу';
-            autoSellToggle.classList.toggle('off');
-            showErrorMessage(autoSellActive ? 'Автопродажа включена' : 'Автопродажа выключена');
+        backToMainButton.addEventListener('click', () => {
+            newLocation.style.display = 'none';
+            mainLocation.style.display = 'block';
         });
 
-        function saveGameData() {
-            const gameData = {
-                clicks: clicks,
-                coins: coins,
-                maxClicks: maxClicks,
-                clickValue: clickValue,
-                upgrades: upgrades.map(upgrade => ({
-                    purchased: upgrade.purchased,
-                    cost: upgrade.cost,
-                    level: upgrade.level || 0
-                })),
-                inventory: inventory,
-                clickDelay: clickDelay,
-                sellMultiplier: sellMultiplier,
-                autoClickerActive: autoClickerActive,
-                autoSellActive: autoSellActive
-            };
-            localStorage.setItem('clickerGameData', JSON.stringify(gameData));
-        }
+        newClickArea.addEventListener('click', () => {
+            newCurrency += newCurrencyValue;
+            updateUI();
+            animateClick(newClickArea);
+        });
 
-        function loadGameData() {
-            const savedData = localStorage.getItem('clickerGameData');
-            if (savedData) {
-                const gameData = JSON.parse(savedData);
-                clicks = gameData.clicks;
-                coins = gameData.coins;
-                maxClicks = gameData.maxClicks;
-                clickValue = gameData.clickValue;
-                clickDelay = gameData.clickDelay || 500;
-                sellMultiplier = gameData.sellMultiplier || 1;
-                autoClickerActive = gameData.autoClickerActive || false;
-                autoSellActive = gameData.autoSellActive || false;
-                upgrades.forEach((upgrade, index) => {
-                    if (gameData.upgrades[index]) {
-                        upgrade.purchased = gameData.upgrades[index].purchased;
-                        upgrade.cost = gameData.upgrades[index].cost;
-                        upgrade.level = gameData.upgrades[index].level;
-                    }
-                });
-                inventory = gameData.inventory;
-                updateDisplay();
-                renderUpgrades();
-                renderInventory();
-                if (autoClickerActive) {
-                    autoClickerInterval = setInterval(() => {
-                        simulateClick();
-                        simulateClick();
-                    }, 1000);
-                }
-                if (autoSellActive) {
-                    document.getElementById('auto-sell-toggle').style.display = 'block';
-                    autoSellToggle.textContent = 'Выключить автопродажу';
-                } else {
-                    autoSellToggle.textContent = 'Включить автопродажу';
-                    autoSellToggle.classList.add('off');
-                }
+        newSellButton.addEventListener('click', () => {
+            coins += newCurrency;
+            newCurrency = 0;
+            updateUI();
+        });
+
+        newMenuButton.addEventListener('click', () => {
+            newMenu.classList.toggle('open');
+        });
+
+        document.getElementById('clickUpgrade').addEventListener('click', () => {
+            if (coins >= clickUpgradeCost) {
+                coins -= clickUpgradeCost;
+                clickValue++;
+                clickUpgradeCost *= 2;
+                updateUI();
             }
+        });
+
+        document.getElementById('coinUpgrade').addEventListener('click', () => {
+            if (coins >= coinUpgradeCost) {
+                coins -= coinUpgradeCost;
+                coinValue++;
+                coinUpgradeCost *= 2;
+                updateUI();
+            }
+        });
+
+        document.getElementById('newCurrencyUpgrade').addEventListener('click', () => {
+            if (coins >= newCurrencyUpgradeCost) {
+                coins -= newCurrencyUpgradeCost;
+                newCurrencyValue++;
+                newCurrencyUpgradeCost *= 2;
+                updateUI();
+            }
+        });
+
+        document.getElementById('convertToOldCurrency').addEventListener('click', () => {
+            if (newCurrency >= convertToOldCurrencyCost) {
+                newCurrency -= convertToOldCurrencyCost;
+                clicks += convertToOldCurrencyCost / 2;
+                coins += convertToOldCurrencyCost / 2;
+                updateUI();
+            }
+        });
+
+        function updateUI() {
+            document.getElementById('clicks').textContent = `Клики: ${clicks}`;
+            document.getElementById('coins').textContent = `Монеты: ${coins}`;
+            document.getElementById('clickUpgradeCost').textContent = `Стоимость: ${clickUpgradeCost} монет`;
+            document.getElementById('coinUpgradeCost').textContent = `Стоимость: ${coinUpgradeCost} монет`;
+
+            document.getElementById('newCurrency').textContent = `Новая Валюта: ${newCurrency}`;
+            document.getElementById('newCurrencyUpgradeCost').textContent = `Стоимость: ${newCurrencyUpgradeCost} монет`;
+            document.getElementById('convertToOldCurrencyCost').textContent = `Стоимость: ${convertToOldCurrencyCost} новой валюты`;
+
+            const totalClicks = clicks + coins * 10; // Example for progress bar
+            progressBar.style.width = `${Math.min((totalClicks / 1000) * 100, 100)}%`;
+
+            const totalNewCurrency = newCurrency + coins * 10; // Example for progress bar
+            newProgressBar.style.width = `${Math.min((totalNewCurrency / 1000) * 100, 100)}%`;
         }
 
-        renderUpgrades();
-        renderPotions();
-        renderInventory();
-        loadGameData();
-        updateDisplay();
+        function animateClick(element) {
+            const popText = document.createElement('div');
+            popText.classList.add('pop-text');
+            popText.textContent = '+1';
+            element.appendChild(popText);
 
-        // Скрываем кнопку автопродажи, если улучшение не куплено
-        if (!upgrades[11].purchased) {
-            document.getElementById('auto-sell-toggle').style.display = 'none';
+            setTimeout(() => {
+                popText.remove();
+            }, 500);
         }
+
+        updateUI();
     </script>
 </body>
 
