@@ -1,11 +1,11 @@
-<html>
+<!DOCTYPE html>
+<html lang="ru">
 
 <head>
-    <base href="https://2d-top-down-multiplayer-game.com/" />
-    <title>тест шкибиди</title>
+    <meta charset="UTF-8">
+    <title>шкебеде</title>
     <style>
-        body,
-        html {
+        body, html {
             margin: 0;
             padding: 0;
             overflow: hidden;
@@ -124,34 +124,38 @@
             keys[e.key.toLowerCase()] = false;
         });
 
-        // Connect to the server
-        const socket = io('https://dopevibesonly.github.io/sigmagarouspammer.io');
+        // Мультиплеерная часть (использование WebSockets)
+        const socket = new WebSocket('wss://echo.websocket.org');
 
-        socket.on('connect', () => {
-            console.log('Connected to server');
-        });
+        socket.onopen = function(event) {
+            console.log('Connected to WebSocket server');
+        };
 
-        socket.on('updatePlayers', (players) => {
-            Object.keys(players).forEach(id => {
-                if (id !== socket.id) {
-                    if (!otherPlayers[id]) {
-                        otherPlayers[id] = new Character(players[id].x, players[id].y, `Player${id.substr(0, 4)}`);
-                        gameWorld.addChild(otherPlayers[id]);
-                    } else {
-                        otherPlayers[id].x = players[id].x;
-                        otherPlayers[id].y = players[id].y;
+        socket.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+
+            if (data.type === 'updatePlayers') {
+                Object.keys(data.players).forEach(id => {
+                    if (id !== socket.id) {
+                        if (!otherPlayers[id]) {
+                            otherPlayers[id] = new Character(data.players[id].x, data.players[id].y, `Player${id.substr(0, 4)}`);
+                            gameWorld.addChild(otherPlayers[id]);
+                        } else {
+                            otherPlayers[id].x = data.players[id].x;
+                            otherPlayers[id].y = data.players[id].y;
+                        }
                     }
-                }
-            });
+                });
 
-            // Remove disconnected players
-            Object.keys(otherPlayers).forEach(id => {
-                if (!players[id]) {
-                    gameWorld.removeChild(otherPlayers[id]);
-                    delete otherPlayers[id];
-                }
-            });
-        });
+                // Remove disconnected players
+                Object.keys(otherPlayers).forEach(id => {
+                    if (!data.players[id]) {
+                        gameWorld.removeChild(otherPlayers[id]);
+                        delete otherPlayers[id];
+                    }
+                });
+            }
+        };
 
         // Game loop
         app.ticker.add((delta) => {
@@ -170,7 +174,11 @@
             gameWorld.position.y = app.screen.height / 2;
 
             // Send player position to server
-            socket.emit('updatePosition', { x: localPlayer.x, y: localPlayer.y });
+            socket.send(JSON.stringify({
+                type: 'updatePosition',
+                x: localPlayer.x,
+                y: localPlayer.y
+            }));
         });
 
         // Handle window resize
@@ -190,7 +198,6 @@
         instructions.x = 10;
         instructions.y = 10;
         app.stage.addChild(instructions);
-
     </script>
 </body>
 
