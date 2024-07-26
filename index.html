@@ -518,6 +518,43 @@
                     return "Автопродажа активирована!";
                 },
                 maxLevel: 1
+
+                name: "Квантовый резонатор",
+        description: "Каждый 100-й клик создает квантовый резонанс, умножая следующие 5 кликов на 3",
+        cost: 5000,
+        effect: () => {
+            let resonanceCounter = 0;
+            let resonanceActive = false;
+            let resonanceClicks = 0;
+
+            const oldSimulateClick = window.simulateClick;
+            window.simulateClick = () => {
+                resonanceCounter++;
+                if (resonanceCounter === 100) {
+                    resonanceActive = true;
+                    resonanceClicks = 0;
+                    resonanceCounter = 0;
+                    showErrorMessage("Квантовый резонанс активирован!");
+                }
+
+                let result = oldSimulateClick();
+
+                if (resonanceActive) {
+                    result *= 3;
+                    resonanceClicks++;
+                    if (resonanceClicks === 5) {
+                        resonanceActive = false;
+                        showErrorMessage("Квантовый резонанс завершен.");
+                    }
+                }
+
+                return result;
+            };
+
+            return "Квантовый резонатор установлен!";
+        },
+        maxLevel: 1
+                
             }
         ];
 
