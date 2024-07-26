@@ -519,7 +519,8 @@
                 },
                 maxLevel: 1
 
-        {
+      
+    {
         name: "Квантовый резонатор",
         description: "Каждый 100-й клик создает квантовый резонанс, умножая следующие 5 кликов на 3",
         cost: 5000,
@@ -527,6 +528,12 @@
             let resonanceCounter = 0;
             let resonanceActive = false;
             let resonanceClicks = 0;
+
+            // Проверка наличия функции window.simulateClick
+            if (typeof window.simulateClick !== 'function') {
+                console.error("Функция simulateClick не определена.");
+                return "Ошибка: функция simulateClick не определена.";
+            }
 
             const oldSimulateClick = window.simulateClick;
             window.simulateClick = () => {
