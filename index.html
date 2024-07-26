@@ -4,7 +4,7 @@
     <base href="index.html">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Смачный Кликер</title>
+    <title>Кликер Развития</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
 
@@ -366,7 +366,7 @@
     </div>
     <div class="game-container">
         <div id="error-message" class="error-message"></div>
-        <h1>Смачный Кликер</h1>
+        <h1>Кликер Развития</h1>
         <div class="stats">
             <div class="stat">Клики: <span id="clicks">0</span> / <span id="max-clicks">10</span></div>
             <div class="stat">Монеты: <span id="coins">0</span></div>
@@ -518,57 +518,50 @@
                     return "Автопродажа активирована!";
                 },
                 maxLevel: 1
+            },
+            {
+                name: "Квантовый резонатор",
+                description: "Каждый 100-й клик создает квантовый резонанс, умножая следующие 5 кликов на 3",
+                cost: 5000,
+                effect: () => {
+                    let resonanceCounter = 0;
+                    let resonanceActive = false;
+                    let resonanceClicks = 0;
 
-      
-    {
-        name: "Квантовый резонатор",
-        description: "Каждый 100-й клик создает квантовый резонанс, умножая следующие 5 кликов на 3",
-        cost: 5000,
-        effect: () => {
-            let resonanceCounter = 0;
-            let resonanceActive = false;
-            let resonanceClicks = 0;
+                    const oldSimulateClick = window.simulateClick;
+                    window.simulateClick = () => {
+                        resonanceCounter++;
+                        if (resonanceCounter === 100) {
+                            resonanceActive = true;
+                            resonanceClicks = 0;
+                            resonanceCounter = 0;
+                            showErrorMessage("Квантовый резонанс активирован!");
+                        }
 
-            // Проверка наличия функции window.simulateClick
-            if (typeof window.simulateClick !== 'function') {
-                console.error("Функция simulateClick не определена.");
-                return "Ошибка: функция simulateClick не определена.";
+                        let result = oldSimulateClick();
+
+                        if (resonanceActive) {
+                            result *= 3;
+                            resonanceClicks++;
+                            if (resonanceClicks === 5) {
+                                resonanceActive = false;
+                                showErrorMessage("Квантовый резонанс завершен.");
+                            }
+                        }
+
+                        return result;
+                    };
+
+                    return "Квантовый резонатор установлен!";
+                },
+                maxLevel: 1
             }
-
-            const oldSimulateClick = window.simulateClick;
-            window.simulateClick = () => {
-                resonanceCounter++;
-                if (resonanceCounter === 100) {
-                    resonanceActive = true;
-                    resonanceClicks = 0;
-                    resonanceCounter = 0;
-                    showErrorMessage("Квантовый резонанс активирован!");
-                }
-
-                let result = oldSimulateClick();
-
-                if (resonanceActive) {
-                    result *= 3;
-                    resonanceClicks++;
-                    if (resonanceClicks === 5) {
-                        resonanceActive = false;
-                        showErrorMessage("Квантовый резонанс завершен.");
-                    }
-                }
-
-                return result;
-            };
-
-            return "Квантовый резонатор установлен!";
-        },
-        maxLevel: 1
-    }
-];
+        ];
 
         const potions = [
-            { name: "Малое зелье прибыли", description: "Увеличивает прибыль от продажи на 50% на 3 минуты", cost: 1000, boost: 1.5 },
-            { name: "Большое зелье прибыли", description: "Удваивает прибыль от продажи на 3 минуты", cost: 6900, boost: 2 },
-            { name: "Зелье сверхприбыли", description: "Утраивает прибыль от продажи на 3 минуты", cost: 15000, boost: 3 },
+            { name: "Малое зелье прибыли", description: "Увеличивает прибыль от продажи на 50% на 3 минуты", cost: 100, boost: 1.5 },
+            { name: "Большое зелье прибыли", description: "Удваивает прибыль от продажи на 3 минуты", cost: 250, boost: 2 },
+            { name: "Зелье сверхприбыли", description: "Утраивает прибыль от продажи на 3 минуты", cost: 500, boost: 3 },
         ];
 
         let inventory = [];
@@ -669,13 +662,15 @@
                     sellClicks();
                 }
             }
+
+            return clicksToAdd;
         }
 
         clickArea.addEventListener('click', (e) => {
             const currentTime = Date.now();
             if (currentTime - lastClickTime >= clickDelay) {
-                simulateClick();
-                createPopText(e.clientX, e.clientY, `+${clickValue}`);
+                const clicksAdded = simulateClick();
+                createPopText(e.clientX, e.clientY, `+${clicksAdded}`);
                 lastClickTime = currentTime;
             } else {
                 clickArea.classList.add('shake');
@@ -906,26 +901,4 @@
                     }, 1000);
                 }
                 if (autoSellActive) {
-                    document.getElementById('auto-sell-toggle').style.display = 'block';
-                    autoSellToggle.textContent = 'Выключить автопродажу';
-                } else {
-                    autoSellToggle.textContent = 'Включить автопродажу';
-                    autoSellToggle.classList.add('off');
-                }
-            }
-        }
-
-        renderUpgrades();
-        renderPotions();
-        renderInventory();
-        loadGameData();
-        updateDisplay();
-
-        // Скрываем кнопку автопродажи, если улучшение не куплено
-        if (!upgrades[11].purchased) {
-            document.getElementById('auto-sell-toggle').style.display = 'none';
-        }
-    </script>
-</body>
-
-</html>
+                    document.getElementById('auto-sell-toggle').style.display
