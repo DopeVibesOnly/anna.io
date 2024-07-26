@@ -1,8 +1,8 @@
 <html>
 
 <head>
-    <base href="https://websim.io/games/clicker-evolution-v6/">
-    <title>Смачный кликер</title>
+    <base href="https://websim.io/games/clicker-evolution-v10/">
+    <title>Смачный Кликер</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
 
@@ -287,6 +287,11 @@
                 <div class="menu-item-description">5% шанс получить бонусный клик</div>
                 <div class="menu-item-cost">Стоимость: 200 монет</div>
             </div>
+            <div class="menu-item" data-upgrade="increaseCapacity" data-cost="100">
+                <div class="menu-item-title">Увеличить вместимость</div>
+                <div class="menu-item-description">Увеличивает вместимость рюкзака на 10</div>
+                <div class="menu-item-cost">Стоимость: 150 монет</div>
+            </div>
         </div>
 
         <div class="menu-section">
@@ -312,7 +317,7 @@
             <div class="menu-section-title">Перерождение</div>
             <div class="menu-item" data-upgrade="rebirth" data-cost="100">
                 <div class="menu-item-title">Перерождение</div>
-                <div class="menu-item-description">Сбросывание прогресса, но взамен x2 буст на клики</div>
+                <div class="menu-item-description">Сбросывание прогресса, но взамен буст x2 на клики</div>
                 <div class="menu-item-cost">Стоимость: 5000 монет</div>
             </div>
         </div>
@@ -320,7 +325,7 @@
 
     <div class="game-container">
         <div class="clicker-card">
-            <h2 class="clicker-title">Смачный Кликер v2</h2>
+            <h2 class="clicker-title">Смачный Кликер</h2>
             <div class="stats">
                 <span>Клики: <span id="clicks">0</span> / <span id="maxClicks">50</span></span>
                 <span>Монеты: <span id="coins">0</span></span>
@@ -345,6 +350,7 @@
         let rebirthCost = 5000;
         let clickCooldown = false;
         let purchasedUpgrades = new Set();
+        let capacityCost = 150;
 
         const clicksElement = document.getElementById('clicks');
         const maxClicksElement = document.getElementById('maxClicks');
@@ -356,7 +362,6 @@
         const menu = document.getElementById('menu');
         const rebirthOverlay = document.getElementById('rebirthOverlay');
 
-        // Load saved data
         function loadSavedData() {
             const savedData = JSON.parse(localStorage.getItem('clickerData'));
             if (savedData) {
@@ -367,12 +372,12 @@
                 rebirthMultiplier = savedData.rebirthMultiplier;
                 rebirthCost = savedData.rebirthCost;
                 purchasedUpgrades = new Set(savedData.purchasedUpgrades);
+                capacityCost = savedData.capacityCost || 100;
 
-                // Reapply purchased upgrades
                 purchasedUpgrades.forEach(upgrade => {
                     applyUpgrade(upgrade, false);
                     const upgradeElement = document.querySelector(`.menu-item[data-upgrade="${upgrade}"]`);
-                    if (upgradeElement) {
+                    if (upgradeElement && upgrade !== 'increaseCapacity') {
                         upgradeElement.classList.add('purchased');
                     }
                 });
@@ -381,7 +386,6 @@
             }
         }
 
-        // Save data
         function saveData() {
             const dataToSave = {
                 clicks,
@@ -390,7 +394,8 @@
                 clickValue,
                 rebirthMultiplier,
                 rebirthCost,
-                purchasedUpgrades: Array.from(purchasedUpgrades)
+                purchasedUpgrades: Array.from(purchasedUpgrades),
+                capacityCost
             };
             localStorage.setItem('clickerData', JSON.stringify(dataToSave));
         }
@@ -400,6 +405,12 @@
             maxClicksElement.textContent = maxClicks;
             coinsElement.textContent = coins;
             clickProgress.style.width = `${(clicks / maxClicks) * 100}%`;
+
+            const capacityUpgrade = document.querySelector('.menu-item[data-upgrade="increaseCapacity"]');
+            if (capacityUpgrade) {
+                capacityUpgrade.querySelector('.menu-item-cost').textContent = `Стоимость: ${capacityCost} монет`;
+            }
+
             saveData();
         }
 
@@ -433,21 +444,22 @@
         document.querySelectorAll('.menu-item').forEach(item => {
             item.addEventListener('click', () => {
                 const upgrade = item.dataset.upgrade;
-                const cost = parseInt(item.dataset.cost);
+                const cost = upgrade === 'increaseCapacity' ? capacityCost : parseInt(item.dataset.cost);
 
-                if (coins >= cost && !purchasedUpgrades.has(upgrade)) {
+                if (coins >= cost) {
                     coins -= cost;
                     applyUpgrade(upgrade, true);
                     updateDisplay();
                     if (upgrade === 'rebirth') {
                         item.dataset.cost = rebirthCost;
                         item.querySelector('.menu-item-cost').textContent = `Стоимость: ${rebirthCost} монет`;
-                    } else if (upgrade === 'tripleClick') {
+                    } else if (upgrade !== 'increaseCapacity') {
                         item.classList.add('purchased');
-                        purchasedUpgrades.add(upgrade);
                     }
-                } else if (purchasedUpgrades.has(upgrade)) {
-                    alert('Это улучшение уже куплено!');
+                    if (upgrade === 'increaseCapacity') {
+                        capacityCost = Math.floor(capacityCost * 1.5);
+                        item.querySelector('.menu-item-cost').textContent = `Стоимость: ${capacityCost} монет`;
+                    }
                 } else {
                     alert('Недостаточно монет!');
                 }
@@ -483,9 +495,14 @@
                 case 'rebirth':
                     performRebirth();
                     break;
+                case 'increaseCapacity':
+                    maxClicks += 10;
+                    break;
             }
             if (shouldSave) {
-                purchasedUpgrades.add(upgrade);
+                if (upgrade !== 'increaseCapacity') {
+                    purchasedUpgrades.add(upgrade);
+                }
                 saveData();
             }
         }
@@ -496,11 +513,12 @@
                 rebirthMultiplier *= 2;
                 clicks = 0;
                 coins = 0;
-                maxClicks = 50;
+                maxClicks = 10;
                 clickValue = 1;
                 clearInterval(autoClickerInterval);
                 autoClickerInterval = null;
                 rebirthCost *= 3;
+                capacityCost = 100;
                 purchasedUpgrades.clear();
                 document.querySelectorAll('.menu-item').forEach(item => {
                     item.classList.remove('purchased');
@@ -512,12 +530,8 @@
             }, 1000);
         }
 
-        // Load saved data when the page loads
         loadSavedData();
-
-        // Save data periodically (every 30 seconds)
-        setInterval(saveData, 10000);
-
+        setInterval(saveData, 30000);
         updateDisplay();
     </script>
 </body>
