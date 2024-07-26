@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 
 <head>
-    <meta charset="UTF-8">
-    <title>шкебеде</title>
+    <base href="https://2d-top-down-multiplayer-game.com/" />
+    <title>тест шкибиди</title>
     <style>
         body, html {
             margin: 0;
@@ -11,7 +11,6 @@
             overflow: hidden;
             font-family: Arial, sans-serif;
         }
-
         #gameCanvas {
             position: absolute;
             top: 0;
@@ -33,29 +32,24 @@
             view: document.getElementById('gameCanvas')
         });
 
-        // Create a container for the game world
         const gameWorld = new PIXI.Container();
         app.stage.addChild(gameWorld);
 
-        // Platform dimensions
         const platformWidth = 1000;
         const platformHeight = 1000;
 
-        // Character class
         class Character extends PIXI.Container {
             constructor(x, y, name) {
                 super();
                 this.x = x;
                 this.y = y;
 
-                // Create character sprite
                 this.sprite = new PIXI.Graphics();
                 this.sprite.beginFill(0xFF0000);
                 this.sprite.drawRect(-15, -15, 30, 30);
                 this.sprite.endFill();
                 this.addChild(this.sprite);
 
-                // Add a small triangle to indicate direction
                 const direction = new PIXI.Graphics();
                 direction.beginFill(0xFFFF00);
                 direction.moveTo(0, -20);
@@ -65,7 +59,6 @@
                 direction.endFill();
                 this.addChild(direction);
 
-                // Add name above head
                 this.nameText = new PIXI.Text(name, {
                     fontFamily: 'Arial',
                     fontSize: 14,
@@ -81,7 +74,6 @@
                 let newX = this.x + dx;
                 let newY = this.y + dy;
 
-                // Constrain movement within platform boundaries
                 newX = Math.max(-platformWidth / 2 + 15, Math.min(platformWidth / 2 - 15, newX));
                 newY = Math.max(-platformHeight / 2 + 15, Math.min(platformHeight / 2 - 15, newY));
 
@@ -90,30 +82,25 @@
             }
         }
 
-        // Create the platform
         const platform = new PIXI.Graphics();
         platform.beginFill(0x00FF00);
         platform.drawRect(-platformWidth / 2, -platformHeight / 2, platformWidth, platformHeight);
         platform.endFill();
         gameWorld.addChild(platform);
 
-        // Create the local player
         const localPlayer = new Character(0, 0, "Player1");
         gameWorld.addChild(localPlayer);
 
-        // Object to store other players
         const otherPlayers = {};
 
-        // Add some obstacles
         const obstacles = new PIXI.Graphics();
-        obstacles.beginFill(0x8B4513); // Brown color
+        obstacles.beginFill(0x8B4513);
         obstacles.drawRect(-200, -200, 100, 100);
         obstacles.drawRect(200, 200, 150, 150);
         obstacles.drawRect(-300, 300, 120, 120);
         obstacles.endFill();
         gameWorld.addChild(obstacles);
 
-        // Keyboard controls
         const keys = {};
 
         window.addEventListener('keydown', (e) => {
@@ -124,71 +111,55 @@
             keys[e.key.toLowerCase()] = false;
         });
 
-        // Мультиплеерная часть (использование WebSockets)
-        const socket = new WebSocket('wss://echo.websocket.org');
+        const socket = io('http://localhost:3000');
 
-        socket.onopen = function(event) {
-            console.log('Connected to WebSocket server');
-        };
+        socket.on('connect', () => {
+            console.log('Connected to server');
+        });
 
-        socket.onmessage = function(event) {
-            const data = JSON.parse(event.data);
-
-            if (data.type === 'updatePlayers') {
-                Object.keys(data.players).forEach(id => {
-                    if (id !== socket.id) {
-                        if (!otherPlayers[id]) {
-                            otherPlayers[id] = new Character(data.players[id].x, data.players[id].y, `Player${id.substr(0, 4)}`);
-                            gameWorld.addChild(otherPlayers[id]);
-                        } else {
-                            otherPlayers[id].x = data.players[id].x;
-                            otherPlayers[id].y = data.players[id].y;
-                        }
+        socket.on('updatePlayers', (players) => {
+            Object.keys(players).forEach(id => {
+                if (id !== socket.id) {
+                    if (!otherPlayers[id]) {
+                        otherPlayers[id] = new Character(players[id].x, players[id].y, `Player${id.substr(0, 4)}`);
+                        gameWorld.addChild(otherPlayers[id]);
+                    } else {
+                        otherPlayers[id].x = players[id].x;
+                        otherPlayers[id].y = players[id].y;
                     }
-                });
+                }
+            });
 
-                // Remove disconnected players
-                Object.keys(otherPlayers).forEach(id => {
-                    if (!data.players[id]) {
-                        gameWorld.removeChild(otherPlayers[id]);
-                        delete otherPlayers[id];
-                    }
-                });
-            }
-        };
+            Object.keys(otherPlayers).forEach(id => {
+                if (!players[id]) {
+                    gameWorld.removeChild(otherPlayers[id]);
+                    delete otherPlayers[id];
+                }
+            });
+        });
 
-        // Game loop
         app.ticker.add((delta) => {
             const speed = 3 * delta;
 
-            // Updated control logic
             if (keys['w'] || keys['arrowup']) localPlayer.move(0, -speed);
             if (keys['s'] || keys['arrowdown']) localPlayer.move(0, speed);
             if (keys['a'] || keys['arrowleft']) localPlayer.move(-speed, 0);
             if (keys['d'] || keys['arrowright']) localPlayer.move(speed, 0);
 
-            // Update camera position
             gameWorld.pivot.x = localPlayer.x;
             gameWorld.pivot.y = localPlayer.y;
             gameWorld.position.x = app.screen.width / 2;
             gameWorld.position.y = app.screen.height / 2;
 
-            // Send player position to server
-            socket.send(JSON.stringify({
-                type: 'updatePosition',
-                x: localPlayer.x,
-                y: localPlayer.y
-            }));
+            socket.emit('updatePosition', { x: localPlayer.x, y: localPlayer.y });
         });
 
-        // Handle window resize
         window.addEventListener('resize', () => {
             app.renderer.resize(window.innerWidth, window.innerHeight);
             gameWorld.position.x = app.screen.width / 2;
             gameWorld.position.y = app.screen.height / 2;
         });
 
-        // Add instructions
         const instructions = new PIXI.Text('тест', {
             fontFamily: 'Arial',
             fontSize: 16,
