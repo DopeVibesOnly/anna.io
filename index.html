@@ -412,7 +412,7 @@ let canClick = true;
 
 const upgrades = {
   clickers: [
-    { name: "Двойной клик", baseCost: 50, cost: 50, effect: "Удваивает стоимость клика", purchased: false, oneTime: true, 
+    { name: "Двойной клик", baseCost: 50, cost: 50, effect: "Удваивает стоимость клика", purchased: 0, maxPurchases: 3, oneTime: false, 
       action: () => { clickValue *= 2; }, icon: "🖱️" },
     { name: "Быстрые пальцы", baseCost: 150, cost: 150, effect: "Увеличивает скорость клика на 10%", purchased: 0, maxPurchases: 3, oneTime: false,
       action: () => { clickValue *= 1.1; }, icon: "👆" },
