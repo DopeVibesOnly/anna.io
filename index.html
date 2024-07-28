@@ -1,539 +1,785 @@
-<html>
+<html><head><base href="https://clickerdevelopment.com/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Смачный кликер v2</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
 
-<head>
-    <base href="https://websim.io/games/clicker-evolution-v10/">
-    <title>Смачный Кликер</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: #f0f0f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  overflow: hidden;
+}
 
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
+#game-container {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  width: 450px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
 
-        .menu {
-            background-color: #2c3e50;
-            width: 15%;
-            height: 100%;
-            position: fixed;
-            top: 0;
-            left: -15%;
-            transition: left 0.3s ease-in-out;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-            overflow-y: auto;
-            z-index: 1000;
-            color: #ecf0f1;
-            padding-right: 15px;
-        }
+h1 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #333;
+}
 
-        .menu.open {
-            left: 0;
-        }
+#stats {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #666;
+}
 
-        .menu-toggle {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            z-index: 1001;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 10px;
-            font-size: 20px;
-            cursor: pointer;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: transform 0.3s ease;
-        }
+#click-button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 200px;
+  height: 200px;
+  font-size: 24px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.1s;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
 
-        .menu-toggle:hover {
-            transform: rotate(90deg);
-        }
+#click-button:hover {
+  background-color: #2980b9;
+}
 
-        .menu-section {
-            margin-bottom: 20px;
-        }
+#click-button:active {
+  transform: scale(0.95);
+}
 
-        .menu-section-title {
-            font-size: 1.2em;
-            font-weight: bold;
-            padding: 10px;
-            background-color: #34495e;
-            border-radius: 5px;
-            margin-bottom: 10px;
-        }
+#click-button:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+}
 
-        .menu-item {
-            padding: 10px;
-            border-bottom: 1px solid #34495e;
-            cursor: pointer;
-            transition: background-color 0.2s, transform 0.2s;
-        }
+#progress-bar {
+  background-color: #ecf0f1;
+  border-radius: 5px;
+  height: 10px;
+  margin: 20px 0;
+  overflow: hidden;
+}
 
-        .menu-item:hover {
-            background-color: #34495e;
-            transform: translateX(5px);
-        }
+#progress {
+  background-color: #2ecc71;
+  border-radius: 5px;
+  height: 100%;
+  width: 0;
+  transition: width 0.3s;
+}
 
-        .menu-item-title {
-            font-weight: bold;
-            margin-bottom: 5px;
-            font-size: 1em;
-        }
+#sell-button {
+  background-color: #2ecc71;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.1s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
 
-        .menu-item-description {
-            font-size: 0.8em;
-            color: #bdc3c7;
-        }
+#sell-button:hover {
+  background-color: #27ae60;
+}
 
-        .menu-item-cost {
-            font-weight: bold;
-            color: #2ecc71;
-            margin-top: 5px;
-        }
+#sell-button:active {
+  transform: scale(0.98);
+}
 
-        .menu-item.purchased {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+#menu-button {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  background-color: #34495e;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  font-size: 24px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+  z-index: 3;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
 
-        .rebirth-section {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 2px solid #3498db;
-        }
+#menu-button:hover {
+  background-color: #2c3e50;
+}
 
-        .game-container {
-            flex-grow: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding-left: 60px;
-        }
+#menu-button.open {
+  transform: rotate(90deg);
+}
 
-        .clicker-card {
-            background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-            text-align: center;
-            width: 350px;
-        }
+#upgrades-menu {
+  position: fixed;
+  top: 0;
+  left: -300px;
+  width: 300px;
+  height: 100vh;
+  background-color: #34495e;
+  color: white;
+  padding: 80px 20px 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  transition: left 0.3s ease-in-out;
+  z-index: 2;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
 
-        .clicker-title {
-            font-size: 28px;
-            margin-bottom: 25px;
-            color: #2c3e50;
-        }
+#upgrades-menu.open {
+  left: 0;
+}
 
-        .stats {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 25px;
-            font-size: 18px;
-            color: #34495e;
-        }
+.upgrade-section {
+  margin-bottom: 20px;
+}
 
-        .click-button {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 180px;
-            height: 180px;
-            font-size: 28px;
-            cursor: pointer;
-            transition: transform 0.1s, box-shadow 0.1s, background-color 0.3s;
-            animation: pulse 2s infinite;
-        }
+.upgrade-section h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+  color: #ecf0f1;
+}
 
-        .click-button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
-            background-color: #2980b9;
-        }
+.upgrade-item {
+  background-color: #2c3e50;
+  border-radius: 5px;
+  padding: 15px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.1s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
-        .click-button:active {
-            transform: scale(0.95);
-            background-color: #2980b9;
-        }
+.upgrade-item:hover {
+  background-color: #3c5269;
+}
 
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7);
-            }
+.upgrade-item:active {
+  transform: scale(0.98);
+}
 
-            70% {
-                box-shadow: 0 0 0 10px rgba(52, 152, 219, 0);
-            }
+.upgrade-info {
+  text-align: left;
+}
 
-            100% {
-                box-shadow: 0 0 0 0 rgba(52, 152, 219, 0);
-            }
-        }
+.upgrade-name {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
 
-        .progress-bar {
-            background-color: #ecf0f1;
-            border-radius: 10px;
-            height: 15px;
-            margin-top: 25px;
-            overflow: hidden;
-            position: relative;
-        }
+.upgrade-cost {
+  font-size: 12px;
+  color: #bdc3c7;
+}
 
-        .progress {
-            background-color: #2ecc71;
-            height: 100%;
-            width: 0%;
-            transition: width 0.3s ease-in-out;
-            position: relative;
-        }
+.upgrade-effect {
+  font-size: 14px;
+  color: #95a5a6;
+  margin-top: 5px;
+}
 
-        .progress::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(90deg,
-                    rgba(255, 255, 255, 0.1) 25%,
-                    transparent 25%,
-                    transparent 50%,
-                    rgba(255, 255, 255, 0.1) 50%,
-                    rgba(255, 255, 255, 0.1) 75%,
-                    transparent 75%,
-                    transparent 100%);
-            background-size: 30px 30px;
-            animation: stripes 1s linear infinite;
-        }
+.upgrade-icon {
+  font-size: 24px;
+  margin-left: 10px;
+}
 
-        @keyframes stripes {
-            0% {
-                background-position: 0 0;
-            }
+.upgrade-item.purchased {
+  opacity: 0.5;
+  cursor: default;
+}
 
-            100% {
-                background-position: 30px 0;
-            }
-        }
+#inventory-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #e67e22;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  font-size: 24px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+  z-index: 3;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
 
-        .sell-button {
-            background-color: #2ecc71;
-            color: white;
-            border: none;
-            border-radius: 25px;
-            padding: 12px 25px;
-            font-size: 18px;
-            cursor: pointer;
-            margin-top: 25px;
-            transition: background-color 0.2s, transform 0.1s;
-        }
+#inventory-button:hover {
+  background-color: #d35400;
+}
 
-        .sell-button:hover {
-            background-color: #27ae60;
-            transform: translateY(-2px);
-        }
+#inventory {
+  position: fixed;
+  bottom: -300px;
+  right: 20px;
+  width: 300px;
+  height: 300px;
+  background-color: #34495e;
+  color: white;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  transition: bottom 0.3s ease-in-out;
+  z-index: 2;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+  border-radius: 10px 10px 0 0;
+}
 
-        .sell-button:active {
-            transform: translateY(1px);
-        }
+#inventory.open {
+  bottom: 0;
+}
 
-        .rebirth-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0);
-            transition: background-color 1s ease-in-out;
-            pointer-events: none;
-            z-index: 9999;
-        }
+.inventory-item {
+  background-color: #2c3e50;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.1s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
-        .rebirth-overlay.active {
-            background-color: rgba(0, 0, 0, 1);
-        }
-    </style>
+.inventory-item:hover {
+  background-color: #3c5269;
+}
+
+.inventory-item:active {
+  transform: scale(0.98);
+}
+
+#modal {
+  display: none;
+  position: fixed;
+  z-index: 4;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 300px;
+  text-align: center;
+  border-radius: 10px;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+}
+
+.modal-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.modal-button.yes {
+  background-color: #2ecc71;
+  color: white;
+}
+
+.modal-button.no {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.modal-button:hover {
+  opacity: 0.8;
+}
+
+#potion-timer {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  background-color: rgba(52, 73, 94, 0.8);
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 14px;
+  z-index: 3;
+  display: none;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.pulse {
+  animation: pulse 0.5s;
+}
+
+@keyframes coinFall {
+  0% { transform: translateY(-50px); opacity: 1; }
+  100% { transform: translateY(50px); opacity: 0; }
+}
+
+.falling-coin {
+  position: absolute;
+  font-size: 24px;
+  color: gold;
+  pointer-events: none;
+  animation: coinFall 1s forwards;
+}
+
+</style>
 </head>
-
 <body>
-    <button class="menu-toggle" id="menuToggle">☰</button>
+<div id="game-container">
+  <h1>Смачный Кликер v2</h1>
+  <div id="stats">
+    <div>Клики: <span id="clicks">0 / 50</span></div>
+    <div>Монеты: <span id="coins">0</span></div>
+  </div>
+  <button id="click-button">Клик!</button>
+  <div id="progress-bar">
+    <div id="progress"></div>
+  </div>
+  <button id="sell-button">Продать клики</button>
+</div>
 
-    <div class="menu" id="menu">
-        <div class="menu-section">
-            <div class="menu-section-title">Базовые улучшения</div>
-            <div class="menu-item" data-upgrade="autoClicker" data-cost="50">
-                <div class="menu-item-title">Авто-кликер</div>
-                <div class="menu-item-description">Автоматически кликает каждую секунду</div>
-                <div class="menu-item-cost">Стоимость: 50 монет</div>
-            </div>
-            <div class="menu-item" data-upgrade="tripleClick" data-cost="150">
-                <div class="menu-item-title">Тройной клик</div>
-                <div class="menu-item-description">Каждый клик дает в три раза больше (одноразовое)</div>
-                <div class="menu-item-cost">Стоимость: 150 монет</div>
-            </div>
-            <div class="menu-item" data-upgrade="luckyClover" data-cost="200">
-                <div class="menu-item-title">Счастливый клевер</div>
-                <div class="menu-item-description">5% шанс получить бонусный клик</div>
-                <div class="menu-item-cost">Стоимость: 200 монет</div>
-            </div>
-            <div class="menu-item" data-upgrade="increaseCapacity" data-cost="100">
-                <div class="menu-item-title">Увеличить вместимость</div>
-                <div class="menu-item-description">Увеличивает вместимость рюкзака на 10</div>
-                <div class="menu-item-cost">Стоимость: 150 монет</div>
-            </div>
-        </div>
+<button id="menu-button">☰</button>
+<button id="inventory-button">🎒</button>
 
-        <div class="menu-section">
-            <div class="menu-section-title">Продвинутые улучшения</div>
-            <div class="menu-item" data-upgrade="goldenTouch" data-cost="500">
-                <div class="menu-item-title">Золотое прикосновение</div>
-                <div class="menu-item-description">1% шанс получить золотой клик (x10)</div>
-                <div class="menu-item-cost">Стоимость: 500 монет</div>
-            </div>
-            <div class="menu-item" data-upgrade="timeDilation" data-cost="1000">
-                <div class="menu-item-title">Растяжение времени</div>
-                <div class="menu-item-description">Увеличивает время между автоматическими продажами на 10%</div>
-                <div class="menu-item-cost">Стоимость: 1000 монет</div>
-            </div>
-            <div class="menu-item" data-upgrade="quantumTunnel" data-cost="2000">
-                <div class="menu-item-title">Квантовый туннель</div>
-                <div class="menu-item-description">Позволяет превысить лимит рюкзака на 20%</div>
-                <div class="menu-item-cost">Стоимость: 2000 монет</div>
-            </div>
-        </div>
+<div id="upgrades-menu">
+  <h2>Улучшения</h2>
+  <div id="upgrades-list"></div>
+</div>
 
-        <div class="menu-section rebirth-section">
-            <div class="menu-section-title">Перерождение</div>
-            <div class="menu-item" data-upgrade="rebirth" data-cost="100">
-                <div class="menu-item-title">Перерождение</div>
-                <div class="menu-item-description">Сбросывание прогресса, но взамен буст x2 на монеты</div>
-                <div class="menu-item-cost">Стоимость: 5000 монет</div>
-            </div>
-        </div>
+<div id="inventory">
+  <h2>Инвентарь</h2>
+  <div id="inventory-list"></div>
+</div>
+
+<div id="modal">
+  <div class="modal-content">
+    <h2>Вы уверены что хотите использовать зелье?</h2>
+    <p id="modal-description"></p>
+    <div class="modal-buttons">
+      <button class="modal-button yes">Да</button>
+      <button class="modal-button no">Нет</button>
     </div>
+  </div>
+</div>
 
-    <div class="game-container">
-        <div class="clicker-card">
-            <h2 class="clicker-title">Смачный Кликер</h2>
-            <div class="stats">
-                <span>Клики: <span id="clicks">0</span> / <span id="maxClicks">50</span></span>
-                <span>Монеты: <span id="coins">0</span></span>
-            </div>
-            <button class="click-button" id="clickButton">Клик!</button>
-            <div class="progress-bar">
-                <div class="progress" id="clickProgress"></div>
-            </div>
-            <button class="sell-button" id="sellButton">Продать клики</button>
+<div id="potion-timer"></div>
+
+<script>
+let clicks = 0;
+let coins = 0;
+let maxClicks = 50;
+let clickValue = 1;
+let autoClickerInterval = null;
+let autoSellInterval = null;
+let coinMultiplier = 1;
+let coinMultiplierTimeout = null;
+let activePotionEndTime = null;
+let clickDelay = 300; // 0.3 seconds in milliseconds
+let canClick = true;
+
+const upgrades = {
+  clickers: [
+    { name: "Двойной клик", baseCost: 50, cost: 50, effect: "Удваивает стоимость клика", purchased: false, oneTime: true, 
+      action: () => { clickValue *= 2; }, icon: "🖱️" },
+    { name: "Быстрые пальцы", baseCost: 150, cost: 150, effect: "Увеличивает скорость клика на 10%", purchased: 0, maxPurchases: 3, oneTime: false,
+      action: () => { clickValue *= 1.1; }, icon: "👆" },
+    { name: "Квантовый клик", baseCost: 25000, cost: 25000, effect: "Случайный шанс мгновенно заполнить счетчик кликов", purchased: false, oneTime: true, icon: "⚛️" },
+  ],
+  automation: [
+    { name: "Автокликер", baseCost: 200, cost: 200, effect: "Автоматически кликает каждую секунду", purchased: false, oneTime: true, 
+      action: () => { 
+        if (!autoClickerInterval) {
+          autoClickerInterval = setInterval(() => {
+            if (clicks < maxClicks) {
+              clicks += clickValue;
+              updateDisplay();
+            }
+          }, 1000);
+        }
+      }, icon: "🤖" },
+    { name: "Турбо-продажа", baseCost: 1200, cost: 1200, effect: "Автоматически продает клики каждые 5 секунд", purchased: false, oneTime: true,
+      action: () => {
+        if (!autoSellInterval) {
+          autoSellInterval = setInterval(() => {
+            sellClicks();
+          }, 5000);
+        }
+      }, icon: "🚀" },
+  ],
+  storage: [
+    { name: "Супер хранилище", baseCost: 1000, cost: 1000, effect: "Удваивает максимальное количество кликов", purchased: 0, maxPurchases: 3, oneTime: false,
+      action: () => { maxClicks *= 2; }, icon: "🏦" },
+  ],
+  economy: [
+    { name: "Золотой клик", baseCost: 500, cost: 500, effect: "10% шанс получить двойные монеты при продаже", purchased: false, oneTime: true, icon: "🌟" },
+    { name: "Магнит для монет", baseCost: 300, cost: 300, effect: "5% бонус к заработку монет", purchased: 0, maxPurchases: 3, oneTime: false, icon: "🧲" },
+    { name: "Экономический гений", baseCost: 7500, cost: 7500, effect: "Увеличивает стоимость всех кликов на 25%", purchased: 0, maxPurchases: 3, oneTime: false, icon: "🧠" },
+    { name: "Мультипликатор прибыли", baseCost: 15000, cost: 15000, effect: "Удваивает доход от всех источников", purchased: 0, maxPurchases: 3, oneTime: false, icon: "💰" },
+  ],
+  special: [
+    { name: "Золотая жила", baseCost: 2000, cost: 2000, effect: "Шанс найти золотой самородок при клике (x10 монет)", purchased: false, oneTime: true, icon: "💎" },
+    { name: "Космическая экспансия", baseCost: 100000, cost: 100000, effect: "Открывает новые галактические возможности", purchased: false, oneTime: true, icon: "🌌" },
+  ],
+  backpack: [
+    { name: "Расширение рюкзака", baseCost: 50, cost: 50, effect: "Увеличивает вместимость рюкзака на 10 кликов", purchased: 0, oneTime: false, 
+      action: () => { maxClicks += 10; }, icon: "🎒" },
+  ],
+  potions: [
+    { name: "Коробка с зельем", baseCost: 3000, cost: 3000, effect: "Случайный шанс получить зелье умножения монет", purchased: 0, oneTime: false, 
+      action: () => { 
+        const random = Math.random();
+        if (random < 0.7) {
+          addToInventory({ name: "Обычное зелье", multiplier: 1.5, duration: 180000, icon: "🧪" });
+        } else if (random < 0.95) {
+          addToInventory({ name: "Среднее зелье", multiplier: 2, duration: 180000, icon: "🧪" });
+        } else {
+          addToInventory({ name: "Смачное зелье", multiplier: 2.5, duration: 180000, icon: "🧪" });
+        }
+      }, icon: "📦" },
+  ],
+};
+
+const inventory = [];
+
+function loadGame() {
+  const savedGame = localStorage.getItem('clickerGame');
+  if (savedGame) {
+    const gameData = JSON.parse(savedGame);
+    clicks = gameData.clicks;
+    coins = gameData.coins;
+    maxClicks = gameData.maxClicks;
+    clickValue = gameData.clickValue;
+    
+    for (const section in gameData.upgrades) {
+      for (let i = 0; i < gameData.upgrades[section].length; i++) {
+        upgrades[section][i].purchased = gameData.upgrades[section][i].purchased;
+        if (section !== 'potions') {
+          upgrades[section][i].cost = gameData.upgrades[section][i].cost;
+        }
+      }
+    }
+
+    if (gameData.inventory) {
+      inventory.push(...gameData.inventory);
+    }
+
+    if (upgrades.automation[0].purchased) {
+      startAutoClicker();
+    }
+    if (upgrades.automation[1].purchased) {
+      startAutoSell();
+    }
+
+    if (gameData.activePotionEndTime) {
+      activePotionEndTime = gameData.activePotionEndTime;
+      const timeLeft = activePotionEndTime - Date.now();
+      if (timeLeft > 0) {
+        coinMultiplier = gameData.coinMultiplier;
+        updatePotionTimer(activePotionEndTime);
+        setTimeout(() => {
+          coinMultiplier = 1;
+          activePotionEndTime = null;
+          updateDisplay();
+          document.getElementById('potion-timer').style.display = 'none';
+        }, timeLeft);
+      }
+    }
+  }
+  updateDisplay();
+  renderUpgrades();
+  renderInventory();
+}
+
+function saveGame() {
+  const gameData = {
+    clicks,
+    coins,
+    maxClicks,
+    clickValue,
+    upgrades,
+    inventory,
+    activePotionEndTime,
+    coinMultiplier
+  };
+  localStorage.setItem('clickerGame', JSON.stringify(gameData));
+}
+
+function updateDisplay() {
+  document.getElementById('clicks').textContent = `${Math.floor(clicks)} / ${maxClicks}`;
+  document.getElementById('coins').textContent = Math.floor(coins);
+  const progress = (clicks / maxClicks) * 100;
+  document.getElementById('progress').style.width = `${progress}%`;
+  saveGame();
+}
+
+document.getElementById('click-button').addEventListener('click', () => {
+  if (canClick && clicks < maxClicks) {
+    clicks += clickValue;
+    document.getElementById('click-button').classList.add('pulse');
+    setTimeout(() => {
+      document.getElementById('click-button').classList.remove('pulse');
+    }, 500);
+    updateDisplay();
+    
+    canClick = false;
+    document.getElementById('click-button').disabled = true;
+    setTimeout(() => {
+      canClick = true;
+      document.getElementById('click-button').disabled = false;
+    }, clickDelay);
+  }
+});
+
+function sellClicks() {
+  let coinsEarned = clicks * coinMultiplier;
+  if (upgrades.economy[0].purchased && Math.random() < 0.1) {
+    coinsEarned *= 2;
+  }
+  coins += coinsEarned;
+  clicks = 0;
+  updateDisplay();
+  animateCoins(coinsEarned);
+}
+
+document.getElementById('sell-button').addEventListener('click', sellClicks);
+
+function animateCoins(amount) {
+  for (let i = 0; i < 5; i++) {
+    const coin = document.createElement('div');
+    coin.textContent = '🪙';
+    coin.className = 'falling-coin';
+    coin.style.left = `${Math.random() * 450}px`;
+    document.body.appendChild(coin);
+    setTimeout(() => {
+      coin.remove();
+    }, 1000);
+  }
+}
+
+const menuButton = document.getElementById('menu-button');
+const upgradesMenu = document.getElementById('upgrades-menu');
+
+menuButton.addEventListener('click', () => {
+  menuButton.classList.toggle('open');
+  upgradesMenu.classList.toggle('open');
+});
+
+const inventoryButton = document.getElementById('inventory-button');
+const inventoryMenu = document.getElementById('inventory');
+
+inventoryButton.addEventListener('click', () => {
+  inventoryMenu.classList.toggle('open');
+});
+
+function renderUpgrades() {
+  const upgradesList = document.getElementById('upgrades-list');
+  upgradesList.innerHTML = '';
+  
+  for (const [section, sectionUpgrades] of Object.entries(upgrades)) {
+    const sectionElement = document.createElement('div');
+    sectionElement.className = 'upgrade-section';
+    sectionElement.innerHTML = `<h3>${section.charAt(0).toUpperCase() + section.slice(1)}</h3>`;
+    
+    sectionUpgrades.forEach((upgrade, index) => {
+      const upgradeElement = document.createElement('div');
+      upgradeElement.className = 'upgrade-item';
+      if ((upgrade.purchased && upgrade.oneTime) || (upgrade.maxPurchases && upgrade.purchased >= upgrade.maxPurchases)) {
+        upgradeElement.classList.add('purchased');
+      }
+      upgradeElement.innerHTML = `
+        <div class="upgrade-info">
+          <div class="upgrade-name">${upgrade.name}${typeof upgrade.purchased === 'number' ? ` (${upgrade.purchased}${upgrade.maxPurchases ? `/${upgrade.maxPurchases}` : ''})` : ''}</div>
+          <div class="upgrade-cost">Стоимость: ${upgrade.cost} монет</div>
+          <div class="upgrade-effect">${upgrade.effect}</div>
         </div>
-    </div>
+        <div class="upgrade-icon">${upgrade.icon}</div>
+      `;
+      if (!upgrade.purchased || (typeof upgrade.purchased === 'number' && upgrade.purchased < (upgrade.maxPurchases || Infinity))) {
+        upgradeElement.addEventListener('click', () => purchaseUpgrade(section, index));
+      }
+      sectionElement.appendChild(upgradeElement);
+    });
+    
+    upgradesList.appendChild(sectionElement);
+  }
+}
 
-    <div class="rebirth-overlay" id="rebirthOverlay"></div>
+function purchaseUpgrade(section, index) {
+  const upgrade = upgrades[section][index];
+  if (coins >= upgrade.cost) {
+    coins -= upgrade.cost;
+    if (typeof upgrade.purchased === 'number') {
+      upgrade.purchased++;
+      if (section !== 'potions') {
+        upgrade.cost = Math.floor(upgrade.baseCost * Math.pow(1.15, upgrade.purchased));
+      }
+    } else {
+      upgrade.purchased = true;
+    }
+    if (upgrade.action) {
+      upgrade.action();
+    }
+    updateDisplay();
+    renderUpgrades();
+    renderInventory();
+  }
+}
 
-    <script>
-        let clicks = 0;
-        let coins = 0;
-        let maxClicks = 10;
-        let clickValue = 1;
-        let autoClickerInterval = null;
-        let rebirthMultiplier = 1;
-        let rebirthCost = 5000;
-        let clickCooldown = false;
-        let purchasedUpgrades = new Set();
-        let capacityCost = 100;
+function renderInventory() {
+  const inventoryList = document.getElementById('inventory-list');
+  inventoryList.innerHTML = '';
+  
+  inventory.forEach((item, index) => {
+    const itemElement = document.createElement('div');
+    itemElement.className = 'inventory-item';
+    itemElement.innerHTML = `
+      <div class="item-info">
+        <div class="item-name">${item.name}</div>
+        <div class="item-effect">x${item.multiplier} на ${item.duration / 60000} минут</div>
+      </div>
+      <div class="item-icon">${item.icon}</div>
+    `;
+    itemElement.addEventListener('click', () => showPotionModal(index));
+    inventoryList.appendChild(itemElement);
+  });
+}
 
-        const clicksElement = document.getElementById('clicks');
-        const maxClicksElement = document.getElementById('maxClicks');
-        const coinsElement = document.getElementById('coins');
-        const clickButton = document.getElementById('clickButton');
-        const sellButton = document.getElementById('sellButton');
-        const clickProgress = document.getElementById('clickProgress');
-        const menuToggle = document.getElementById('menuToggle');
-        const menu = document.getElementById('menu');
-        const rebirthOverlay = document.getElementById('rebirthOverlay');
+function addToInventory(item) {
+  inventory.push(item);
+  renderInventory();
+  saveGame();
+}
 
-        function loadSavedData() {
-            const savedData = JSON.parse(localStorage.getItem('clickerData'));
-            if (savedData) {
-                clicks = savedData.clicks;
-                coins = savedData.coins;
-                maxClicks = savedData.maxClicks;
-                clickValue = savedData.clickValue;
-                rebirthMultiplier = savedData.rebirthMultiplier;
-                rebirthCost = savedData.rebirthCost;
-                purchasedUpgrades = new Set(savedData.purchasedUpgrades);
-                capacityCost = savedData.capacityCost || 100;
+function showPotionModal(index) {
+  const modal = document.getElementById('modal');
+  const description = document.getElementById('modal-description');
+  const item = inventory[index];
+  
+  description.textContent = `${item.name} (x${item.multiplier} на ${item.duration / 60000} минут)`;
+  
+  modal.style.display = 'block';
+  
+  const yesButton = modal.querySelector('.yes');
+  const noButton = modal.querySelector('.no');
+  
+  yesButton.onclick = () => {
+    if (!activePotionEndTime) {
+      usePotion(index);
+    } else {
+      alert('Нельзя использовать несколько зелий одновременно!');
+    }
+    modal.style.display = 'none';
+  };
+  
+  noButton.onclick = () => {
+    modal.style.display = 'none';
+  };
+}
 
-                purchasedUpgrades.forEach(upgrade => {
-                    applyUpgrade(upgrade, false);
-                    const upgradeElement = document.querySelector(`.menu-item[data-upgrade="${upgrade}"]`);
-                    if (upgradeElement && upgrade !== 'increaseCapacity') {
-                        upgradeElement.classList.add('purchased');
-                    }
-                });
+function usePotion(index) {
+  const potion = inventory[index];
+  inventory.splice(index, 1);
+  
+  if (coinMultiplierTimeout) {
+    clearTimeout(coinMultiplierTimeout);
+  }
+  
+  coinMultiplier = potion.multiplier;
+  activePotionEndTime = Date.now() + potion.duration;
+  
+  updatePotionTimer(activePotionEndTime);
+  
+  coinMultiplierTimeout = setTimeout(() => {
+    coinMultiplier = 1;
+    activePotionEndTime = null;
+    updateDisplay();
+    document.getElementById('potion-timer').style.display = 'none';
+  }, potion.duration);
+  
+  renderInventory();
+  updateDisplay();
+}
 
-                updateDisplay();
-            }
-        }
+function updatePotionTimer(endTime) {
+  const timerElement = document.getElementById('potion-timer');
+  timerElement.style.display = 'block';
+  
+  const updateTimer = () => {
+    const now = Date.now();
+    const timeLeft = Math.max(0, endTime - now);
+    
+    if (timeLeft > 0) {
+      const minutes = Math.floor(timeLeft / 60000);
+      const seconds = Math.floor((timeLeft % 60000) / 1000);
+      timerElement.textContent = `Зелье: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+      requestAnimationFrame(updateTimer);
+    } else {
+      timerElement.style.display = 'none';
+      activePotionEndTime = null;
+    }
+  };
+  
+  updateTimer();
+}
 
-        function saveData() {
-            const dataToSave = {
-                clicks,
-                coins,
-                maxClicks,
-                clickValue,
-                rebirthMultiplier,
-                rebirthCost,
-                purchasedUpgrades: Array.from(purchasedUpgrades),
-                capacityCost
-            };
-            localStorage.setItem('clickerData', JSON.stringify(dataToSave));
-        }
-
-        function updateDisplay() {
-            clicksElement.textContent = clicks;
-            maxClicksElement.textContent = maxClicks;
-            coinsElement.textContent = coins;
-            clickProgress.style.width = `${(clicks / maxClicks) * 100}%`;
-
-            const capacityUpgrade = document.querySelector('.menu-item[data-upgrade="increaseCapacity"]');
-            if (capacityUpgrade) {
-                capacityUpgrade.querySelector('.menu-item-cost').textContent = `Стоимость: ${capacityCost} монет`;
-            }
-
-            saveData();
-        }
-
-        function addClicks(amount) {
-            clicks = Math.min(clicks + amount, maxClicks);
-            updateDisplay();
-        }
-
-        function sellClicks() {
-            coins += clicks * rebirthMultiplier;
-            clicks = 0;
-            updateDisplay();
-        }
-
-        clickButton.addEventListener('click', () => {
-            if (!clickCooldown) {
-                clickCooldown = true;
-                addClicks(clickValue);
-                setTimeout(() => {
-                    clickCooldown = false;
-                }, 400);
-            }
-        });
-
-        sellButton.addEventListener('click', sellClicks);
-
-        menuToggle.addEventListener('click', () => {
-            menu.classList.toggle('open');
-        });
-
-        document.querySelectorAll('.menu-item').forEach(item => {
-            item.addEventListener('click', () => {
-                const upgrade = item.dataset.upgrade;
-                const cost = upgrade === 'increaseCapacity' ? capacityCost : parseInt(item.dataset.cost);
-
-                if (coins >= cost) {
-                    coins -= cost;
-                    applyUpgrade(upgrade, true);
-                    updateDisplay();
-                    if (upgrade === 'rebirth') {
-                        item.dataset.cost = rebirthCost;
-                        item.querySelector('.menu-item-cost').textContent = `Стоимость: ${rebirthCost} монет`;
-                    } else if (upgrade !== 'increaseCapacity') {
-                        item.classList.add('purchased');
-                    }
-                    if (upgrade === 'increaseCapacity') {
-                        capacityCost = Math.floor(capacityCost * 1.5);
-                        item.querySelector('.menu-item-cost').textContent = `Стоимость: ${capacityCost} монет`;
-                    }
-                } else {
-                    alert('Недостаточно монет!');
-                }
-            });
-        });
-
-        function applyUpgrade(upgrade, shouldSave = true) {
-            switch (upgrade) {
-                case 'autoClicker':
-                    if (!autoClickerInterval) {
-                        autoClickerInterval = setInterval(() => addClicks(1), 1000);
-                    }
-                    break;
-                case 'tripleClick':
-                    clickValue *= 3;
-                    break;
-                case 'luckyClover':
-                    clickButton.addEventListener('click', () => {
-                        if (Math.random() < 0.05) addClicks(1);
-                    });
-                    break;
-                case 'goldenTouch':
-                    clickButton.addEventListener('click', () => {
-                        if (Math.random() < 0.01) addClicks(10);
-                    });
-                    break;
-                case 'timeDilation':
-                    maxClicks = Math.floor(maxClicks * 1.1);
-                    break;
-                case 'quantumTunnel':
-                    maxClicks = Math.floor(maxClicks * 1.2);
-                    break;
-                case 'rebirth':
-                    performRebirth();
-                    break;
-                case 'increaseCapacity':
-                    maxClicks += 10;
-                    break;
-            }
-            if (shouldSave) {
-                if (upgrade !== 'increaseCapacity') {
-                    purchasedUpgrades.add(upgrade);
-                }
-                saveData();
-            }
-        }
-
-        function performRebirth() {
-            rebirthOverlay.classList.add('active');
-            setTimeout(() => {
-                rebirthMultiplier *= 2;
-                clicks = 0;
-                coins = 0;
-                maxClicks = 10;
-                clickValue = 1;
-                clearInterval(autoClickerInterval);
-                autoClickerInterval = null;
-                rebirthCost *= 3;
-                capacityCost = 100;
-                purchasedUpgrades.clear();
-                document.querySelectorAll('.menu-item').forEach(item => {
-                    item.classList.remove('purchased');
-                });
-                updateDisplay();
-                setTimeout(() => {
-                    rebirthOverlay.classList.remove('active');
-                }, 1000);
-            }, 1000);
-        }
-
-        loadSavedData();
-        setInterval(saveData, 30000);
+function startAutoClicker() {
+  if (!autoClickerInterval) {
+    autoClickerInterval = setInterval(() => {
+      if (clicks < maxClicks) {
+        clicks += clickValue;
         updateDisplay();
-    </script>
-</body>
+      }
+    }, 1000);
+  }
+}
 
-</html>
+function startAutoSell() {
+  if (!autoSellInterval) {
+    autoSellInterval = setInterval(() => {
+      sellClicks();
+    }, 5000);
+  }
+}
+
+loadGame();
+renderUpgrades();
+renderInventory();
+updateDisplay();
+
+// Автосохранение каждые 30 секунд
+setInterval(saveGame, 30000);
+</script>
+</body></html>
