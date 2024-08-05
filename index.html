@@ -1,625 +1,771 @@
-<html><head><base href="https://clickerdevelopment.com/">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Смачный кликер v2</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+<html>
 
-body {
-  font-family: 'Roboto', sans-serif;
-  background-color: #f0f0f0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  margin: 0;
-  overflow: hidden;
-}
+<head>
+  <base href="https://clickerdevelopment.com/">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Смачный кликер v2.1</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
 
-#game-container {
-  background-color: white;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  width: 450px;
-  text-align: center;
-  position: relative;
-  z-index: 1;
-}
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      overflow: hidden;
+    }
 
-h1 {
-  font-size: 24px;
-  margin-bottom: 20px;
-  color: #333;
-}
+    #game-container {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      width: 450px;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
 
-#stats {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 20px;
-  font-size: 14px;
-  color: #666;
-}
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #333;
+    }
 
-#click-button {
-  background-color: #3498db;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 200px;
-  height: 200px;
-  font-size: 24px;
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.1s;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
+    #stats {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: #666;
+    }
 
-#click-button:hover {
-  background-color: #2980b9;
-}
+    #click-button {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 200px;
+      height: 200px;
+      font-size: 24px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.1s;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
 
-#click-button:active {
-  transform: scale(0.95);
-}
+    #click-button:hover {
+      background-color: #2980b9;
+    }
 
-#click-button:disabled {
-  background-color: #bdc3c7;
-  cursor: not-allowed;
-}
+    #click-button:active {
+      transform: scale(0.95);
+    }
 
-#progress-bar {
-  background-color: #ecf0f1;
-  border-radius: 5px;
-  height: 10px;
-  margin: 20px 0;
-  overflow: hidden;
-}
+    #click-button:disabled {
+      background-color: #bdc3c7;
+      cursor: not-allowed;
+    }
 
-#progress {
-  background-color: #2ecc71;
-  border-radius: 5px;
-  height: 100%;
-  width: 0;
-  transition: width 0.3s;
-}
+    #progress-bar {
+      background-color: #ecf0f1;
+      border-radius: 5px;
+      height: 10px;
+      margin: 20px 0;
+      overflow: hidden;
+    }
 
-#sell-button {
-  background-color: #2ecc71;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 10px 20px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.1s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
+    #progress {
+      background-color: #2ecc71;
+      border-radius: 5px;
+      height: 100%;
+      width: 0;
+      transition: width 0.3s;
+    }
 
-#sell-button:hover {
-  background-color: #27ae60;
-}
+    #sell-button {
+      background-color: #2ecc71;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.1s;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
 
-#sell-button:active {
-  transform: scale(0.98);
-}
+    #sell-button:hover {
+      background-color: #27ae60;
+    }
 
-#menu-button {
-  position: fixed;
-  top: 20px;
-  left: 20px;
-  background-color: #34495e;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  font-size: 24px;
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.3s;
-  z-index: 3;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-}
+    #sell-button:active {
+      transform: scale(0.98);
+    }
 
-#menu-button:hover {
-  background-color: #2c3e50;
-}
+    #menu-button {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background-color: #34495e;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      font-size: 24px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.3s;
+      z-index: 3;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
 
-#menu-button.open {
-  transform: rotate(90deg);
-}
+    #menu-button:hover {
+      background-color: #2c3e50;
+    }
 
-#upgrades-menu {
-  position: fixed;
-  top: 0;
-  left: -300px;
-  width: 300px;
-  height: 100vh;
-  background-color: #34495e;
-  color: white;
-  padding: 80px 20px 20px;
-  box-sizing: border-box;
-  overflow-y: auto;
-  transition: left 0.3s ease-in-out;
-  z-index: 2;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-}
+    #menu-button.open {
+      transform: rotate(90deg);
+    }
 
-#upgrades-menu.open {
-  left: 0;
-}
+    #upgrades-menu {
+      position: fixed;
+      top: 0;
+      left: -300px;
+      width: 300px;
+      height: 100vh;
+      background-color: #34495e;
+      color: white;
+      padding: 80px 20px 20px;
+      box-sizing: border-box;
+      overflow-y: auto;
+      transition: left 0.3s ease-in-out;
+      z-index: 2;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    }
 
-.upgrade-section {
-  margin-bottom: 20px;
-}
+    #upgrades-menu.open {
+      left: 0;
+    }
 
-.upgrade-section h3 {
-  font-size: 18px;
-  margin-bottom: 10px;
-  color: #ecf0f1;
-}
+    .upgrade-section {
+      margin-bottom: 20px;
+    }
 
-.upgrade-item {
-  background-color: #2c3e50;
-  border-radius: 5px;
-  padding: 15px;
-  margin-bottom: 10px;
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.1s;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+    .upgrade-section h3 {
+      font-size: 18px;
+      margin-bottom: 10px;
+      color: #ecf0f1;
+    }
 
-.upgrade-item:hover {
-  background-color: #3c5269;
-}
+    .upgrade-item {
+      background-color: #2c3e50;
+      border-radius: 5px;
+      padding: 15px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.1s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-.upgrade-item:active {
-  transform: scale(0.98);
-}
+    .upgrade-item:hover {
+      background-color: #3c5269;
+    }
 
-.upgrade-info {
-  text-align: left;
-}
+    .upgrade-item:active {
+      transform: scale(0.98);
+    }
 
-.upgrade-name {
-  font-weight: bold;
-  margin-bottom: 5px;
-}
+    .upgrade-info {
+      text-align: left;
+    }
 
-.upgrade-cost {
-  font-size: 12px;
-  color: #bdc3c7;
-}
+    .upgrade-name {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
 
-.upgrade-effect {
-  font-size: 14px;
-  color: #95a5a6;
-  margin-top: 5px;
-}
+    .upgrade-cost {
+      font-size: 12px;
+      color: #bdc3c7;
+    }
 
-.upgrade-icon {
-  font-size: 24px;
-  margin-left: 10px;
-}
+    .upgrade-effect {
+      font-size: 14px;
+      color: #95a5a6;
+      margin-top: 5px;
+    }
 
-.upgrade-item.purchased {
-  opacity: 0.5;
-  cursor: default;
-}
+    .upgrade-icon {
+      font-size: 24px;
+      margin-left: 10px;
+    }
 
-#inventory-button {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background-color: #e67e22;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  font-size: 24px;
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.3s;
-  z-index: 3;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-}
+    .upgrade-item.purchased {
+      opacity: 0.5;
+      cursor: default;
+    }
 
-#inventory-button:hover {
-  background-color: #d35400;
-}
+    #inventory-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #e67e22;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      font-size: 24px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.3s;
+      z-index: 3;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
 
-#inventory {
-  position: fixed;
-  bottom: -300px;
-  right: 20px;
-  width: 300px;
-  height: 300px;
-  background-color: #34495e;
-  color: white;
-  padding: 20px;
-  box-sizing: border-box;
-  overflow-y: auto;
-  transition: bottom 0.3s ease-in-out;
-  z-index: 2;
-  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-  border-radius: 10px 10px 0 0;
-}
+    #inventory-button:hover {
+      background-color: #d35400;
+    }
 
-#inventory.open {
-  bottom: 0;
-}
+    #inventory {
+      position: fixed;
+      bottom: -300px;
+      right: 20px;
+      width: 300px;
+      height: 300px;
+      background-color: #34495e;
+      color: white;
+      padding: 20px;
+      box-sizing: border-box;
+      overflow-y: auto;
+      transition: bottom 0.3s ease-in-out;
+      z-index: 2;
+      box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+      border-radius: 10px 10px 0 0;
+    }
 
-.inventory-item {
-  background-color: #2c3e50;
-  border-radius: 5px;
-  padding: 10px;
-  margin-bottom: 10px;
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.1s;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+    #inventory.open {
+      bottom: 0;
+    }
 
-.inventory-item:hover {
-  background-color: #3c5269;
-}
+    .inventory-item {
+      background-color: #2c3e50;
+      border-radius: 5px;
+      padding: 10px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.1s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-.inventory-item:active {
-  transform: scale(0.98);
-}
+    .inventory-item:hover {
+      background-color: #3c5269;
+    }
 
-#modal {
-  display: none;
-  position: fixed;
-  z-index: 4;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.4);
-}
+    .inventory-item:active {
+      transform: scale(0.98);
+    }
 
-.modal-content {
-  background-color: #fefefe;
-  margin: 15% auto;
-  padding: 20px;
-  border: 1px solid #888;
-  width: 300px;
-  text-align: center;
-  border-radius: 10px;
-}
+    #modal {
+      display: none;
+      position: fixed;
+      z-index: 4;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.4);
+    }
 
-.modal-buttons {
-  display: flex;
-  justify-content: space-around;
-  margin-top: 20px;
-}
+    .modal-content {
+      background-color: #fefefe;
+      margin: 15% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 300px;
+      text-align: center;
+      border-radius: 10px;
+    }
 
-.modal-button {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
+    .modal-buttons {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 20px;
+    }
 
-.modal-button.yes {
-  background-color: #2ecc71;
-  color: white;
-}
+    .modal-button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
 
-.modal-button.no {
-  background-color: #e74c3c;
-  color: white;
-}
+    .modal-button.yes {
+      background-color: #2ecc71;
+      color: white;
+    }
 
-.modal-button:hover {
-  opacity: 0.8;
-}
+    .modal-button.no {
+      background-color: #e74c3c;
+      color: white;
+    }
 
-#potion-timer {
-  position: fixed;
-  bottom: 80px;
-  right: 20px;
-  background-color: rgba(52, 73, 94, 0.8);
-  color: white;
-  padding: 10px;
-  border-radius: 5px;
-  font-size: 14px;
-  z-index: 3;
-  display: none;
-}
+    .modal-button:hover {
+      opacity: 0.8;
+    }
 
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
-}
+    #potion-timer {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      background-color: rgba(52, 73, 94, 0.8);
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 14px;
+      z-index: 3;
+      display: none;
+    }
 
-.pulse {
-  animation: pulse 0.5s;
-}
+    .pet-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #3c5269;
+      border-radius: 5px;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
 
-@keyframes coinFall {
-  0% { transform: translateY(-50px); opacity: 1; }
-  100% { transform: translateY(50px); opacity: 0; }
-}
+    .pet-item img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
 
-.falling-coin {
-  position: absolute;
-  font-size: 24px;
-  color: gold;
-  pointer-events: none;
-  animation: coinFall 1s forwards;
-}
+    .pet-info {
+      flex-grow: 1;
+    }
 
-</style>
+    .pet-name {
+      font-weight: bold;
+    }
+
+    .pet-boost {
+      font-size: 12px;
+      color: #95a5a6;
+    }
+
+    .pet-toggle {
+      background-color: #2ecc71;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 5px 10px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .pet-toggle:hover {
+      background-color: #27ae60;
+    }
+
+    .pet-toggle.active {
+      background-color: #e74c3c;
+    }
+
+    .pet-toggle.active:hover {
+      background-color: #c0392b;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.05);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .pulse {
+      animation: pulse 0.5s;
+    }
+
+    @keyframes coinFall {
+      0% {
+        transform: translateY(-50px);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateY(50px);
+        opacity: 0;
+      }
+    }
+
+    .falling-coin {
+      position: absolute;
+      font-size: 24px;
+      color: gold;
+      pointer-events: none;
+      animation: coinFall 1s forwards;
+    }
+  </style>
 </head>
+
 <body>
-<div id="game-container">
-  <h1>Смачный Кликер v2</h1>
-  <div id="stats">
-    <div>Клики: <span id="clicks">0 / 50</span></div>
-    <div>Монеты: <span id="coins">0</span></div>
+  <div id="game-container">
+    <h1>Смачный кликер v2.1</h1>
+    <div id="stats">
+      <div>Клики: <span id="clicks">0 / 50</span></div>
+      <div>Монеты: <span id="coins">0</span></div>
+    </div>
+    <button id="click-button">Клик!</button>
+    <div id="progress-bar">
+      <div id="progress"></div>
+    </div>
+    <button id="sell-button">Продать клики</button>
   </div>
-  <button id="click-button">Клик!</button>
-  <div id="progress-bar">
-    <div id="progress"></div>
+
+  <button id="menu-button">☰</button>
+  <button id="inventory-button">🎒</button>
+
+  <div id="upgrades-menu">
+    <h2>Улучшения</h2>
+    <div id="upgrades-list"></div>
   </div>
-  <button id="sell-button">Продать клики</button>
-</div>
 
-<button id="menu-button">☰</button>
-<button id="inventory-button">🎒</button>
+  <div id="inventory">
+    <h2>Инвентарь</h2>
+    <div id="inventory-list"></div>
+  </div>
 
-<div id="upgrades-menu">
-  <h2>Улучшения</h2>
-  <div id="upgrades-list"></div>
-</div>
-
-<div id="inventory">
-  <h2>Инвентарь</h2>
-  <div id="inventory-list"></div>
-</div>
-
-<div id="modal">
-  <div class="modal-content">
-    <h2>Вы уверены что хотите использовать зелье?</h2>
-    <p id="modal-description"></p>
-    <div class="modal-buttons">
-      <button class="modal-button yes">Да</button>
-      <button class="modal-button no">Нет</button>
+  <div id="modal">
+    <div class="modal-content">
+      <h2>Вы уверены что хотите использовать зелье?</h2>
+      <p id="modal-description"></p>
+      <div class="modal-buttons">
+        <button class="modal-button yes">Да</button>
+        <button class="modal-button no">Нет</button>
+      </div>
     </div>
   </div>
-</div>
 
-<div id="potion-timer"></div>
+  <div id="potion-timer"></div>
 
-<script>
-let clicks = 0;
-let coins = 0;
-let maxClicks = 50;
-let clickValue = 1;
-let autoClickerInterval = null;
-let autoSellInterval = null;
-let coinMultiplier = 1;
-let coinMultiplierTimeout = null;
-let activePotionEndTime = null;
-let clickDelay = 300; // 0.3 seconds in milliseconds
-let canClick = true;
+  <script>
+    let clicks = 0;
+    let coins = 0;
+    let maxClicks = 50;
+    let clickValue = 1;
+    let autoClickerInterval = null;
+    let autoSellInterval = null;
+    let coinMultiplier = 1;
+    let coinMultiplierTimeout = null;
+    let activePotionEndTime = null;
+    let clickDelay = 300; // 0.3 seconds in milliseconds
+    let canClick = true;
 
-const upgrades = {
-  clickers: [
-    { name: "Двойной клик", baseCost: 50, cost: 50, effect: "Удваивает стоимость клика", purchased: 0, maxPurchases: 3, oneTime: false, 
-      action: () => { clickValue *= 2; }, icon: "🖱️" },
-    { name: "Быстрые пальцы", baseCost: 150, cost: 150, effect: "Увеличивает скорость клика на 10%", purchased: 0, maxPurchases: 3, oneTime: false,
-      action: () => { clickValue *= 1.1; }, icon: "👆" },
-    { name: "Квантовый клик", baseCost: 25000, cost: 25000, effect: "Случайный шанс мгновенно заполнить счетчик кликов", purchased: false, oneTime: true, icon: "⚛️" },
-  ],
-  automation: [
-    { name: "Автокликер", baseCost: 200, cost: 200, effect: "Автоматически кликает каждую секунду", purchased: false, oneTime: true, 
-      action: () => { 
-        if (!autoClickerInterval) {
-          autoClickerInterval = setInterval(() => {
-            if (clicks < maxClicks) {
-              clicks += clickValue;
-              updateDisplay();
+    const pets = [
+      { name: "Смачный котик", boost: 2, rarity: 0.6, icon: "🐱" },
+      { name: "Смачная собачка", boost: 2.5, rarity: 0.3, icon: "🐶" },
+      { name: "Сигма дракончик", boost: 3, rarity: 0.1, icon: "🐉" }
+    ];
+
+    const activePets = [];
+
+    const upgrades = {
+      clickers: [
+        {
+          name: "Двойной клик", baseCost: 50, cost: 50, effect: "Удваивает стоимость клика", purchased: false, oneTime: true,
+          action: () => { clickValue *= 2; }, icon: "🖱️"
+        },
+        {
+          name: "Быстрые пальцы", baseCost: 150, cost: 150, effect: "Увеличивает скорость клика на 10%", purchased: 0, maxPurchases: 3, oneTime: false,
+          action: () => { clickValue *= 1.1; }, icon: "👆"
+        },
+        { name: "Квантовый клик", baseCost: 25000, cost: 25000, effect: "Случайный шанс мгновенно заполнить счетчик кликов", purchased: false, oneTime: true, icon: "⚛️" },
+      ],
+      automation: [
+        {
+          name: "Автокликер", baseCost: 200, cost: 200, effect: "Автоматически кликает каждую секунду", purchased: false, oneTime: true,
+          action: () => {
+            if (!autoClickerInterval) {
+              autoClickerInterval = setInterval(() => {
+                if (clicks < maxClicks) {
+                  clicks += clickValue;
+                  updateDisplay();
+                }
+              }, 1000);
             }
-          }, 1000);
-        }
-      }, icon: "🤖" },
-    { name: "Турбо-продажа", baseCost: 1200, cost: 1200, effect: "Автоматически продает клики каждые 5 секунд", purchased: false, oneTime: true,
-      action: () => {
-        if (!autoSellInterval) {
-          autoSellInterval = setInterval(() => {
-            sellClicks();
-          }, 5000);
-        }
-      }, icon: "🚀" },
-  ],
-  storage: [
-    { name: "Супер хранилище", baseCost: 1000, cost: 1000, effect: "Удваивает максимальное количество кликов", purchased: 0, maxPurchases: 3, oneTime: false,
-      action: () => { maxClicks *= 2; }, icon: "🏦" },
-  ],
-  economy: [
-    { name: "Золотой клик", baseCost: 500, cost: 500, effect: "10% шанс получить двойные монеты при продаже", purchased: false, oneTime: true, icon: "🌟" },
-    { name: "Магнит для монет", baseCost: 300, cost: 300, effect: "5% бонус к заработку монет", purchased: 0, maxPurchases: 3, oneTime: false, icon: "🧲" },
-    { name: "Экономический гений", baseCost: 7500, cost: 7500, effect: "Увеличивает стоимость всех кликов на 25%", purchased: 0, maxPurchases: 3, oneTime: false, icon: "🧠" },
-    { name: "Мультипликатор прибыли", baseCost: 15000, cost: 15000, effect: "Удваивает доход от всех источников", purchased: 0, maxPurchases: 3, oneTime: false, icon: "💰" },
-  ],
-  special: [
-    { name: "Золотая жила", baseCost: 2000, cost: 2000, effect: "Шанс найти золотой самородок при клике (x10 монет)", purchased: false, oneTime: true, icon: "💎" },
-    { name: "Космическая экспансия", baseCost: 100000, cost: 100000, effect: "Открывает новые галактические возможности", purchased: false, oneTime: true, icon: "🌌" },
-  ],
-  backpack: [
-    { name: "Расширение рюкзака", baseCost: 50, cost: 50, effect: "Увеличивает вместимость рюкзака на 10 кликов", purchased: 0, oneTime: false, 
-      action: () => { maxClicks += 10; }, icon: "🎒" },
-  ],
-  potions: [
-    { name: "Коробка с зельем", baseCost: 3000, cost: 3000, effect: "Случайный шанс получить зелье умножения монет", purchased: 0, oneTime: false, 
-      action: () => { 
-        const random = Math.random();
-        if (random < 0.7) {
-          addToInventory({ name: "Обычное зелье", multiplier: 1.5, duration: 180000, icon: "🧪" });
-        } else if (random < 0.95) {
-          addToInventory({ name: "Среднее зелье", multiplier: 2, duration: 180000, icon: "🧪" });
-        } else {
-          addToInventory({ name: "Смачное зелье", multiplier: 2.5, duration: 180000, icon: "🧪" });
-        }
-      }, icon: "📦" },
-  ],
-};
+          }, icon: "🤖"
+        },
+        {
+          name: "Турбо-продажа", baseCost: 1200, cost: 1200, effect: "Автоматически продает клики каждые 5 секунд", purchased: false, oneTime: true,
+          action: () => {
+            if (!autoSellInterval) {
+              autoSellInterval = setInterval(() => {
+                sellClicks();
+              }, 5000);
+            }
+          }, icon: "🚀"
+        },
+      ],
+      storage: [
+        {
+          name: "Супер хранилище", baseCost: 1000, cost: 1000, effect: "Удваивает максимальное количество кликов", purchased: 0, maxPurchases: 3, oneTime: false,
+          action: () => { maxClicks *= 2; }, icon: "🏦"
+        },
+      ],
+      economy: [
+        { name: "Золотой клик", baseCost: 500, cost: 500, effect: "10% шанс получить двойные монеты при продаже", purchased: false, oneTime: true, icon: "🌟" },
+        { name: "Магнит для монет", baseCost: 300, cost: 300, effect: "5% бонус к заработку монет", purchased: 0, maxPurchases: 3, oneTime: false, icon: "🧲" },
+        { name: "Экономический гений", baseCost: 7500, cost: 7500, effect: "Увеличивает стоимость всех кликов на 25%", purchased: 0, maxPurchases: 3, oneTime: false, icon: "🧠" },
+        { name: "Мультипликатор прибыли", baseCost: 15000, cost: 15000, effect: "Удваивает доход от всех источников", purchased: 0, maxPurchases: 3, oneTime: false, icon: "💰" },
+      ],
+      special: [
+        { name: "Золотая жила", baseCost: 2000, cost: 2000, effect: "Шанс найти золотой самородок при клике (x10 монет)", purchased: false, oneTime: true, icon: "💎" },
+        { name: "Космическая экспансия", baseCost: 100000, cost: 100000, effect: "Открывает новые галактические возможности", purchased: false, oneTime: true, icon: "🌌" },
+        { name: "Временной парадокс", baseCost: 50000, cost: 50000, effect: "5% шанс удвоить время действия зелья", purchased: false, oneTime: true, icon: "⏳" },
+      ],
+      backpack: [
+        {
+          name: "Расширение рюкзака", baseCost: 50, cost: 50, effect: "Увеличивает вместимость рюкзака на 10 кликов", purchased: 0, oneTime: false,
+          action: () => { maxClicks += 10; }, icon: "🎒"
+        },
+      ],
+      potions: [
+        {
+          name: "Коробка с зельем", baseCost: 3000, cost: 3000, effect: "Случайный шанс получить зелье умножения монет", purchased: 0, oneTime: false,
+          action: () => {
+            const random = Math.random();
+            if (random < 0.7) {
+              addToInventory({ name: "Зелье x1.5", multiplier: 1.5, duration: 180000, icon: "🧪" });
+            } else if (random < 0.95) {
+              addToInventory({ name: "Зелье x2", multiplier: 2, duration: 180000, icon: "🧪" });
+            } else {
+              addToInventory({ name: "Зелье x2.5", multiplier: 2.5, duration: 180000, icon: "🧪" });
+            }
+          }, icon: "📦"
+        },
+      ],
+      pets: [
+        {
+          name: "Коробка с питомцем", baseCost: 5000, cost: 5000, effect: "Случайный шанс получить питомца с бустом", purchased: 0, oneTime: false,
+          action: () => {
+            const random = Math.random();
+            let selectedPet;
+            let cumulativeProbability = 0;
+            for (const pet of pets) {
+              cumulativeProbability += pet.rarity;
+              if (random <= cumulativeProbability) {
+                selectedPet = pet;
+                break;
+              }
+            }
+            addPetToInventory(selectedPet);
+          }, icon: "📦"
+        },
+      ],
+    };
 
-const inventory = [];
+    const inventory = [];
 
-function loadGame() {
-  const savedGame = localStorage.getItem('clickerGame');
-  if (savedGame) {
-    const gameData = JSON.parse(savedGame);
-    clicks = gameData.clicks;
-    coins = gameData.coins;
-    maxClicks = gameData.maxClicks;
-    clickValue = gameData.clickValue;
-    
-    for (const section in gameData.upgrades) {
-      for (let i = 0; i < gameData.upgrades[section].length; i++) {
-        upgrades[section][i].purchased = gameData.upgrades[section][i].purchased;
-        if (section !== 'potions') {
-          upgrades[section][i].cost = gameData.upgrades[section][i].cost;
+    function loadGame() {
+      const savedGame = localStorage.getItem('clickerGame');
+      if (savedGame) {
+        const gameData = JSON.parse(savedGame);
+        clicks = gameData.clicks;
+        coins = gameData.coins;
+        maxClicks = gameData.maxClicks;
+        clickValue = gameData.clickValue;
+
+        for (const section in gameData.upgrades) {
+          for (let i = 0; i < gameData.upgrades[section].length; i++) {
+            if (upgrades[section][i]) {
+              upgrades[section][i].purchased = gameData.upgrades[section][i].purchased;
+              if (section !== 'potions' && section !== 'pets') {
+                upgrades[section][i].cost = gameData.upgrades[section][i].cost;
+              }
+            }
+          }
+        }
+
+        if (gameData.inventory) {
+          inventory.push(...gameData.inventory);
+        }
+
+        if (gameData.activePets) {
+          activePets.push(...gameData.activePets);
+        }
+
+        if (upgrades.automation[0].purchased) {
+          startAutoClicker();
+        }
+        if (upgrades.automation[1].purchased) {
+          startAutoSell();
+        }
+
+        if (gameData.activePotionEndTime) {
+          activePotionEndTime = gameData.activePotionEndTime;
+          const timeLeft = activePotionEndTime - Date.now();
+          if (timeLeft > 0) {
+            coinMultiplier = gameData.coinMultiplier;
+            updatePotionTimer(activePotionEndTime);
+            setTimeout(() => {
+              coinMultiplier = 1;
+              activePotionEndTime = null;
+              updateDisplay();
+              document.getElementById('potion-timer').style.display = 'none';
+            }, timeLeft);
+          }
         }
       }
+      updateDisplay();
+      renderUpgrades();
+      renderInventory();
     }
 
-    if (gameData.inventory) {
-      inventory.push(...gameData.inventory);
+    function saveGame() {
+      const gameData = {
+        clicks,
+        coins,
+        maxClicks,
+        clickValue,
+        upgrades,
+        inventory,
+        activePets,
+        activePotionEndTime,
+        coinMultiplier
+      };
+      localStorage.setItem('clickerGame', JSON.stringify(gameData));
     }
 
-    if (upgrades.automation[0].purchased) {
-      startAutoClicker();
-    }
-    if (upgrades.automation[1].purchased) {
-      startAutoSell();
+    function updateDisplay() {
+      document.getElementById('clicks').textContent = `${Math.floor(clicks)} / ${maxClicks}`;
+      document.getElementById('coins').textContent = Math.floor(coins);
+      const progress = (clicks / maxClicks) * 100;
+      document.getElementById('progress').style.width = `${progress}%`;
+      saveGame();
     }
 
-    if (gameData.activePotionEndTime) {
-      activePotionEndTime = gameData.activePotionEndTime;
-      const timeLeft = activePotionEndTime - Date.now();
-      if (timeLeft > 0) {
-        coinMultiplier = gameData.coinMultiplier;
-        updatePotionTimer(activePotionEndTime);
+    document.getElementById('click-button').addEventListener('click', () => {
+      if (canClick && clicks < maxClicks) {
+        clicks += clickValue;
+        document.getElementById('click-button').classList.add('pulse');
         setTimeout(() => {
-          coinMultiplier = 1;
-          activePotionEndTime = null;
+          document.getElementById('click-button').classList.remove('pulse');
+        }, 500);
+        updateDisplay();
+
+        // Проверка на "Квантовый клик"
+        if (upgrades.clickers[2].purchased && Math.random() < 0.01) {
+          clicks = maxClicks;
           updateDisplay();
-          document.getElementById('potion-timer').style.display = 'none';
-        }, timeLeft);
+        }
+
+        // Проверка на "Золотую жилу"
+        if (upgrades.special[0].purchased && Math.random() < 0.05) {
+          coins += clickValue * 10;
+          updateDisplay();
+          animateCoins(clickValue * 10);
+        }
+
+        canClick = false;
+        document.getElementById('click-button').disabled = true;
+        setTimeout(() => {
+          canClick = true;
+          document.getElementById('click-button').disabled = false;
+        }, clickDelay);
+      }
+    });
+
+    function sellClicks() {
+      let coinsEarned = clicks * coinMultiplier;
+      if (upgrades.economy[0].purchased && Math.random() < 0.1) {
+        coinsEarned *= 2;
+      }
+      if (upgrades.economy[1].purchased) {
+        coinsEarned *= Math.pow(1.05, upgrades.economy[1].purchased);
+      }
+      if (upgrades.economy[2].purchased) {
+        coinsEarned *= Math.pow(1.25, upgrades.economy[2].purchased);
+      }
+      if (upgrades.economy[3].purchased) {
+        coinsEarned *= Math.pow(2, upgrades.economy[3].purchased);
+      }
+
+      // Применяем бусты от активных питомцев
+      for (const pet of activePets) {
+        coinsEarned *= pet.boost;
+      }
+
+      coins += coinsEarned;
+      clicks = 0;
+      updateDisplay();
+      animateCoins(coinsEarned);
+    }
+
+    document.getElementById('sell-button').addEventListener('click', sellClicks);
+
+    function animateCoins(amount) {
+      for (let i = 0; i < 5; i++) {
+        const coin = document.createElement('div');
+        coin.textContent = '🪙';
+        coin.className = 'falling-coin';
+        coin.style.left = `${Math.random() * 450}px`;
+        document.body.appendChild(coin);
+        setTimeout(() => {
+          coin.remove();
+        }, 1000);
       }
     }
-  }
-  updateDisplay();
-  renderUpgrades();
-  renderInventory();
-}
 
-function saveGame() {
-  const gameData = {
-    clicks,
-    coins,
-    maxClicks,
-    clickValue,
-    upgrades,
-    inventory,
-    activePotionEndTime,
-    coinMultiplier
-  };
-  localStorage.setItem('clickerGame', JSON.stringify(gameData));
-}
+    const menuButton = document.getElementById('menu-button');
+    const upgradesMenu = document.getElementById('upgrades-menu');
 
-function updateDisplay() {
-  document.getElementById('clicks').textContent = `${Math.floor(clicks)} / ${maxClicks}`;
-  document.getElementById('coins').textContent = Math.floor(coins);
-  const progress = (clicks / maxClicks) * 100;
-  document.getElementById('progress').style.width = `${progress}%`;
-  saveGame();
-}
+    menuButton.addEventListener('click', () => {
+      menuButton.classList.toggle('open');
+      upgradesMenu.classList.toggle('open');
+    });
 
-document.getElementById('click-button').addEventListener('click', () => {
-  if (canClick && clicks < maxClicks) {
-    clicks += clickValue;
-    document.getElementById('click-button').classList.add('pulse');
-    setTimeout(() => {
-      document.getElementById('click-button').classList.remove('pulse');
-    }, 500);
-    updateDisplay();
-    
-    canClick = false;
-    document.getElementById('click-button').disabled = true;
-    setTimeout(() => {
-      canClick = true;
-      document.getElementById('click-button').disabled = false;
-    }, clickDelay);
-  }
-});
+    const inventoryButton = document.getElementById('inventory-button');
+    const inventoryMenu = document.getElementById('inventory');
 
-function sellClicks() {
-  let coinsEarned = clicks * coinMultiplier;
-  if (upgrades.economy[0].purchased && Math.random() < 0.1) {
-    coinsEarned *= 2;
-  }
-  coins += coinsEarned;
-  clicks = 0;
-  updateDisplay();
-  animateCoins(coinsEarned);
-}
+    inventoryButton.addEventListener('click', () => {
+      inventoryMenu.classList.toggle('open');
+    });
 
-document.getElementById('sell-button').addEventListener('click', sellClicks);
+    function renderUpgrades() {
+      const upgradesList = document.getElementById('upgrades-list');
+      upgradesList.innerHTML = '';
 
-function animateCoins(amount) {
-  for (let i = 0; i < 5; i++) {
-    const coin = document.createElement('div');
-    coin.textContent = '🪙';
-    coin.className = 'falling-coin';
-    coin.style.left = `${Math.random() * 450}px`;
-    document.body.appendChild(coin);
-    setTimeout(() => {
-      coin.remove();
-    }, 1000);
-  }
-}
+      for (const [section, sectionUpgrades] of Object.entries(upgrades)) {
+        const sectionElement = document.createElement('div');
+        sectionElement.className = 'upgrade-section';
+        sectionElement.innerHTML = `<h3>${section.charAt(0).toUpperCase() + section.slice(1)}</h3>`;
 
-const menuButton = document.getElementById('menu-button');
-const upgradesMenu = document.getElementById('upgrades-menu');
-
-menuButton.addEventListener('click', () => {
-  menuButton.classList.toggle('open');
-  upgradesMenu.classList.toggle('open');
-});
-
-const inventoryButton = document.getElementById('inventory-button');
-const inventoryMenu = document.getElementById('inventory');
-
-inventoryButton.addEventListener('click', () => {
-  inventoryMenu.classList.toggle('open');
-});
-
-function renderUpgrades() {
-  const upgradesList = document.getElementById('upgrades-list');
-  upgradesList.innerHTML = '';
-  
-  for (const [section, sectionUpgrades] of Object.entries(upgrades)) {
-    const sectionElement = document.createElement('div');
-    sectionElement.className = 'upgrade-section';
-    sectionElement.innerHTML = `<h3>${section.charAt(0).toUpperCase() + section.slice(1)}</h3>`;
-    
-    sectionUpgrades.forEach((upgrade, index) => {
-      const upgradeElement = document.createElement('div');
-      upgradeElement.className = 'upgrade-item';
-      if ((upgrade.purchased && upgrade.oneTime) || (upgrade.maxPurchases && upgrade.purchased >= upgrade.maxPurchases)) {
-        upgradeElement.classList.add('purchased');
-      }
-      upgradeElement.innerHTML = `
+        sectionUpgrades.forEach((upgrade, index) => {
+          const upgradeElement = document.createElement('div');
+          upgradeElement.className = 'upgrade-item';
+          if ((upgrade.purchased && upgrade.oneTime) || (upgrade.maxPurchases && upgrade.purchased >= upgrade.maxPurchases)) {
+            upgradeElement.classList.add('purchased');
+          }
+          upgradeElement.innerHTML = `
         <div class="upgrade-info">
           <div class="upgrade-name">${upgrade.name}${typeof upgrade.purchased === 'number' ? ` (${upgrade.purchased}${upgrade.maxPurchases ? `/${upgrade.maxPurchases}` : ''})` : ''}</div>
           <div class="upgrade-cost">Стоимость: ${upgrade.cost} монет</div>
@@ -627,159 +773,201 @@ function renderUpgrades() {
         </div>
         <div class="upgrade-icon">${upgrade.icon}</div>
       `;
-      if (!upgrade.purchased || (typeof upgrade.purchased === 'number' && upgrade.purchased < (upgrade.maxPurchases || Infinity))) {
-        upgradeElement.addEventListener('click', () => purchaseUpgrade(section, index));
+          if (!upgrade.purchased || (typeof upgrade.purchased === 'number' && upgrade.purchased < (upgrade.maxPurchases || Infinity))) {
+            upgradeElement.addEventListener('click', () => purchaseUpgrade(section, index));
+          }
+          sectionElement.appendChild(upgradeElement);
+        });
+
+        upgradesList.appendChild(sectionElement);
       }
-      sectionElement.appendChild(upgradeElement);
-    });
-    
-    upgradesList.appendChild(sectionElement);
-  }
-}
-
-function purchaseUpgrade(section, index) {
-  const upgrade = upgrades[section][index];
-  if (coins >= upgrade.cost) {
-    coins -= upgrade.cost;
-    if (typeof upgrade.purchased === 'number') {
-      upgrade.purchased++;
-      if (section !== 'potions') {
-        upgrade.cost = Math.floor(upgrade.baseCost * Math.pow(1.15, upgrade.purchased));
-      }
-    } else {
-      upgrade.purchased = true;
     }
-    if (upgrade.action) {
-      upgrade.action();
-    }
-    updateDisplay();
-    renderUpgrades();
-    renderInventory();
-  }
-}
 
-function renderInventory() {
-  const inventoryList = document.getElementById('inventory-list');
-  inventoryList.innerHTML = '';
-  
-  inventory.forEach((item, index) => {
-    const itemElement = document.createElement('div');
-    itemElement.className = 'inventory-item';
-    itemElement.innerHTML = `
-      <div class="item-info">
-        <div class="item-name">${item.name}</div>
-        <div class="item-effect">x${item.multiplier} на ${item.duration / 60000} минут</div>
-      </div>
-      <div class="item-icon">${item.icon}</div>
-    `;
-    itemElement.addEventListener('click', () => showPotionModal(index));
-    inventoryList.appendChild(itemElement);
-  });
-}
-
-function addToInventory(item) {
-  inventory.push(item);
-  renderInventory();
-  saveGame();
-}
-
-function showPotionModal(index) {
-  const modal = document.getElementById('modal');
-  const description = document.getElementById('modal-description');
-  const item = inventory[index];
-  
-  description.textContent = `${item.name} (x${item.multiplier} на ${item.duration / 60000} минут)`;
-  
-  modal.style.display = 'block';
-  
-  const yesButton = modal.querySelector('.yes');
-  const noButton = modal.querySelector('.no');
-  
-  yesButton.onclick = () => {
-    if (!activePotionEndTime) {
-      usePotion(index);
-    } else {
-      alert('Нельзя использовать несколько зелий одновременно!');
-    }
-    modal.style.display = 'none';
-  };
-  
-  noButton.onclick = () => {
-    modal.style.display = 'none';
-  };
-}
-
-function usePotion(index) {
-  const potion = inventory[index];
-  inventory.splice(index, 1);
-  
-  if (coinMultiplierTimeout) {
-    clearTimeout(coinMultiplierTimeout);
-  }
-  
-  coinMultiplier = potion.multiplier;
-  activePotionEndTime = Date.now() + potion.duration;
-  
-  updatePotionTimer(activePotionEndTime);
-  
-  coinMultiplierTimeout = setTimeout(() => {
-    coinMultiplier = 1;
-    activePotionEndTime = null;
-    updateDisplay();
-    document.getElementById('potion-timer').style.display = 'none';
-  }, potion.duration);
-  
-  renderInventory();
-  updateDisplay();
-}
-
-function updatePotionTimer(endTime) {
-  const timerElement = document.getElementById('potion-timer');
-  timerElement.style.display = 'block';
-  
-  const updateTimer = () => {
-    const now = Date.now();
-    const timeLeft = Math.max(0, endTime - now);
-    
-    if (timeLeft > 0) {
-      const minutes = Math.floor(timeLeft / 60000);
-      const seconds = Math.floor((timeLeft % 60000) / 1000);
-      timerElement.textContent = `Зелье: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-      requestAnimationFrame(updateTimer);
-    } else {
-      timerElement.style.display = 'none';
-      activePotionEndTime = null;
-    }
-  };
-  
-  updateTimer();
-}
-
-function startAutoClicker() {
-  if (!autoClickerInterval) {
-    autoClickerInterval = setInterval(() => {
-      if (clicks < maxClicks) {
-        clicks += clickValue;
+    function purchaseUpgrade(section, index) {
+      const upgrade = upgrades[section][index];
+      if (coins >= upgrade.cost) {
+        coins -= upgrade.cost;
+        if (typeof upgrade.purchased === 'number') {
+          upgrade.purchased++;
+          if (section !== 'potions' && section !== 'pets') {
+            upgrade.cost = Math.floor(upgrade.baseCost * Math.pow(1.15, upgrade.purchased));
+          }
+        } else {
+          upgrade.purchased = true;
+        }
+        if (upgrade.action) {
+          upgrade.action();
+        }
         updateDisplay();
+        renderUpgrades();
+        renderInventory();
       }
-    }, 1000);
-  }
-}
+    }
 
-function startAutoSell() {
-  if (!autoSellInterval) {
-    autoSellInterval = setInterval(() => {
-      sellClicks();
-    }, 5000);
-  }
-}
+    function renderInventory() {
+      const inventoryList = document.getElementById('inventory-list');
+      inventoryList.innerHTML = '';
 
-loadGame();
-renderUpgrades();
-renderInventory();
-updateDisplay();
+      inventory.forEach((item, index) => {
+        if (item.type === 'potion') {
+          const itemElement = document.createElement('div');
+          itemElement.className = 'inventory-item';
+          itemElement.innerHTML = `
+        <div class="item-info">
+          <div class="item-name">${item.name}</div>
+          <div class="item-effect">x${item.multiplier} на ${item.duration / 60000} минут</div>
+        </div>
+        <div class="item-icon">${item.icon}</div>
+      `;
+          itemElement.addEventListener('click', () => showPotionModal(index));
+          inventoryList.appendChild(itemElement);
+        } else if (item.type === 'pet') {
+          const petElement = document.createElement('div');
+          petElement.className = 'pet-item';
+          petElement.innerHTML = `
+        <div class="pet-info">
+          <div class="pet-name">${item.name}</div>
+          <div class="pet-boost">Буст: x${item.boost}</div>
+        </div>
+        <div class="pet-icon">${item.icon}</div>
+        <button class="pet-toggle">${activePets.includes(item) ? 'Снять' : 'Надеть'}</button>
+      `;
+          const toggleButton = petElement.querySelector('.pet-toggle');
+          toggleButton.addEventListener('click', () => togglePet(item, toggleButton));
+          inventoryList.appendChild(petElement);
+        }
+      });
+    }
 
-// Автосохранение каждые 30 секунд
-setInterval(saveGame, 30000);
-</script>
-</body></html>
+    function addToInventory(item) {
+      if (item.multiplier) {
+        item.type = 'potion';
+      }
+      inventory.push(item);
+      renderInventory();
+      saveGame();
+    }
+
+    function addPetToInventory(pet) {
+      const newPet = { ...pet, type: 'pet' };
+      inventory.push(newPet);
+      renderInventory();
+      saveGame();
+    }
+
+    function togglePet(pet, button) {
+      const petIndex = activePets.findIndex(p => p.name === pet.name);
+      if (petIndex === -1) {
+        if (activePets.length < 2) {
+          activePets.push(pet);
+          button.textContent = 'Снять';
+          button.classList.add('active');
+        } else {
+          alert('Можно использовать максимум 2 питомца одновременно!');
+        }
+      } else {
+        activePets.splice(petIndex, 1);
+        button.textContent = 'Надеть';
+        button.classList.remove('active');
+      }
+      saveGame();
+    }
+
+    function showPotionModal(index) {
+      const modal = document.getElementById('modal');
+      const description = document.getElementById('modal-description');
+      const item = inventory[index];
+
+      description.textContent = `${item.name} (x${item.multiplier} на ${item.duration / 60000} минут)`;
+
+      modal.style.display = 'block';
+
+      const yesButton = modal.querySelector('.yes');
+      const noButton = modal.querySelector('.no');
+
+      yesButton.onclick = () => {
+        if (!activePotionEndTime) {
+          usePotion(index);
+        } else {
+          alert('Невозможно использовать несколько зелий одновременно!');
+        }
+        modal.style.display = 'none';
+      };
+
+      noButton.onclick = () => {
+        modal.style.display = 'none';
+      };
+    }
+
+    function usePotion(index) {
+      const potion = inventory[index];
+      coinMultiplier = potion.multiplier;
+
+      let duration = potion.duration;
+      if (upgrades.special[2].purchased && Math.random() < 0.05) {
+        duration *= 2;
+      }
+
+      activePotionEndTime = Date.now() + duration;
+      updatePotionTimer(activePotionEndTime);
+
+      inventory.splice(index, 1);
+      renderInventory();
+
+      setTimeout(() => {
+        coinMultiplier = 1;
+        activePotionEndTime = null;
+        updateDisplay();
+        document.getElementById('potion-timer').style.display = 'none';
+      }, duration);
+
+      saveGame();
+    }
+
+    function updatePotionTimer(endTime) {
+      const timerElement = document.getElementById('potion-timer');
+      timerElement.style.display = 'block';
+
+      function updateTimer() {
+        const now = Date.now();
+        const timeLeft = endTime - now;
+
+        if (timeLeft > 0) {
+          const minutes = Math.floor(timeLeft / 60000);
+          const seconds = Math.floor((timeLeft % 60000) / 1000);
+          timerElement.textContent = `Зелье: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+          requestAnimationFrame(updateTimer);
+        } else {
+          timerElement.style.display = 'none';
+        }
+      }
+
+      updateTimer();
+    }
+
+    function startAutoClicker() {
+      if (!autoClickerInterval) {
+        autoClickerInterval = setInterval(() => {
+          if (clicks < maxClicks) {
+            clicks += clickValue;
+            updateDisplay();
+          }
+        }, 1000);
+      }
+    }
+
+    function startAutoSell() {
+      if (!autoSellInterval) {
+        autoSellInterval = setInterval(() => {
+          sellClicks();
+        }, 5000);
+      }
+    }
+
+    loadGame();
+    setInterval(saveGame, 30000);
+
+  </script>
+</body>
+
+</html>
