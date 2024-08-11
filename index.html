@@ -1,278 +1,279 @@
 <html><head><base href="https://websim.creativeengine.com/"><style>
-body, html {
-    margin: 0;
-    padding: 0;
-    font-family: 'Arial', sans-serif;
-    background-color: #f0f0f5;
-    overflow-x: hidden;
-}
-
-#intro-screen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #000;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    opacity: 1;
-    transition: opacity 3s ease-in-out;
-}
-
-#intro-text {
-    color: #fff;
-    font-size: 2.5em;
-    text-align: center;
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 1s ease-in-out, transform 1s ease-in-out;
-}
-
-.container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-.photo-section, .video-section {
-    margin-bottom: 100px;
-}
-
-.section-title {
-    text-align: center;
-    font-size: 2.5em;
-    color: #ff69b4;
-    margin-bottom: 50px;
-}
-
-.photo-item {
-    display: flex;
-    align-items: flex-start;
-    margin-bottom: 100px;
-    opacity: 0;
-    transform: translateY(50px) rotate(-5deg);
-    transition: opacity 0.5s ease, transform 0.5s ease;
-}
-
-.photo-item.visible {
-    opacity: 1;
-    transform: translateY(0) rotate(-5deg);
-}
-
-.photo-item:nth-child(even) {
-    flex-direction: row-reverse;
-    transform: translateY(50px) rotate(5deg);
-}
-
-.photo-item:nth-child(even).visible {
-    transform: translateY(0) rotate(5deg);
-}
-
-.photo-item img {
-    width: 300px;
-    height: 300px;
-    object-fit: cover;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.photo-item:hover img {
-    transform: scale(1.05) rotate(2deg);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-}
-
-.photo-item .text {
-    background-color: rgba(255, 255, 255, 0.8);
-    padding: 20px;
-    margin: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    max-width: 300px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.photo-item:hover .text {
-    transform: scale(1.05) rotate(-2deg);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-}
-
-.photo-item:nth-child(even):hover .text {
-    transform: scale(1.05) rotate(2deg);
-}
-
-.photo-item .text h2 {
-    color: #ff69b4;
-    margin-top: 0;
-}
-
-.photo-item .text p {
-    color: #333;
-}
-
-.video-item {
-    margin-bottom: 50px;
-    opacity: 0;
-    transform: translateY(50px);
-    transition: opacity 0.5s ease, transform 0.5s ease;
-}
-
-.video-item.visible {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.video-item video {
-    width: 100%;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.video-item:hover video {
-    transform: scale(1.02);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-}
-
-.video-item .text {
-    background-color: rgba(255, 255, 255, 0.8);
-    padding: 20px;
-    margin-top: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.video-item:hover .text {
-    transform: scale(1.02) rotate(-1deg);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-}
-
-.video-item .text h2 {
-    color: #ff69b4;
-    margin-top: 0;
-}
-
-.video-item .text p {
-    color: #333;
-}
-
-/* Background design */
-body {
-    background: linear-gradient(45deg, #f0f0f5, #e6e6fa);
-    position: relative;
-    overflow-x: hidden;
-}
-
-body::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    background-image: 
-        radial-gradient(circle at 10% 20%, rgba(255, 105, 180, 0.1) 0%, transparent 20%),
-        radial-gradient(circle at 90% 80%, rgba(100, 149, 237, 0.1) 0%, transparent 20%),
-        radial-gradient(circle at 50% 50%, rgba(255, 222, 173, 0.1) 0%, transparent 30%);
-    animation: backgroundAnimation 20s ease-in-out infinite alternate;
-}
-
-@keyframes backgroundAnimation {
-    0% {
-        background-position: 0% 0%;
+    body, html {
+        margin: 0;
+        padding: 0;
+        font-family: 'Arial', sans-serif;
+        background-color: #f0f0f5;
+        overflow-x: hidden;
     }
-    100% {
-        background-position: 100% 100%;
+    
+    #intro-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 1;
+        transition: opacity 3s ease-in-out;
     }
-}
-</style></head><body>
-<div id="intro-screen">
-    <h1 id="intro-text">Sspecially for Anna...</h1>
-</div>
-
-<div class="container">
-    <div class="photo-section">
-        <h1 class="section-title">Flowers :></h1>
-        <div class="photo-item">
-            <img alt="Person lying on a surfboard in grassy area near water" src="https://cdnn11.img.sputnik.by/img/07e5/08/03/1055352671_0:0:1707:1280_1920x0_80_0_0_f1d6025e8d10143749fd0f88e3fc9858.jpg" width="300" height="300">
-            <div class="text">
-                <h2>Nature is so beautiful</h2>
-                <p>But we know who is more beautiful :D</p>
-            </div>
-        </div>
-        <div class="photo-item">
-            <img alt="Serene lake surrounded by mountains" src="https://source.unsplash.com/random/300x300?nature,2" width="300" height="300">
-            <div class="text">
-                <h2>Lilies</h2>
-                <p>Is it just me, or are valorant anna's headshots as beautiful as lilies?.</p>
-            </div>
-        </div>
-        <div class="photo-item">
-            <img alt="Dense forest with sunlight peeking through" src="https://source.unsplash.com/random/300x300?nature,3" width="300" height="300">
-            <div class="text">
-                <h2>Valorant</h2>
-                <p>You are like a lily in the world of valorant - rare and unique, like an exclusive skin that everyone is hunting for.</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="video-section">
-        <h1 class="section-title">No, just look</h1>
-        <div class="video-item">
-            <video controls>
-                <source src="https://samplelib.com/lib/preview/mp4/sample-5s.mp4" type="video/mp4">
-                What are these wild frags??
-            </video>
-            <div class="text">
-                <h2>Kills</h2>
-                <p>What are these wild frags???</p>
-            </div>
-        </div>
-        
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-function checkScroll() {
-    const items = document.querySelectorAll('.photo-item, .video-item');
-    items.forEach(item => {
-        const rect = item.getBoundingClientRect();
-        if (rect.top < window.innerHeight - 100) {
-            item.classList.add('visible');
+    
+    #intro-text {
+        color: #fff;
+        font-size: 2.5em;
+        text-align: center;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 1s ease-in-out, transform 1s ease-in-out;
+    }
+    
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .photo-section, .video-section {
+        margin-bottom: 100px;
+    }
+    
+    .section-title {
+        text-align: center;
+        font-size: 2.5em;
+        color: #ff69b4;
+        margin-bottom: 50px;
+    }
+    
+    .photo-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 100px;
+        opacity: 0;
+        transform: translateY(50px) rotate(-5deg);
+        transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    
+    .photo-item.visible {
+        opacity: 1;
+        transform: translateY(0) rotate(-5deg);
+    }
+    
+    .photo-item:nth-child(even) {
+        flex-direction: row-reverse;
+        transform: translateY(50px) rotate(5deg);
+    }
+    
+    .photo-item:nth-child(even).visible {
+        transform: translateY(0) rotate(5deg);
+    }
+    
+    .photo-item img {
+        width: 300px;
+        height: 300px;
+        object-fit: cover;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .photo-item:hover img {
+        transform: scale(1.05) rotate(2deg);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    }
+    
+    .photo-item .text {
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 20px;
+        margin: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        max-width: 300px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .photo-item:hover .text {
+        transform: scale(1.05) rotate(-2deg);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    }
+    
+    .photo-item:nth-child(even):hover .text {
+        transform: scale(1.05) rotate(2deg);
+    }
+    
+    .photo-item .text h2 {
+        color: #ff69b4;
+        margin-top: 0;
+    }
+    
+    .photo-item .text p {
+        color: #333;
+    }
+    
+    .video-item {
+        margin-bottom: 50px;
+        opacity: 0;
+        transform: translateY(50px);
+        transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    
+    .video-item.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
+    .video-item video {
+        width: 100%;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .video-item:hover video {
+        transform: scale(1.02);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    }
+    
+    .video-item .text {
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 20px;
+        margin-top: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .video-item:hover .text {
+        transform: scale(1.02) rotate(-1deg);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    }
+    
+    .video-item .text h2 {
+        color: #ff69b4;
+        margin-top: 0;
+    }
+    
+    .video-item .text p {
+        color: #333;
+    }
+    
+    /* Background design */
+    body {
+        background: linear-gradient(45deg, #f0f0f5, #e6e6fa);
+        position: relative;
+        overflow-x: hidden;
+    }
+    
+    body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        background-image: 
+            radial-gradient(circle at 10% 20%, rgba(255, 105, 180, 0.1) 0%, transparent 20%),
+            radial-gradient(circle at 90% 80%, rgba(100, 149, 237, 0.1) 0%, transparent 20%),
+            radial-gradient(circle at 50% 50%, rgba(255, 222, 173, 0.1) 0%, transparent 30%);
+        animation: backgroundAnimation 20s ease-in-out infinite alternate;
+    }
+    
+    @keyframes backgroundAnimation {
+        0% {
+            background-position: 0% 0%;
         }
-    });
-}
-
-window.addEventListener('scroll', checkScroll);
-window.addEventListener('load', () => {
-    const introScreen = document.getElementById('intro-screen');
-    const introText = document.getElementById('intro-text');
-
-    // Keep black screen for 4 seconds
-    setTimeout(() => {
-        // Fade in the intro text
-        introText.style.opacity = '1';
-        introText.style.transform = 'translateY(0)';
-
-        // Keep text visible for 3 seconds
+        100% {
+            background-position: 100% 100%;
+        }
+    }
+    </style></head><body>
+    <div id="intro-screen">
+        <h1 id="intro-text">Especially for Anna...</h1>
+    </div>
+    
+    <div class="container">
+        <div class="photo-section">
+            <h1 class="section-title">Flowers :></h1>
+            <div class="photo-item">
+                <img alt="Person lying on a surfboard in grassy area near water" src="https://cdnn11.img.sputnik.by/img/07e5/08/03/1055352671_0:0:1707:1280_1920x0_80_0_0_f1d6025e8d10143749fd0f88e3fc9858.jpg" width="300" height="300">
+                <div class="text">
+                    <h2>Nature is so beautiful</h2>
+                    <p>But we know who is more beautiful :D</p>
+                </div>
+            </div>
+            <div class="photo-item">
+                <img alt="Serene lake surrounded by mountains" src="https://s6.stc.all.kpcdn.net/family/wp-content/uploads/2023/07/liliya-marlen-725.jpg" width="300" height="300">
+                <div class="text">
+                    <h2>Lilies</h2>
+                    <p>Is it just me, or are valorant anna's headshots as beautiful as lilies?.</p>
+                </div>
+            </div>
+            <div class="photo-item">
+                <img alt="Dense forest with sunlight peeking through" src="https://daflor.by/upload/iblock/035/cy2ah5vgcvcpr1h89ao4r01v0o1c990i.jpg" width="300" height="300">
+                <div class="text">
+                    <h2>Valorant</h2>
+                    <p>You are like a lily in the world of valorant - rare and unique, like an exclusive skin that everyone is hunting for)</p>
+                </div>
+            </div>
+        </div>
+    
+        <div class="video-section">
+            <h1 class="section-title">No, just look</h1>
+            <div class="video-item">
+                <video controls>
+                    <source src="val/clip.mp4" type="video/mp4">
+                    What are these wild frags??
+                </video>
+                <div class="text">
+                    <h2>Sigma Kills</h2>
+                    <p>What are these wild frags???</p>
+                </div>
+            </div>
+            
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+    function checkScroll() {
+        const items = document.querySelectorAll('.photo-item, .video-item');
+        items.forEach(item => {
+            const rect = item.getBoundingClientRect();
+            if (rect.top < window.innerHeight - 100) {
+                item.classList.add('visible');
+            }
+        });
+    }
+    
+    window.addEventListener('scroll', checkScroll);
+    window.addEventListener('load', () => {
+        const introScreen = document.getElementById('intro-screen');
+        const introText = document.getElementById('intro-text');
+    
+        // Keep black screen for 4 seconds
         setTimeout(() => {
-            // Fade out the intro screen over 3 seconds
-            introScreen.style.opacity = '0';
-
-            // Remove the intro screen from the DOM after fade out
+            // Fade in the intro text
+            introText.style.opacity = '1';
+            introText.style.transform = 'translateY(0)';
+    
+            // Keep text visible for 3 seconds
             setTimeout(() => {
-                introScreen.remove();
-                checkScroll();
+                // Fade out the intro screen over 3 seconds
+                introScreen.style.opacity = '0';
+    
+                // Remove the intro screen from the DOM after fade out
+                setTimeout(() => {
+                    introScreen.remove();
+                    checkScroll();
+                }, 3000);
             }, 3000);
-        }, 3000);
-    }, 4000);
-});
-</script>
-</body></html>
+        }, 4000);
+    });
+    </script>
+    </body></html>
+    
