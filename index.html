@@ -51,6 +51,13 @@
             margin-left: auto;
         }
 
+        .message.system {
+            background-color: #fff3cd;
+            text-align: center;
+            max-width: 100%;
+            font-style: italic;
+        }
+
         .username {
             font-weight: bold;
             margin-bottom: 5px;
@@ -229,6 +236,14 @@
             }
         }
 
+        function addSystemMessage(content) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', 'system');
+            messageElement.textContent = content;
+            chat.appendChild(messageElement);
+            scrollToBottom();
+        }
+
         function isScrolledToBottom() {
             return chat.scrollHeight - chat.clientHeight <= chat.scrollTop + 1;
         }
@@ -266,19 +281,23 @@
             if (content) {
                 const msg = { username, content, timestamp: Date.now() };
                 socket.emit('chat message', msg);
+                addMessage(msg, true);
+                saveMessage(msg);
                 messageInput.value = '';
             }
         }
 
         socket.on('chat message', (msg) => {
-            addMessage(msg, msg.username === username);
-            saveMessage(msg);
+            if (msg.username !== username) {
+                addMessage(msg);
+                saveMessage(msg);
+            }
         });
 
         socket.on('user joined', (user) => {
-            const msg = { username: 'System', content: `${user} has joined the chat.`, timestamp: Date.now() };
-            addMessage(msg);
-            saveMessage(msg);
+            const joinMessage = `${user} joined the chat!`;
+            addSystemMessage(joinMessage);
+            saveMessage({ username: 'System', content: joinMessage, timestamp: Date.now() });
         });
 
         function saveMessage(msg) {
@@ -289,7 +308,13 @@
 
         function loadMessages() {
             let messages = JSON.parse(localStorage.getItem('chatMessages')) || [];
-            messages.forEach(msg => addMessage(msg, msg.username === username));
+            messages.forEach(msg => {
+                if (msg.username === 'System') {
+                    addSystemMessage(msg.content);
+                } else {
+                    addMessage(msg, msg.username === username);
+                }
+            });
             scrollToBottom();
         }
     </script>
