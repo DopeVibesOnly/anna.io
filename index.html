@@ -175,7 +175,7 @@
 
     <div id="username-modal">
         <form id="username-form">
-            <h2>чат/h2>
+            <h2>чат</h2>
             <p>ник:</p>
             <input type="text" id="username-input" required>
             <button type="submit" id="username-submit">Join Chat</button>
@@ -266,17 +266,13 @@
             if (content) {
                 const msg = { username, content, timestamp: Date.now() };
                 socket.emit('chat message', msg);
-                addMessage(msg, true);
                 messageInput.value = '';
-                saveMessage(msg);
             }
         }
 
         socket.on('chat message', (msg) => {
-            if (msg.username !== username) {
-                addMessage(msg);
-                saveMessage(msg);
-            }
+            addMessage(msg, msg.username === username);
+            saveMessage(msg);
         });
 
         socket.on('user joined', (user) => {
