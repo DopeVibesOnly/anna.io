@@ -4,7 +4,7 @@
   <base href="https://chatapp.example.com">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>чат</title>
+  <title>Чат</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -20,6 +20,7 @@
       border-radius: 8px;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
       overflow: hidden;
+      position: relative;
     }
 
     .chat-header {
@@ -43,14 +44,13 @@
       max-width: 70%;
     }
 
-    .message.sent {
-      background-color: #DCF8C6;
-      align-self: flex-end;
-      margin-left: auto;
+    .message .author {
+      font-weight: bold;
+      margin-bottom: 5px;
     }
 
-    .message.received {
-      background-color: #E0E0E0;
+    .message .content {
+      word-wrap: break-word;
     }
 
     .chat-input {
@@ -79,13 +79,29 @@
     #send-button:hover {
       background-color: #45a049;
     }
+
+    .nickname-container {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 10;
+    }
+
+    #nickname-input {
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
   </style>
 </head>
 
 <body>
   <div class="chat-container">
+    <div class="nickname-container">
+      <input type="text" id="nickname-input" placeholder="Введите ник">
+    </div>
     <div class="chat-header">
-      Простой чат для общения
+      Чат
     </div>
     <div class="chat-messages" id="chat-messages">
       <!-- Сообщения будут добавляться здесь -->
@@ -96,21 +112,26 @@
     </div>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
   <script>
-    // Подключение к серверу Socket.IO (замените URL на ваш сервер)
-    const socket = io('https://chat-server.example.com');
-
     const chatMessages = document.getElementById('chat-messages');
     const messageInput = document.getElementById('message-input');
     const sendButton = document.getElementById('send-button');
+    const nicknameInput = document.getElementById('nickname-input');
+
+    let nickname = 'Аноним';
+
+    nicknameInput.addEventListener('change', (e) => {
+      nickname = e.target.value.trim() || 'Аноним';
+    });
 
     // Функция для добавления сообщения в чат
-    function addMessage(message, isSent) {
+    function addMessage(author, message) {
       const messageElement = document.createElement('div');
       messageElement.classList.add('message');
-      messageElement.classList.add(isSent ? 'sent' : 'received');
-      messageElement.textContent = message;
+      messageElement.innerHTML = `
+        <div class="author">${author}</div>
+        <div class="content">${message}</div>
+      `;
       chatMessages.appendChild(messageElement);
       chatMessages.scrollTop = chatMessages.scrollHeight;
     }
@@ -119,9 +140,11 @@
     function sendMessage() {
       const message = messageInput.value.trim();
       if (message) {
-        socket.emit('chat message', message);
-        addMessage(message, true);
+        addMessage(nickname, message);
         messageInput.value = '';
+
+        // Здесь мы бы отправили сообщение на сервер, если бы он был
+        // socket.emit('chat message', { author: nickname, message: message });
       }
     }
 
@@ -133,20 +156,6 @@
       }
     });
 
-    // Получение сообщений от сервера
-    socket.on('chat message', (msg) => {
-      addMessage(msg, false);
-    });
-
-    // Подключение нового пользователя
-    socket.on('user connected', (msg) => {
-      const notificationElement = document.createElement('div');
-      notificationElement.textContent = msg;
-      notificationElement.style.textAlign = 'center';
-      notificationElement.style.color = '#888';
-      notificationElement.style.margin = '10px 0';
-      chatMessages.appendChild(notificationElement);
-    });
   </script>
 </body>
 
