@@ -4,7 +4,7 @@
     <base href="https://chat.example.com/">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>чат1</title>
+    <title>конгресс сигм</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -125,7 +125,6 @@
             if (message) {
                 const timestamp = new Date().toISOString();
                 socket.emit('chat message', { nickname, message, timestamp });
-                addMessage(nickname, message, timestamp, true);
                 messageInput.value = '';
             }
         }
@@ -145,21 +144,25 @@
             socket.emit('get messages');
         }
 
+        // Получение сообщения от сервера и отображение его у всех пользователей
         socket.on('chat message', function (data) {
             addMessage(data.nickname, data.message, data.timestamp, data.nickname === nickname);
         });
 
+        // Присоединение нового пользователя
         socket.on('user joined', function (nick) {
             addMessage('Система', `${nick} присоединился к чату.`, new Date().toISOString(), false);
         });
 
+        // Пользователь покинул чат
         socket.on('user left', function (nick) {
             addMessage('Система', `${nick} покинул чат.`, new Date().toISOString(), false);
         });
 
+        // Загрузка всех сообщений при подключении нового пользователя
         socket.on('load messages', function (messages) {
             const messagesDiv = document.getElementById('messages');
-            messagesDiv.innerHTML = ''; // Clear existing messages
+            messagesDiv.innerHTML = ''; // Очистить существующие сообщения
             messages.forEach(msg => {
                 addMessage(msg.nickname, msg.message, msg.timestamp, msg.nickname === nickname);
             });
@@ -171,7 +174,7 @@
             }
         });
 
-        // Handle page visibility changes
+        // Обработка изменений видимости страницы
         document.addEventListener('visibilitychange', function () {
             if (!document.hidden) {
                 loadMessages();
