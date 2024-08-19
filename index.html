@@ -4,7 +4,7 @@
     <base href="https://chat.example.com/">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>конгресс сигм</title>
+    <title>чат</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -51,6 +51,7 @@
         #chat {
             display: none;
         }
+
         #messages {
             height: 300px;
             overflow-y: auto;
@@ -91,7 +92,7 @@
         <h2>чат</h2>
         <p>введи ник:</p>
         <input type="text" id="nickname" placeholder="Ваш ник">
-        <button onclick="register()">войти в чат</button>
+        <button onclick="register()">Войти в чат</button>
     </div>
 
     <div id="chat">
@@ -114,7 +115,7 @@
                 socket.emit('join', nickname);
                 loadMessages();
             } else {
-                alert('введи ник');
+                alert('введи свой смачный ник');
             }
         }
 
@@ -123,6 +124,7 @@
             const message = messageInput.value.trim();
             if (message) {
                 const timestamp = new Date().toISOString();
+                console.log('Отправка сообщения:', message); // Отладка
                 socket.emit('chat message', { nickname, message, timestamp });
                 messageInput.value = '';
             }
@@ -145,6 +147,7 @@
 
         // Получение сообщения от сервера и отображение его у всех пользователей
         socket.on('chat message', function (data) {
+            console.log('Получено сообщение от сервера:', data); // Отладка
             addMessage(data.nickname, data.message, data.timestamp, data.nickname === nickname);
         });
 
