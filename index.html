@@ -4,7 +4,7 @@
     <base href="https://chat.example.com/">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>чат</title>
+    <title>чат1</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -146,17 +146,15 @@
         }
 
         socket.on('chat message', function (data) {
-            if (data.nickname !== nickname) {
-                addMessage(data.nickname, data.message, data.timestamp);
-            }
+            addMessage(data.nickname, data.message, data.timestamp, data.nickname === nickname);
         });
 
         socket.on('user joined', function (nick) {
-            addMessage('Система', `${nick} присоединился к чату.`, new Date().toISOString(), true);
+            addMessage('Система', `${nick} присоединился к чату.`, new Date().toISOString(), false);
         });
 
         socket.on('user left', function (nick) {
-            addMessage('Система', `${nick} покинул чат.`, new Date().toISOString(), true);
+            addMessage('Система', `${nick} покинул чат.`, new Date().toISOString(), false);
         });
 
         socket.on('load messages', function (messages) {
