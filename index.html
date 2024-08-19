@@ -1,134 +1,158 @@
-<!DOCTYPE html>
-<html lang="en">
+<html>
+
 <head>
+    <base href="https://chat.example.com/">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Messenger</title>
+    <title>чат</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
             margin: 0;
             padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            background-color: #f0f0f0;
         }
-        #container {
-            width: 100%;
+
+        #registration,
+        #chat {
             max-width: 600px;
-            background-color: white;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-        #chat-box {
-            height: 400px;
-            overflow-y: auto;
+            margin: 20px auto;
             padding: 20px;
-            background-color: #f9f9f9;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        #chat-box div {
-            margin-bottom: 10px;
-            padding: 5px 10px;
-            background-color: #eef;
-            border-radius: 5px;
+
+        #registration {
+            text-align: center;
         }
-        #chat-box .system {
-            color: #777;
-            font-style: italic;
-        }
-        #message-input {
-            display: flex;
-            border-top: 1px solid #ccc;
-        }
-        #message-input input {
-            flex: 1;
+
+        #nickname {
             padding: 10px;
-            border: none;
-            border-radius: 0;
+            font-size: 16px;
+            width: 200px;
+            margin-right: 10px;
         }
-        #message-input button {
+
+        button {
             padding: 10px 20px;
-            background-color: #007bff;
+            font-size: 16px;
+            background-color: #4CAF50;
             color: white;
             border: none;
             cursor: pointer;
+            border-radius: 4px;
         }
-        #message-input button:hover {
-            background-color: #0056b3;
+
+        button:hover {
+            background-color: #45a049;
         }
-        #username-form {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
+
+        #chat {
+            display: none;
         }
-        #username-form input {
+
+        #messages {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
             padding: 10px;
             margin-bottom: 10px;
-            width: 100%;
+        }
+
+        #messageInput {
+            width: calc(100% - 80px);
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        .message {
+            margin-bottom: 10px;
+        }
+
+        .nickname {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .self {
+            color: #4CAF50;
         }
     </style>
 </head>
+
 <body>
-
-<div id="container">
-    <div id="chat-box" style="display:none;"></div>
-
-    <div id="username-form">
-        <h2>Enter your username:</h2>
-        <input type="text" id="username" placeholder="Username">
-        <button onclick="joinChat()">Join Chat</button>
+    <div id="registration">
+        <h2>Чат</h2>
+        <p>введи ник:</p>
+        <input type="text" id="nickname" placeholder="Ваш ник">
+        <button onclick="register()">войти в чат</button>
     </div>
 
-    <div id="message-input" style="display:none;">
-        <input type="text" id="message" placeholder="Type a message...">
-        <button onclick="sendMessage()">Send</button>
+    <div id="chat">
+        <h2>Общий чат</h2>
+        <div id="messages"></div>
+        <input type="text" id="messageInput" placeholder="Введите сообщение">
+        <button onclick="sendMessage()">Отправить</button>
     </div>
-</div>
 
-<script>
-    let username = '';
-    const chatBox = document.getElementById('chat-box');
-    const messageInputDiv = document.getElementById('message-input');
-    const usernameForm = document.getElementById('username-form');
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
+    <script>
+        const socket = io('https://chat.example.com');
+        let nickname = '';
 
-    function joinChat() {
-        username = document.getElementById('username').value.trim();
-        if (username) {
-            chatBox.style.display = 'block';
-            messageInputDiv.style.display = 'flex';
-            usernameForm.style.display = 'none';
-            displayMessage('system', `*** ${username} joined the chat ***`);
-        } else {
-            alert('Please enter a username.');
+        function register() {
+            nickname = document.getElementById('nickname').value.trim();
+            if (nickname) {
+                document.getElementById('registration').style.display = 'none';
+                document.getElementById('chat').style.display = 'block';
+                socket.emit('join', nickname);
+                addMessage('Система', `здарова, ${nickname}!`, true);
+            } else {
+                alert('введите ник');
+            }
         }
-    }
 
-    function sendMessage() {
-        const messageInput = document.getElementById('message');
-        const message = messageInput.value.trim();
-        if (message) {
-            displayMessage(username, message);
-            messageInput.value = '';
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            if (message) {
+                socket.emit('chat message', { nickname, message });
+                addMessage(nickname, message, true);
+                messageInput.value = '';
+            }
         }
-    }
 
-    function displayMessage(sender, message) {
-        const messageDiv = document.createElement('div');
-        if (sender === 'system') {
-            messageDiv.className = 'system';
-            messageDiv.innerText = message;
-        } else {
-            messageDiv.innerHTML = `<strong>${sender}:</strong> ${message}`;
+        function addMessage(nick, msg, isSelf = false) {
+            const messagesDiv = document.getElementById('messages');
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message';
+            const nicknameSpan = `<span class="nickname ${isSelf ? 'self' : ''}">${nick}:</span>`;
+            messageElement.innerHTML = `${nicknameSpan} ${msg}`;
+            messagesDiv.appendChild(messageElement);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
-        chatBox.appendChild(messageDiv);
-        chatBox.scrollTop = chatBox.scrollHeight;
-    }
-</script>
 
+        socket.on('chat message', function (data) {
+            if (data.nickname !== nickname) {
+                addMessage(data.nickname, data.message);
+            }
+        });
+
+        socket.on('user joined', function (nick) {
+            addMessage('Система', `${nick} присоединился к чату.`, true);
+        });
+
+        socket.on('user left', function (nick) {
+            addMessage('Система', `${nick} покинул чат.`, true);
+        });
+
+        document.getElementById('messageInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
 </body>
+
 </html>
