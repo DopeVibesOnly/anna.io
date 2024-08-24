@@ -1,158 +1,147 @@
-<html>
-
-<head>
-    <base href="https://chat.example.com/app/" />
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebChat</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f2f5;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .container {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
-
-        .left-panel {
-            width: 300px;
-            background-color: #fff;
-            border-right: 1px solid #e0e0e0;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .right-panel {
-            flex: 1;
-            background-color: #fff;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .search-bar {
-            padding: 10px;
-            background-color: #f5f5f5;
-        }
-
-        .search-bar input {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-        }
-
-        .chat-list {
-            flex: 1;
-            overflow-y: auto;
-        }
-
-        .chat-item {
-            padding: 10px;
-            border-bottom: 1px solid #f0f0f0;
-            cursor: pointer;
-        }
-
-        .chat-item:hover {
-            background-color: #f5f5f5;
-        }
-
-        .chat-header {
-            padding: 10px;
-            background-color: #f5f5f5;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 10px;
-        }
-
-        .message {
-            margin-bottom: 10px;
-            padding: 8px;
-            border-radius: 8px;
-            max-width: 70%;
-        }
-
-        .message.sent {
-            background-color: #dcf8c6;
-            align-self: flex-end;
-        }
-
-        .message.received {
-            background-color: #fff;
-            align-self: flex-start;
-        }
-
-        .chat-input {
-            padding: 10px;
-            background-color: #f5f5f5;
-            display: flex;
-        }
-
-        .chat-input input {
-            flex: 1;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-            margin-right: 10px;
-        }
-
-        .chat-input button {
-            padding: 8px 15px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-        }
-
-        .auth-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        .auth-form {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .auth-form input {
-            display: block;
-            width: 100%;
-            margin-bottom: 10px;
-            padding: 8px;
-        }
-
-        .auth-form button {
-            width: 100%;
-            padding: 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-    </style>
+<html><head><base href="https://chat.example.com/app/" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WebChat</title>
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f2f5;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+    .container {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+    }
+    .left-panel {
+        width: 300px;
+        background-color: #fff;
+        border-right: 1px solid #e0e0e0;
+        display: flex;
+        flex-direction: column;
+    }
+    .right-panel {
+        flex: 1;
+        background-color: #fff;
+        display: flex;
+        flex-direction: column;
+    }
+    .search-bar {
+        padding: 10px;
+        background-color: #f5f5f5;
+    }
+    .search-bar input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+    }
+    .chat-list {
+        flex: 1;
+        overflow-y: auto;
+    }
+    .chat-item {
+        padding: 10px;
+        border-bottom: 1px solid #f0f0f0;
+        cursor: pointer;
+    }
+    .chat-item:hover {
+        background-color: #f5f5f5;
+    }
+    .chat-header {
+        padding: 10px;
+        background-color: #f5f5f5;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 10px;
+    }
+    .message {
+        margin-bottom: 10px;
+        padding: 8px;
+        border-radius: 8px;
+        max-width: 70%;
+    }
+    .message.sent {
+        background-color: #dcf8c6;
+        align-self: flex-end;
+    }
+    .message.received {
+        background-color: #fff;
+        align-self: flex-start;
+    }
+    .chat-input {
+        padding: 10px;
+        background-color: #f5f5f5;
+        display: flex;
+    }
+    .chat-input input {
+        flex: 1;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        margin-right: 10px;
+    }
+    .chat-input button {
+        padding: 8px 15px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+    }
+    .auth-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+    .auth-form {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .auth-form input {
+        display: block;
+        width: 100%;
+        margin-bottom: 10px;
+        padding: 8px;
+    }
+    .auth-form button {
+        width: 100%;
+        padding: 10px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .search-results {
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-top: none;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+    .search-result-item {
+        padding: 10px;
+        cursor: pointer;
+    }
+    .search-result-item:hover {
+        background-color: #f5f5f5;
+    }
+</style>
 </head>
-
 <body>
     <div id="app"></div>
 
@@ -161,183 +150,193 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
     <script>
-        const { createApp, ref, computed } = Vue;
-        const { createStore } = Vuex;
+    const { createApp, ref, computed, watch } = Vue;
+    const { createStore } = Vuex;
 
-        const store = createStore({
-            state() {
-                return {
-                    currentUser: null,
-                    chats: [],
-                    messages: {},
-                    users: []
+    const store = createStore({
+        state() {
+            return {
+                currentUser: null,
+                chats: [],
+                messages: {},
+                users: []
+            }
+        },
+        mutations: {
+            setCurrentUser(state, user) {
+                state.currentUser = user;
+            },
+            addChat(state, chat) {
+                if (!state.chats.some(c => c.id === chat.id)) {
+                    state.chats.push(chat);
                 }
             },
-            mutations: {
-                setCurrentUser(state, user) {
-                    state.currentUser = user;
-                },
-                addChat(state, chat) {
-                    if (!state.chats.some(c => c.id === chat.id)) {
-                        state.chats.push(chat);
-                    }
-                },
-                addMessage(state, { chatId, message }) {
-                    if (!state.messages[chatId]) {
-                        state.messages[chatId] = [];
-                    }
-                    state.messages[chatId].push(message);
-                },
-                addUser(state, user) {
-                    if (!state.users.some(u => u.username === user.username)) {
-                        state.users.push(user);
-                    }
+            addMessage(state, { chatId, message }) {
+                if (!state.messages[chatId]) {
+                    state.messages[chatId] = [];
                 }
+                state.messages[chatId].push(message);
             },
-            actions: {
-                register({ commit }, user) {
-                    // In a real app, this would be an API call
-                    const hashedPassword = CryptoJS.SHA256(user.password).toString();
-                    const newUser = { ...user, password: hashedPassword };
-                    commit('addUser', newUser);
-                    commit('setCurrentUser', newUser);
-                    localStorage.setItem('currentUser', JSON.stringify(newUser));
-                },
-                login({ commit, state }, credentials) {
-                    const user = state.users.find(u => u.username === credentials.username);
-                    if (user && user.password === CryptoJS.SHA256(credentials.password).toString()) {
-                        commit('setCurrentUser', user);
-                        localStorage.setItem('currentUser', JSON.stringify(user));
-                        return true;
-                    }
-                    return false;
-                },
-                logout({ commit }) {
-                    commit('setCurrentUser', null);
-                    localStorage.removeItem('currentUser');
-                },
-                sendMessage({ commit, state }, { recipientUsername, content }) {
-                    const chat = state.chats.find(c => c.participants.includes(recipientUsername)) || {
-                        id: Date.now(),
-                        participants: [state.currentUser.username, recipientUsername]
-                    };
-                    commit('addChat', chat);
-                    const message = {
-                        id: Date.now(),
-                        sender: state.currentUser.username,
-                        content,
-                        timestamp: new Date().toISOString()
-                    };
-                    commit('addMessage', { chatId: chat.id, message });
-                    // In a real app, this would be sent to a server
-                    localStorage.setItem('chats', JSON.stringify(state.chats));
-                    localStorage.setItem('messages', JSON.stringify(state.messages));
-                },
-                loadData({ commit }) {
-                    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-                    if (currentUser) {
-                        commit('setCurrentUser', currentUser);
-                    }
-                    const chats = JSON.parse(localStorage.getItem('chats')) || [];
-                    chats.forEach(chat => commit('addChat', chat));
-                    const messages = JSON.parse(localStorage.getItem('messages')) || {};
-                    Object.entries(messages).forEach(([chatId, chatMessages]) => {
-                        chatMessages.forEach(message => commit('addMessage', { chatId, message }));
-                    });
-                    const users = JSON.parse(localStorage.getItem('users')) || [];
-                    users.forEach(user => commit('addUser', user));
+            addUser(state, user) {
+                if (!state.users.some(u => u.username === user.username)) {
+                    state.users.push(user);
                 }
             }
-        });
-
-        const App = {
-            setup() {
-                const currentUser = computed(() => store.state.currentUser);
-                const chats = computed(() => store.state.chats);
-                const messages = computed(() => store.state.messages);
-                const users = computed(() => store.state.users);
-
-                const username = ref('');
-                const password = ref('');
-                const searchQuery = ref('');
-                const newMessage = ref('');
-                const activeChat = ref(null);
-
-                const filteredChats = computed(() => {
-                    return chats.value.filter(chat =>
-                        chat.participants.some(participant =>
-                            participant.toLowerCase().includes(searchQuery.value.toLowerCase())
-                        )
-                    );
-                });
-
-                const activeChatMessages = computed(() => {
-                    return activeChat.value ? messages.value[activeChat.value.id] || [] : [];
-                });
-
-                const register = () => {
-                    store.dispatch('register', { username: username.value, password: password.value });
-                    username.value = '';
-                    password.value = '';
-                };
-
-                const login = () => {
-                    store.dispatch('login', { username: username.value, password: password.value });
-                    username.value = '';
-                    password.value = '';
-                };
-
-                const logout = () => {
-                    store.dispatch('logout');
-                };
-
-                const searchUser = () => {
-                    const user = users.value.find(u => u.username === searchQuery.value);
-                    if (user) {
-                        const chat = chats.value.find(c => c.participants.includes(user.username)) || {
-                            id: Date.now(),
-                            participants: [currentUser.value.username, user.username]
-                        };
-                        store.commit('addChat', chat);
-                        activeChat.value = chat;
-                    }
-                    searchQuery.value = '';
-                };
-
-                const sendMessage = () => {
-                    if (newMessage.value.trim() && activeChat.value) {
-                        const recipientUsername = activeChat.value.participants.find(p => p !== currentUser.value.username);
-                        store.dispatch('sendMessage', { recipientUsername, content: newMessage.value });
-                        newMessage.value = '';
-                    }
-                };
-
-                const setActiveChat = (chat) => {
-                    activeChat.value = chat;
-                };
-
-                store.dispatch('loadData');
-
-                return {
-                    currentUser,
-                    chats,
-                    messages,
-                    username,
-                    password,
-                    searchQuery,
-                    newMessage,
-                    activeChat,
-                    filteredChats,
-                    activeChatMessages,
-                    register,
-                    login,
-                    logout,
-                    searchUser,
-                    sendMessage,
-                    setActiveChat
-                };
+        },
+        actions: {
+            register({ commit }, user) {
+                const hashedPassword = CryptoJS.SHA256(user.password).toString();
+                const newUser = { ...user, password: hashedPassword };
+                commit('addUser', newUser);
+                commit('setCurrentUser', newUser);
+                localStorage.setItem('currentUser', JSON.stringify(newUser));
+                localStorage.setItem('users', JSON.stringify(this.state.users));
             },
-            template: `
+            login({ commit, state }, credentials) {
+                const user = state.users.find(u => u.username === credentials.username);
+                if (user && user.password === CryptoJS.SHA256(credentials.password).toString()) {
+                    commit('setCurrentUser', user);
+                    localStorage.setItem('currentUser', JSON.stringify(user));
+                    return true;
+                }
+                return false;
+            },
+            logout({ commit }) {
+                commit('setCurrentUser', null);
+                localStorage.removeItem('currentUser');
+            },
+            sendMessage({ commit, state }, { recipientUsername, content }) {
+                const chat = state.chats.find(c => c.participants.includes(recipientUsername)) || {
+                    id: Date.now(),
+                    participants: [state.currentUser.username, recipientUsername]
+                };
+                commit('addChat', chat);
+                const message = {
+                    id: Date.now(),
+                    sender: state.currentUser.username,
+                    content,
+                    timestamp: new Date().toISOString()
+                };
+                commit('addMessage', { chatId: chat.id, message });
+                localStorage.setItem('chats', JSON.stringify(state.chats));
+                localStorage.setItem('messages', JSON.stringify(state.messages));
+            },
+            loadData({ commit }) {
+                const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+                if (currentUser) {
+                    commit('setCurrentUser', currentUser);
+                }
+                const chats = JSON.parse(localStorage.getItem('chats')) || [];
+                chats.forEach(chat => commit('addChat', chat));
+                const messages = JSON.parse(localStorage.getItem('messages')) || {};
+                Object.entries(messages).forEach(([chatId, chatMessages]) => {
+                    chatMessages.forEach(message => commit('addMessage', { chatId, message }));
+                });
+                const users = JSON.parse(localStorage.getItem('users')) || [];
+                users.forEach(user => commit('addUser', user));
+            }
+        }
+    });
+
+    const App = {
+        setup() {
+            const currentUser = computed(() => store.state.currentUser);
+            const chats = computed(() => store.state.chats);
+            const messages = computed(() => store.state.messages);
+            const users = computed(() => store.state.users);
+
+            const username = ref('');
+            const password = ref('');
+            const searchQuery = ref('');
+            const newMessage = ref('');
+            const activeChat = ref(null);
+            const searchResults = ref([]);
+
+            const filteredChats = computed(() => {
+                return chats.value.filter(chat => 
+                    chat.participants.some(participant => 
+                        participant.toLowerCase().includes(searchQuery.value.toLowerCase())
+                    )
+                );
+            });
+
+            const activeChatMessages = computed(() => {
+                return activeChat.value ? messages.value[activeChat.value.id] || [] : [];
+            });
+
+            watch(searchQuery, (newQuery) => {
+                if (newQuery.startsWith('@')) {
+                    searchResults.value = users.value.filter(user => 
+                        user.username.toLowerCase().includes(newQuery.slice(1).toLowerCase()) &&
+                        user.username !== currentUser.value.username
+                    );
+                } else {
+                    searchResults.value = [];
+                }
+            });
+
+            const register = () => {
+                store.dispatch('register', { username: username.value, password: password.value });
+                username.value = '';
+                password.value = '';
+            };
+
+            const login = () => {
+                store.dispatch('login', { username: username.value, password: password.value });
+                username.value = '';
+                password.value = '';
+            };
+
+            const logout = () => {
+                store.dispatch('logout');
+            };
+
+            const startChat = (user) => {
+                const chat = chats.value.find(c => c.participants.includes(user.username)) || {
+                    id: Date.now(),
+                    participants: [currentUser.value.username, user.username]
+                };
+                store.commit('addChat', chat);
+                activeChat.value = chat;
+                searchQuery.value = '';
+                searchResults.value = [];
+            };
+
+            const sendMessage = () => {
+                if (newMessage.value.trim() && activeChat.value) {
+                    const recipientUsername = activeChat.value.participants.find(p => p !== currentUser.value.username);
+                    store.dispatch('sendMessage', { recipientUsername, content: newMessage.value });
+                    newMessage.value = '';
+                }
+            };
+
+            const setActiveChat = (chat) => {
+                activeChat.value = chat;
+            };
+
+            store.dispatch('loadData');
+
+            return {
+                currentUser,
+                chats,
+                messages,
+                username,
+                password,
+                searchQuery,
+                newMessage,
+                activeChat,
+                searchResults,
+                filteredChats,
+                activeChatMessages,
+                register,
+                login,
+                logout,
+                startChat,
+                sendMessage,
+                setActiveChat
+            };
+        },
+        template: `
             <div v-if="!currentUser" class="auth-container">
                 <div class="auth-form">
                     <input v-model="username" placeholder="Username" />
@@ -349,7 +348,13 @@
             <div v-else class="container">
                 <div class="left-panel">
                     <div class="search-bar">
-                        <input v-model="searchQuery" @keyup.enter="searchUser" placeholder="Search @username" />
+                        <input v-model="searchQuery" placeholder="Search @username" />
+                        <div v-if="searchResults.length > 0" class="search-results">
+                            <div v-for="user in searchResults" :key="user.username" 
+                                 class="search-result-item" @click="startChat(user)">
+                                {{ user.username }}
+                            </div>
+                        </div>
                     </div>
                     <div class="chat-list">
                         <div v-for="chat in filteredChats" :key="chat.id" class="chat-item" @click="setActiveChat(chat)">
@@ -378,10 +383,9 @@
                 </div>
             </div>
         `
-        };
+    };
 
-        createApp(App).use(store).mount('#app');
+    createApp(App).use(store).mount('#app');
     </script>
 </body>
-
 </html>
