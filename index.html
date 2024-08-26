@@ -1,306 +1,324 @@
 <html><head><base href="https://websim.io/sols-rng-game/">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>sols</title>
+<title>понос</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Montserrat:wght@400;700&family=Poppins:wght@400;600&family=Lato:wght@400;700&display=swap" rel="stylesheet">
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@400;700&family=Poppins:wght@400;700&family=Lato:wght@400;700&display=swap');
+@keyframes gradient {
+    0% {background-position: 0% 50%;}
+    50% {background-position: 100% 50%;}
+    100% {background-position: 0% 50%;}
+}
 
-    body, html {
-        margin: 0;
-        padding: 0;
-        font-family: 'Roboto', sans-serif;
-        background: #f0f2f5;
-        color: #333;
-        height: 100%;
-        overflow: hidden;
-    }
-    #game-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: 100vh;
-        position: relative;
-    }
-    #roll-button {
-        background: linear-gradient(45deg, #4a90e2, #357abd);
-        color: #fff;
-        border: none;
-        padding: 18px 40px;
-        font-size: 20px;
-        border-radius: 50px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 10px 20px rgba(74, 144, 226, 0.4);
-        text-transform: uppercase;
-        font-weight: bold;
-        letter-spacing: 1px;
-        z-index: 10;
-    }
-    #roll-button:hover {
-        background: linear-gradient(45deg, #357abd, #2a5f9e);
-        transform: translateY(-3px);
-        box-shadow: 0 15px 25px rgba(74, 144, 226, 0.6);
-    }
-    #roll-button:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-        transform: none;
-        box-shadow: none;
-    }
-    #inventory-button {
-        position: fixed;
-        left: 30px;
-        bottom: 30px;
-        background: linear-gradient(45deg, #4a90e2, #357abd);
-        color: #fff;
-        border: none;
-        padding: 15px 30px;
-        font-size: 18px;
-        border-radius: 25px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        z-index: 1000;
-        box-shadow: 0 5px 15px rgba(74, 144, 226, 0.4);
-    }
-    #inventory-button:hover {
-        background: linear-gradient(45deg, #357abd, #2a5f9e);
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(74, 144, 226, 0.6);
-    }
-    #inventory-modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0,0,0,0.8);
-        z-index: 1001;
-        backdrop-filter: blur(5px);
-    }
-    #inventory-content {
-        background-color: rgba(255,255,255,0.95);
-        margin: 5% auto;
-        padding: 30px;
-        width: 90%;
-        max-width: 800px;
-        border-radius: 20px;
-        box-shadow: 0 0 30px rgba(0,0,0,0.3);
-    }
-    #inventory {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-        gap: 20px;
-        margin-top: 30px;
-    }
-    .inventory-item {
-        width: 120px;
-        height: 120px;
-        border-radius: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        font-size: 16px;
-        text-align: center;
-        box-shadow: 0 8px 15px rgba(0,0,0,0.1);
-        transition: all 0.3s ease;
-        overflow: hidden;
-        padding: 8px;
-        word-wrap: break-word;
-        border: 3px solid rgba(255,255,255,0.5);
-        position: relative;
-    }
-    #close-inventory {
-        color: #4a90e2;
-        float: right;
-        font-size: 36px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-    #close-inventory:hover {
-        color: #357abd;
-        transform: rotate(90deg);
-    }
-    h1 {
-        font-size: 48px;
-        color: #4a90e2;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        margin-bottom: 40px;
-        letter-spacing: 2px;
-    }
-    @keyframes glow {
-        0% { box-shadow: 0 0 5px #4a90e2; }
-        50% { box-shadow: 0 0 20px #4a90e2, 0 0 30px #4a90e2; }
-        100% { box-shadow: 0 0 5px #4a90e2; }
-    }
-    .glow {
-        animation: glow 2s infinite;
-    }
-    #delete-button {
-        background: linear-gradient(45deg, #ff4136, #dc3545);
-        color: #fff;
-        border: none;
-        padding: 10px 20px;
-        font-size: 16px;
-        border-radius: 25px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        margin-top: 20px;
-        box-shadow: 0 5px 15px rgba(255, 65, 54, 0.4);
-    }
-    #delete-button:hover {
-        background: linear-gradient(45deg, #dc3545, #c82333);
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(255, 65, 54, 0.6);
-    }
-    #delete-button.active {
-        background: linear-gradient(45deg, #28a745, #218838);
-        box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
-    }
-    #delete-button.active:hover {
-        background: linear-gradient(45deg, #218838, #1e7e34);
-        box-shadow: 0 8px 20px rgba(40, 167, 69, 0.6);
-    }
-    #confirmation-modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0,0,0,0.5);
-        z-index: 2000;
-        align-items: center;
-        justify-content: center;
-    }
-    #confirmation-content {
-        background-color: white;
-        padding: 30px;
-        border-radius: 15px;
-        text-align: center;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    }
-    #confirmation-buttons {
-        margin-top: 20px;
-    }
-    #confirmation-buttons button {
-        margin: 0 10px;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-    #confirm-delete {
-        background-color: #dc3545;
-        color: white;
-    }
-    #cancel-delete {
-        background-color: #6c757d;
-        color: white;
-    }
-    #confirm-delete:hover, #cancel-delete:hover {
-        opacity: 0.8;
-    }
-    #overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.7);
-        display: none;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-    }
-    #roll-animation {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: 100%;
-    }
-    .aura-display {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 36px;
-        font-weight: bold;
-        color: white;
-        text-align: center;
+@keyframes float {
+    0% {transform: translateY(0px);}
+    50% {transform: translateY(-20px);}
+    100% {transform: translateY(0px);}
+}
+
+@keyframes pulse {
+    0% {transform: scale(1);}
+    50% {transform: scale(1.05);}
+    100% {transform: scale(1);}
+}
+
+@keyframes slideIn {
+    0% {
+        transform: translateY(-100%);
         opacity: 0;
-        transition: opacity 0.5s ease;
-        text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
     }
-    #result-container {
-        position: fixed;
-        bottom: 30px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(255, 255, 255, 0.9);
-        padding: 20px;
-        border-radius: 15px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        text-align: center;
-        z-index: 1000;
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    0% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100%);
         opacity: 0;
-        transition: opacity 0.5s ease;
     }
-    #result-text {
-        font-size: 24px;
-        font-weight: bold;
-        color: #4a90e2;
-        margin-bottom: 10px;
+}
+
+@keyframes glowPulse {
+    0% {
+        box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
     }
-    #aura-name {
-        font-size: 32px;
-        font-weight: bold;
-        background: linear-gradient(45deg, #4a90e2, #357abd);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+    50% {
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
     }
+    100% {
+        box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+    }
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    background: white;
+    color: #333;
+    overflow-x: hidden;
+}
+
+.game-container {
+    text-align: center;
+    background: linear-gradient(45deg, #f3f4f6, #ddd);
+    background-size: 200% 200%;
+    animation: gradient 15s ease infinite;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    max-width: 90%;
+    width: 400px;
+    transition: all 0.3s ease;
+}
+
+.game-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 2.5em;
+    margin-bottom: 30px;
+    color: #2c3e50;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    animation: float 6s ease-in-out infinite;
+}
+
+button {
+    font-family: 'Poppins', sans-serif;
+    font-size: 18px;
+    padding: 12px 24px;
+    margin: 10px;
+    cursor: pointer;
+    background: linear-gradient(45deg, #4CAF50, #45a049);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+button:before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: rgba(255,255,255,0.1);
+    transform: rotate(45deg);
+    transition: all 0.3s ease;
+}
+
+button:hover:before {
+    left: 100%;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+}
+
+button:disabled {
+    background: linear-gradient(45deg, #cccccc, #bbbbbb);
+    cursor: not-allowed;
+}
+
+#overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    perspective: 1000px;
+}
+
+#aura-display {
+    font-size: 32px;
+    font-weight: bold;
+    text-align: center;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    max-width: 80%;
+    transition: all 0.5s ease;
+    position: absolute;
+    animation: glowPulse 2s infinite;
+}
+
+#result-container {
+    margin-top: 30px;
+    font-size: 24px;
+    font-weight: 300;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    color: #2c3e50;
+}
+
+.inventory-modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(255,255,255,0.9);
+}
+
+.inventory-content {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    margin: 10% auto;
+    padding: 30px;
+    border-radius: 15px;
+    width: 80%;
+    max-width: 600px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    color: #333;
+    animation: float 6s ease-in-out infinite;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close:hover,
+.close:focus {
+    color: #333;
+}
+
+.inventory-item {
+    display: inline-block;
+    margin: 8px;
+    padding: 10px 15px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-family: 'Lato', sans-serif;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.inventory-item:hover {
+    transform: translateY(-2px) rotate(3deg);
+    box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+}
+
+.delete-mode .inventory-item {
+    opacity: 0.7;
+}
+
+.delete-mode .inventory-item.selected {
+    opacity: 1;
+    box-shadow: 0 0 0 3px #ff0000;
+    animation: pulse 1s infinite;
+}
+
+.confirmation-modal {
+    display: none;
+    position: fixed;
+    z-index: 2;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(255,255,255,0.9);
+}
+
+.confirmation-content {
+    background: linear-gradient(135deg, #FF9A8B 0%, #FF6A88 55%, #FF99AC 100%);
+    margin: 15% auto;
+    padding: 30px;
+    border-radius: 15px;
+    width: 300px;
+    text-align: center;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    color: white;
+    animation: float 4s ease-in-out infinite;
+}
+
+.confirmation-content button {
+    margin: 10px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.confirmation-content button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+#confirm-delete {
+    background: linear-gradient(45deg, #4CAF50, #45a049);
+    color: white;
+}
+
+#cancel-delete {
+    background: linear-gradient(45deg, #f44336, #d32f2f);
+    color: white;
+}
+
 </style>
 </head>
 <body>
-    <div id="game-container">
+    <div class="game-container">
         <h1>смачный рнг</h1>
         <button id="roll-button">Крутить</button>
+        <button id="inventory-button">Инвентарь</button>
+        <div id="result-container"></div>
     </div>
-    <button id="inventory-button">Инвентарь</button>
-    <div id="inventory-modal">
-        <div id="inventory-content">
-            <span id="close-inventory">&times;</span>
-            <h2>Ваш магический инвентарь</h2>
-            <div id="inventory"></div>
-            <button id="delete-button">Удалить</button>
-        </div>
-    </div>
-    <div id="confirmation-modal">
-        <div id="confirmation-content">
-            <p>Вы уверены, что хотите удалить выбранные ауры?</p>
-            <div id="confirmation-buttons">
-                <button id="confirm-delete">Да, удалить</button>
-                <button id="cancel-delete">Отмена</button>
-            </div>
-        </div>
-    </div>
+
     <div id="overlay">
-        <div id="roll-animation">
-            <div class="aura-display" id="aura1"></div>
-            <div class="aura-display" id="aura2"></div>
-            <div class="aura-display" id="aura3"></div>
-            <div class="aura-display" id="aura4"></div>
-            <div class="aura-display" id="aura5"></div>
+        <div id="aura-display"></div>
+    </div>
+
+    <div id="inventory-modal" class="inventory-modal">
+        <div class="inventory-content">
+            <span class="close">&times;</span>
+            <h2>Инвентарь</h2>
+            <div id="inventory-items"></div>
+            <button id="delete-button">Удалить выбранные</button>
         </div>
     </div>
-    <div id="result-container">
-        <div id="result-text">Вы получили:</div>
-        <div id="aura-name"></div>
+
+    <div id="confirmation-modal" class="confirmation-modal">
+        <div class="confirmation-content">
+            <h2>Подтверждение</h2>
+            <p>Вы уверены, что хотите удалить выбранные предметы?</p>
+            <button id="confirm-delete">Да</button>
+            <button id="cancel-delete">Нет</button>
+        </div>
     </div>
 
 <script>
@@ -308,9 +326,9 @@ const auras = [
     { name: "Огненная вспышка", color: "#ff4136", chance: 1/2, font: "Roboto" },
     { name: "Ледяной бриз", color: "#7fdbff", chance: 1/5, font: "Montserrat" },
     { name: "Земляной щит", color: "#3d9970", chance: 1/15, font: "Poppins" },
-    { name: "Воздушный вихрь", color: "#e9ebee", chance: 1/69, font: "Lato" },
+    { name: "Воздушный вихрь", color: "#aaaaaa", chance: 1/69, font: "Lato" },
     { name: "Электрический разряд", color: "#ffdc00", chance: 1/500, font: "Roboto" },
-    { name: "Теневое покрывало", color: "#111111", chance: 1/999, font: "Montserrat" },
+    { name: "Теневое покрывало", color: "#333333", chance: 1/999, font: "Montserrat" },
     { name: "Световая аура", color: "#ffff99", chance: 1/3000, font: "Poppins" },
     { name: "Космическая пыль", color: "#b10dc9", chance: 1/5555, font: "Lato" },
     { name: "Временной разлом", color: "#01ff70", chance: 1/9999, font: "Roboto" },
@@ -320,96 +338,32 @@ const auras = [
 
 const rollButton = document.getElementById('roll-button');
 const inventoryButton = document.getElementById('inventory-button');
+const resultContainer = document.getElementById('result-container');
+const overlay = document.getElementById('overlay');
+const auraDisplay = document.getElementById('aura-display');
 const inventoryModal = document.getElementById('inventory-modal');
-const inventory = document.getElementById('inventory');
-const closeInventory = document.getElementById('close-inventory');
+const closeInventory = document.querySelector('.close');
+const inventoryItems = document.getElementById('inventory-items');
 const deleteButton = document.getElementById('delete-button');
 const confirmationModal = document.getElementById('confirmation-modal');
 const confirmDelete = document.getElementById('confirm-delete');
 const cancelDelete = document.getElementById('cancel-delete');
-const overlay = document.getElementById('overlay');
-const resultContainer = document.getElementById('result-container');
-const auraName = document.getElementById('aura-name');
 
 let isRolling = false;
-let inventoryItems = JSON.parse(localStorage.getItem('inventory')) || [];
+let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
 let isDeleteMode = false;
 let selectedItems = [];
-
-function updateInventory() {
-    inventory.innerHTML = '';
-    inventoryItems.forEach((item, index) => {
-        const inventoryItem = document.createElement('div');
-        inventoryItem.className = 'inventory-item';
-        inventoryItem.style.backgroundColor = item.color;
-        inventoryItem.textContent = item.name;
-        inventoryItem.dataset.index = index;
-        inventoryItem.addEventListener('click', () => toggleItemSelection(inventoryItem));
-        inventory.appendChild(inventoryItem);
-    });
-    localStorage.setItem('inventory', JSON.stringify(inventoryItems));
-}
-
-function toggleItemSelection(item) {
-    if (!isDeleteMode) return;
-    item.classList.toggle('selected');
-    const index = selectedItems.indexOf(parseInt(item.dataset.index));
-    if (index > -1) {
-        selectedItems.splice(index, 1);
-    } else {
-        selectedItems.push(parseInt(item.dataset.index));
-    }
-}
-
-function toggleDeleteMode() {
-    isDeleteMode = !isDeleteMode;
-    deleteButton.textContent = isDeleteMode ? 'Отменить удаление' : 'Удалить';
-    deleteButton.classList.toggle('active');
-    if (!isDeleteMode) {
-        selectedItems = [];
-        document.querySelectorAll('.inventory-item').forEach(item => item.classList.remove('selected'));
-    }
-}
-
-function showConfirmationModal() {
-    if (selectedItems.length > 0) {
-        confirmationModal.style.display = 'flex';
-    }
-}
-
-function hideConfirmationModal() {
-    confirmationModal.style.display = 'none';
-}
-
-function deleteSelectedItems() {
-    inventoryItems = inventoryItems.filter((_, index) => !selectedItems.includes(index));
-    updateInventory();
-    selectedItems = [];
-    toggleDeleteMode();
-    hideConfirmationModal();
-}
 
 function getRandomAura() {
     const random = Math.random();
     let cumulativeChance = 0;
     for (const aura of auras) {
         cumulativeChance += aura.chance;
-        if (random < cumulativeChance) {
+        if (random <= cumulativeChance) {
             return aura;
         }
     }
     return auras[auras.length - 1];
-}
-
-function displayAura(aura, index) {
-    const auraElement = document.getElementById(`aura${index}`);
-    auraElement.style.color = aura.color;
-    auraElement.style.fontFamily = aura.font;
-    auraElement.textContent = aura.name;
-    auraElement.style.opacity = '1';
-    setTimeout(() => {
-        auraElement.style.opacity = '0';
-    }, 800);
 }
 
 function roll() {
@@ -423,36 +377,109 @@ function roll() {
     let displayCount = 0;
 
     function displayNextAura() {
-        if (displayCount < 4) {
+        if (displayCount < 20) {
             const randomAura = auras[Math.floor(Math.random() * auras.length)];
             displayAura(randomAura, displayCount + 1);
             displayCount++;
-            setTimeout(displayNextAura, 1000);
+            setTimeout(displayNextAura, 100);
         } else {
             setTimeout(() => {
-                displayAura(result, 5);
+                displayAura(result, 21);
                 finishRoll(result);
-            }, 1000);
+            }, 500);
         }
     }
 
     displayNextAura();
 }
 
+function displayAura(aura, count) {
+    auraDisplay.style.color = aura.color;
+    auraDisplay.style.fontFamily = aura.font;
+    auraDisplay.textContent = `${aura.name}`;
+    auraDisplay.style.animation = 'none';
+    void auraDisplay.offsetWidth; // Trigger reflow
+    auraDisplay.style.animation = count % 2 === 0 ? 'slideIn 0.2s ease-out' : 'slideOut 0.2s ease-in';
+    
+    // Add 3D rotation effect
+    const rotationAmount = Math.random() * 20 - 10; // Random rotation between -10 and 10 degrees
+    auraDisplay.style.transform = `rotateX(${rotationAmount}deg)`;
+}
+
 function finishRoll(result) {
-    inventoryItems.push(result);
-    updateInventory();
-    isRolling = false;
-    rollButton.disabled = false;
-    auraName.textContent = result.name;
-    auraName.style.color = result.color;
-    resultContainer.style.opacity = '1';
     setTimeout(() => {
         overlay.style.display = 'none';
-        setTimeout(() => {
-            resultContainer.style.opacity = '0';
-        }, 3000);
-    }, 2000);
+        resultContainer.textContent = `Вы получили: ${result.name}`;
+        resultContainer.style.opacity = '1';
+        resultContainer.style.animation = 'pulse 1s ease-in-out';
+        rollButton.disabled = false;
+        isRolling = false;
+        addToInventory(result);
+    }, 1500);
+}
+
+function addToInventory(aura) {
+    inventory.push(aura);
+    localStorage.setItem('inventory', JSON.stringify(inventory));
+    updateInventory();
+}
+
+function updateInventory() {
+    inventoryItems.innerHTML = '';
+    inventory.forEach((item, index) => {
+        const itemElement = document.createElement('span');
+        itemElement.textContent = item.name;
+        itemElement.className = 'inventory-item';
+        itemElement.style.backgroundColor = item.color;
+        itemElement.style.color = getContrastColor(item.color);
+        itemElement.dataset.index = index;
+        itemElement.onclick = () => toggleItemSelection(itemElement);
+        inventoryItems.appendChild(itemElement);
+    });
+}
+
+function getContrastColor(hexcolor) {
+    hexcolor = hexcolor.replace("#", "");
+    var r = parseInt(hexcolor.substr(0,2),16);
+    var g = parseInt(hexcolor.substr(2,2),16);
+    var b = parseInt(hexcolor.substr(4,2),16);
+    var yiq = ((r*299)+(g*587)+(b*114))/1000;
+    return (yiq >= 128) ? 'black' : 'white';
+}
+
+function toggleDeleteMode() {
+    isDeleteMode = !isDeleteMode;
+    deleteButton.textContent = isDeleteMode ? 'Отменить удаление' : 'Удалить выбранные';
+    inventoryItems.classList.toggle('delete-mode');
+    selectedItems = [];
+    updateInventory();
+}
+
+function toggleItemSelection(item) {
+    if (!isDeleteMode) return;
+    item.classList.toggle('selected');
+    const index = selectedItems.indexOf(item.dataset.index);
+    if (index > -1) {
+        selectedItems.splice(index, 1);
+    } else {
+        selectedItems.push(item.dataset.index);
+    }
+}
+
+function showConfirmationModal() {
+    confirmationModal.style.display = 'block';
+}
+
+function hideConfirmationModal() {
+    confirmationModal.style.display = 'none';
+}
+
+function deleteSelectedItems() {
+    inventory = inventory.filter((_, index) => !selectedItems.includes(index.toString()));
+    localStorage.setItem('inventory', JSON.stringify(inventory));
+    hideConfirmationModal();
+    toggleDeleteMode();
+    updateInventory();
 }
 
 rollButton.addEventListener('click', roll);
