@@ -1,1062 +1,488 @@
-<html><head><base href="https://www.epicclicker.com/">
+<html><head><base href="https://websim.io/sols-rng-game/">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>понос</title>
+<title>sols</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@400;700&family=Poppins:wght@400;700&family=Lato:wght@400;700&display=swap');
 
-  :root {
-    --primary-color: #4a69bd;
-    --secondary-color: #ff6b6b;
-    --background-color: #1a1a2e;
-    --text-color: #ffffff;
-    --menu-bg-color: rgba(22, 33, 62, 0.95);
-    --button-gradient: linear-gradient(135deg, #4a69bd, #3498db);
-    --button-hover-gradient: linear-gradient(135deg, #3498db, #4a69bd);
-    --disabled-color: #888;
-  }
-
-  body {
-    font-family: 'Roboto', sans-serif;
-    background: linear-gradient(135deg, var(--background-color), #16213e);
-    color: var(--text-color);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    overflow: hidden;
-  }
-
-  .game-container {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    padding: 2rem;
-    text-align: center;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .game-container::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
-    animation: pulse 4s linear infinite;
-  }
-
-  @keyframes pulse {
-    0% {
-      transform: translate(0, 0);
+    body, html {
+        margin: 0;
+        padding: 0;
+        font-family: 'Roboto', sans-serif;
+        background: #f0f2f5;
+        color: #333;
+        height: 100%;
+        overflow: hidden;
     }
-    100% {
-      transform: translate(-25%, -25%);
+    #game-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        position: relative;
     }
-  }
-
-  #click-area {
-    width: 200px;
-    height: 200px;
-    margin: 2rem auto;
-    cursor: pointer;
-    transition: transform 0.1s;
-    position: relative;
-    overflow: visible;
-  }
-
-  .like-button {
-    width: 100%;
-    height: 100%;
-    background-color: #fff;
-    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") no-repeat center center;
-    mask-size: contain;
-    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") no-repeat center center;
-    -webkit-mask-size: contain;
-    background-color: var(--secondary-color);
-    transition: background-color 0.3s, transform 0.1s;
-  }
-
-  #click-area:active .like-button {
-    transform: scale(0.95);
-    background-color: #ff4757;
-  }
-
-  @keyframes heartbeat {
-    0% {
-      transform: scale(1);
+    #roll-button {
+        background: linear-gradient(45deg, #4a90e2, #357abd);
+        color: #fff;
+        border: none;
+        padding: 18px 40px;
+        font-size: 20px;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 20px rgba(74, 144, 226, 0.4);
+        text-transform: uppercase;
+        font-weight: bold;
+        letter-spacing: 1px;
+        z-index: 10;
     }
-    50% {
-      transform: scale(1.1);
+    #roll-button:hover {
+        background: linear-gradient(45deg, #357abd, #2a5f9e);
+        transform: translateY(-3px);
+        box-shadow: 0 15px 25px rgba(74, 144, 226, 0.6);
     }
-    100% {
-      transform: scale(1);
+    #roll-button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
     }
-  }
-
-  .heartbeat {
-    animation: heartbeat 0.5s;
-  }
-
-  #score, #multiplier {
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-  }
-
-  .upgrade {
-    background: var(--button-gradient);
-    border: none;
-    color: white;
-    padding: 12px 24px;
-    margin: 8px 0;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 14px;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    width: 100%;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .upgrade::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%);
-    transform: scale(0);
-    transition: transform 0.5s;
-  }
-
-  .upgrade:hover::before {
-    transform: scale(1);
-  }
-
-  .upgrade:hover {
-    background: var(--button-hover-gradient);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
-  }
-
-  .upgrade:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-
-  .upgrade:disabled {
-    background: var(--disabled-color);
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-    opacity: 0.7;
-  }
-
-  .upgrade-description {
-    font-size: 12px;
-    color: #ccc;
-    margin-top: 4px;
-    font-style: italic;
-  }
-
-  #menu-button {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: var(--primary-color);
-    border: none;
-    color: white;
-    padding: 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-
-  #menu-button:hover {
-    background: #3a5795;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-
-  #menu {
-    position: fixed;
-    top: 0;
-    right: -300px;
-    width: 300px;
-    height: 100%;
-    background: var(--menu-bg-color);
-    transition: right 0.3s ease-in-out;
-    padding: 20px;
-    box-sizing: border-box;
-    overflow-y: auto;
-    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
-  }
-
-  #menu.open {
-    right: 0;
-  }
-
-  .menu-section {
-    margin-bottom: 20px;
-    background: rgba(255, 255, 255, 0.05);
-    padding: 15px;
-    border-radius: 10px;
-  }
-
-  .menu-section h3 {
-    border-bottom: 1px solid var(--text-color);
-    padding-bottom: 5px;
-    margin-top: 0;
-  }
-
-  .achievement {
-    background: rgba(255, 255, 255, 0.1);
-    padding: 10px;
-    margin: 5px 0;
-    border-radius: 5px;
-    transition: all 0.3s ease;
-  }
-
-  .achievement.unlocked {
-    background: rgba(74, 105, 189, 0.3);
-  }
-
-  .achievement:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-
-  #prestige-info {
-    margin-top: 20px;
-    font-style: italic;
-  }
-
-  .resource {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-  }
-
-  .progress-bar {
-    width: 100%;
-    height: 10px;
-    background-color: #ddd;
-    border-radius: 5px;
-    overflow: hidden;
-    position: relative;
-  }
-
-  .progress {
-    width: 0%;
-    height: 100%;
-    background-color: var(--primary-color);
-    transition: width 0.5s ease-in-out;
-    position: relative;
-  }
-
-  .progress::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    animation: shimmer 1.5s infinite;
-  }
-
-  @keyframes shimmer {
-    0% {
-      transform: translateX(-100%);
+    #inventory-button {
+        position: fixed;
+        left: 30px;
+        bottom: 30px;
+        background: linear-gradient(45deg, #4a90e2, #357abd);
+        color: #fff;
+        border: none;
+        padding: 15px 30px;
+        font-size: 18px;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        z-index: 1000;
+        box-shadow: 0 5px 15px rgba(74, 144, 226, 0.4);
     }
-    100% {
-      transform: translateX(100%);
+    #inventory-button:hover {
+        background: linear-gradient(45deg, #357abd, #2a5f9e);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(74, 144, 226, 0.6);
     }
-  }
-
-  #overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease-in-out;
-  }
-
-  #overlay.active {
-    opacity: 1;
-    pointer-events: all;
-  }
-
-  .modal {
-    background: var(--menu-bg-color);
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-    max-width: 80%;
-    transform: scale(0.9);
-    transition: transform 0.3s ease-in-out;
-  }
-
-  #overlay.active .modal {
-    transform: scale(1);
-  }
-
-  .modal h2 {
-    margin-top: 0;
-  }
-
-  .modal-buttons {
-    margin-top: 20px;
-  }
-
-  .modal-button {
-    background: var(--primary-color);
-    border: none;
-    color: white;
-    padding: 10px 20px;
-    margin: 0 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background 0.3s;
-  }
-
-  .modal-button:hover {
-    background: #1e3799;
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-
-  .fadeIn {
-    animation: fadeIn 0.5s ease-in-out;
-  }
-
-  .particle {
-    position: absolute;
-    pointer-events: none;
-    animation: particleAnimation 1s ease-out forwards;
-  }
-
-  @keyframes particleAnimation {
-    0% {
-      transform: translate(0, 0) scale(1);
-      opacity: 1;
+    #inventory-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.8);
+        z-index: 1001;
+        backdrop-filter: blur(5px);
     }
-    100% {
-      transform: translate(var(--x), var(--y)) scale(0);
-      opacity: 0;
+    #inventory-content {
+        background-color: rgba(255,255,255,0.95);
+        margin: 5% auto;
+        padding: 30px;
+        width: 90%;
+        max-width: 800px;
+        border-radius: 20px;
+        box-shadow: 0 0 30px rgba(0,0,0,0.3);
     }
-  }
+    #inventory {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 20px;
+        margin-top: 30px;
+    }
+    .inventory-item {
+        width: 120px;
+        height: 120px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 16px;
+        text-align: center;
+        box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        padding: 8px;
+        word-wrap: break-word;
+        border: 3px solid rgba(255,255,255,0.5);
+        position: relative;
+    }
+    #close-inventory {
+        color: #4a90e2;
+        float: right;
+        font-size: 36px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    #close-inventory:hover {
+        color: #357abd;
+        transform: rotate(90deg);
+    }
+    h1 {
+        font-size: 48px;
+        color: #4a90e2;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 40px;
+        letter-spacing: 2px;
+    }
+    @keyframes glow {
+        0% { box-shadow: 0 0 5px #4a90e2; }
+        50% { box-shadow: 0 0 20px #4a90e2, 0 0 30px #4a90e2; }
+        100% { box-shadow: 0 0 5px #4a90e2; }
+    }
+    .glow {
+        animation: glow 2s infinite;
+    }
+    #delete-button {
+        background: linear-gradient(45deg, #ff4136, #dc3545);
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 20px;
+        box-shadow: 0 5px 15px rgba(255, 65, 54, 0.4);
+    }
+    #delete-button:hover {
+        background: linear-gradient(45deg, #dc3545, #c82333);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(255, 65, 54, 0.6);
+    }
+    #delete-button.active {
+        background: linear-gradient(45deg, #28a745, #218838);
+        box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+    }
+    #delete-button.active:hover {
+        background: linear-gradient(45deg, #218838, #1e7e34);
+        box-shadow: 0 8px 20px rgba(40, 167, 69, 0.6);
+    }
+    #confirmation-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+    }
+    #confirmation-content {
+        background-color: white;
+        padding: 30px;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    #confirmation-buttons {
+        margin-top: 20px;
+    }
+    #confirmation-buttons button {
+        margin: 0 10px;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    #confirm-delete {
+        background-color: #dc3545;
+        color: white;
+    }
+    #cancel-delete {
+        background-color: #6c757d;
+        color: white;
+    }
+    #confirm-delete:hover, #cancel-delete:hover {
+        opacity: 0.8;
+    }
+    #overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+    #roll-animation {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+    }
+    .aura-display {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 36px;
+        font-weight: bold;
+        color: white;
+        text-align: center;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    }
+    #result-container {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(255, 255, 255, 0.9);
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+    }
+    #result-text {
+        font-size: 24px;
+        font-weight: bold;
+        color: #4a90e2;
+        margin-bottom: 10px;
+    }
+    #aura-name {
+        font-size: 32px;
+        font-weight: bold;
+        background: linear-gradient(45deg, #4a90e2, #357abd);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
 </style>
 </head>
 <body>
-<div class="game-container">
-  <h1>Мега наисмачнеший кликер v69</h1>
-  <div id="score">Монеты: 0</div>
-  <div id="multiplier">Множитель: x1</div>
-  <div id="click-area">
-    <div class="like-button"></div>
-  </div>
-  <button id="menu-button">Меню</button>
-</div>
-
-<div id="menu">
-  <h2>Меню</h2>
-  <div class="menu-section">
-    <h3>Ресурсы</h3>
-    <div class="resource">
-      <span>Энергия:</span>
-      <span id="energy">10/10</span>
+    <div id="game-container">
+        <h1>смачный рнг</h1>
+        <button id="roll-button">Крутить</button>
     </div>
-    <div class="progress-bar">
-      <div class="progress" id="energy-bar"></div>
+    <button id="inventory-button">Инвентарь</button>
+    <div id="inventory-modal">
+        <div id="inventory-content">
+            <span id="close-inventory">&times;</span>
+            <h2>Ваш магический инвентарь</h2>
+            <div id="inventory"></div>
+            <button id="delete-button">Удалить</button>
+        </div>
     </div>
-    <div class="resource">
-      <span>Кристаллы:</span>
-      <span id="crystals">0</span>
+    <div id="confirmation-modal">
+        <div id="confirmation-content">
+            <p>Вы уверены, что хотите удалить выбранные ауры?</p>
+            <div id="confirmation-buttons">
+                <button id="confirm-delete">Да, удалить</button>
+                <button id="cancel-delete">Отмена</button>
+            </div>
+        </div>
     </div>
-  </div>
-  <div class="menu-section">
-    <h3>Улучшения</h3>
-    <button class="upgrade" id="upgrade-click">Улучшить клик (10 монет) [0/3]</button>
-    <div class="upgrade-description">Увеличивает силу клика на 1</div>
-    <button class="upgrade" id="upgrade-multiplier">Улучшить множитель (50 монет)</button>
-    <div class="upgrade-description">Увеличивает множитель на 1 (макс. 3)</div>
-    <button class="upgrade" id="upgrade-energy">Увеличить макс. энергию (100 монет)</button>
-    <div class="upgrade-description">Увеличивает максимальную энергию на 20</div>
-    <button class="upgrade" id="upgrade-energy-regen">Ускорить восстановление энергии (200 монет)</button>
-    <div class="upgrade-description">Увеличивает скорость восстановления энергии на 0.5 в секунду</div>
-    <button class="upgrade" id="upgrade-auto-click">Авто-клик (500 монет, макс. 3)</button>
-    <div class="upgrade-description">Автоматически кликает каждую секунду</div>
-    <button class="upgrade" id="upgrade-lucky-clicks">Удачливые клики (1000 монет, макс. 3)</button>
-    <div class="upgrade-description">Увеличивает шанс двойной награды за клик</div>
-    <button class="upgrade" id="upgrade-offline-progress">Офлайн прогресс (2000 монет)</button>
-    <div class="upgrade-description">Увеличивает заработок в офлайне</div>
-    <button class="upgrade" id="upgrade-golden-clicks">Золотые клики (3000 монет)</button>
-    <div class="upgrade-description">Шанс получить бонусные монеты при клике</div>
-    <button class="upgrade" id="upgrade-energy-capacity">Энергетическая ёмкость (5000 монет)</button>
-    <div class="upgrade-description">Значительно увеличивает максимальную энергию</div>
-    <button class="upgrade" id="upgrade-click-storm">Шторм кликов (7500 монет)</button>
-    <div class="upgrade-description">Периодически активирует бонус мощных кликов</div>
-    <button class="upgrade" id="upgrade-crystal-finder">Кристальный искатель (10000 монет)</button>
-    <div class="upgrade-description">Увеличивает шанс найти кристаллы при клике</div>
-  </div>
-  <div class="menu-section">
-    <h3>Кристальные улучшения</h3>
-    <button class="upgrade" id="crystal-click-power">Сила кликов (+5%, 1 кристалл)</button>
-    <div class="upgrade-description">Увеличивает силу кликов на 5%</div>
-    <button class="upgrade" id="crystal-offline-progress">Офлайн прогресс (+1% в час, 2 кристалла)</button>
-    <div class="upgrade-description">Увеличивает офлайн заработок на 1% в час</div>
-    <button class="upgrade" id="crystal-energy-boost">Энергетический буст (+10% макс. энергии, 3 кристалла)</button>
-    <div class="upgrade-description">Увеличивает максимальную энергию на 10%</div>
-    <button class="upgrade" id="crystal-auto-clicker">Кристальный авто-кликер (5 кристаллов)</button>
-    <div class="upgrade-description">Добавляет мощный авто-кликер</div>
-    <button class="upgrade" id="crystal-lucky-bonus">Бонус удачи (7 кристаллов)</button>
-    <div class="upgrade-description">Увеличивает эффективность удачливых кликов</div>
-  </div>
-  <div class="menu-section">
-    <h3>Статистика</h3>
-    <div id="statistics"></div>
-  </div>
-  <div class="menu-section">
-    <h3>Достижения</h3>
-    <div id="achievements"></div>
-  </div>
-  <div class="menu-section">
-    <h3>Престиж</h3>
-    <button class="upgrade" id="prestige">Престиж (1000 монет)</button>
-    <div id="prestige-info">Престиж сбросит ваш прогресс, но даст вам кристаллы для мощных бонусов!</div>
-  </div>
-</div>
-
-<div id="overlay">
-  <div class="modal">
-    <h2 id="modal-title"></h2>
-    <p id="modal-content"></p>
-    <div class="modal-buttons">
-      <button class="modal-button" id="modal-confirm">Подтвердить</button>
-      <button class="modal-button" id="modal-cancel">Отмена</button>
+    <div id="overlay">
+        <div id="roll-animation">
+            <div class="aura-display" id="aura1"></div>
+            <div class="aura-display" id="aura2"></div>
+            <div class="aura-display" id="aura3"></div>
+            <div class="aura-display" id="aura4"></div>
+            <div class="aura-display" id="aura5"></div>
+        </div>
     </div>
-  </div>
-</div>
+    <div id="result-container">
+        <div id="result-text">Вы получили:</div>
+        <div id="aura-name"></div>
+    </div>
 
 <script>
-let score = 0;
-let clickValue = 1;
-let multiplier = 1;
-let energy = 10;
-let maxEnergy = 10;
-let energyRegen = 0.5;
-let crystals = 0;
-let prestigeCount = 0;
-let prestigeCost = 1000;
-let autoClickPower = 0;
-let luckyClickChance = 0;
-let offlineProgressRate = 0;
-let lastUpdateTime = Date.now();
-let totalClicks = 0;
-let totalMoney = 0;
-let goldenClickChance = 0;
-let clickStormActive = false;
-let crystalFinderChance = 0;
-let clickUpgrades = 0;
-
-const clickArea = document.getElementById('click-area');
-const scoreDisplay = document.getElementById('score');
-const multiplierDisplay = document.getElementById('multiplier');
-const menuButton = document.getElementById('menu-button');
-const menu = document.getElementById('menu');
-const energyDisplay = document.getElementById('energy');
-const energyBar = document.getElementById('energy-bar');
-const crystalsDisplay = document.getElementById('crystals');
-const upgradeClickBtn = document.getElementById('upgrade-click');
-const upgradeMultiplierBtn = document.getElementById('upgrade-multiplier');
-const upgradeEnergyBtn = document.getElementById('upgrade-energy');
-const upgradeEnergyRegenBtn = document.getElementById('upgrade-energy-regen');
-const upgradeAutoClickBtn = document.getElementById('upgrade-auto-click');
-const upgradeLuckyClicksBtn = document.getElementById('upgrade-lucky-clicks');
-const upgradeOfflineProgressBtn = document.getElementById('upgrade-offline-progress');
-const upgradeGoldenClicksBtn = document.getElementById('upgrade-golden-clicks');
-const upgradeEnergyCapacityBtn = document.getElementById('upgrade-energy-capacity');
-const upgradeClickStormBtn = document.getElementById('upgrade-click-storm');
-const upgradeCrystalFinderBtn = document.getElementById('upgrade-crystal-finder');
-const prestigeBtn = document.getElementById('prestige');
-const achievementsContainer = document.getElementById('achievements');
-const statisticsContainer = document.getElementById('statistics');
-const overlay = document.getElementById('overlay');
-const modalTitle = document.getElementById('modal-title');
-const modalContent = document.getElementById('modal-content');
-const modalConfirm = document.getElementById('modal-confirm');
-const modalCancel = document.getElementById('modal-cancel');
-
-const crystalClickPowerBtn = document.getElementById('crystal-click-power');
-const crystalOfflineProgressBtn = document.getElementById('crystal-offline-progress');
-const crystalEnergyBoostBtn = document.getElementById('crystal-energy-boost');
-const crystalAutoClickerBtn = document.getElementById('crystal-auto-clicker');
-const crystalLuckyBonusBtn = document.getElementById('crystal-lucky-bonus');
-
-const achievements = [
-  { id: 'firstClick', name: 'Первый клик', description: 'Сделайте свой первый клик', unlocked: false },
-  { id: 'hundredClicks', name: 'Сотня кликов', description: 'Сделайте 100 кликов', unlocked: false },
-  { id: 'firstUpgrade', name: 'Первое улучшение', description: 'Купите первое улучшение', unlocked: false },
-  { id: 'energyMaster', name: 'Мастер энергии', description: 'Достигните максимальной энергии 200', unlocked: false },
-  { id: 'crystalCollector', name: 'Коллекционер кристаллов', description: 'Соберите 10 кристаллов', unlocked: false },
-  { id: 'millionaire', name: 'Миллионер', description: 'Накопите 1,000,000 монет', unlocked: false },
-  { id: 'prestigeMaster', name: 'Мастер престижа', description: 'Выполните престиж 5 раз', unlocked: false },
-  { id: 'goldenLuck', name: 'Золотая удача', description: 'Получите 10 золотых кликов', unlocked: false },
-  { id: 'stormChaser', name: 'Охотник за штормами', description: 'Переживите 5 штормов кликов', unlocked: false },
-  { id: 'crystalHunter', name: 'Охотник за кристаллами', description: 'Найдите 50 кристаллов', unlocked: false }
+const auras = [
+    { name: "Огненная вспышка", color: "#ff4136", chance: 1/2, font: "Roboto" },
+    { name: "Ледяной бриз", color: "#7fdbff", chance: 1/5, font: "Montserrat" },
+    { name: "Земляной щит", color: "#3d9970", chance: 1/15, font: "Poppins" },
+    { name: "Воздушный вихрь", color: "#e9ebee", chance: 1/69, font: "Lato" },
+    { name: "Электрический разряд", color: "#ffdc00", chance: 1/500, font: "Roboto" },
+    { name: "Теневое покрывало", color: "#111111", chance: 1/999, font: "Montserrat" },
+    { name: "Световая аура", color: "#ffff99", chance: 1/3000, font: "Poppins" },
+    { name: "Космическая пыль", color: "#b10dc9", chance: 1/5555, font: "Lato" },
+    { name: "Временной разлом", color: "#01ff70", chance: 1/9999, font: "Roboto" },
+    { name: "Звёздный ветер", color: "#f012be", chance: 1/40000, font: "Montserrat" },
+    { name: "Вселенская гармония", color: "#39cccc", chance: 1/99999, font: "Poppins" }
 ];
 
-function updateAchievements() {
-  achievementsContainer.innerHTML = '';
-  achievements.forEach(achievement => {
-    const achievementElement = document.createElement('div');
-    achievementElement.classList.add('achievement');
-    if (achievement.unlocked) {
-      achievementElement.classList.add('unlocked');
-    }
-    achievementElement.textContent = `${achievement.name}: ${achievement.description}`;
-    achievementsContainer.appendChild(achievementElement);
-  });
+const rollButton = document.getElementById('roll-button');
+const inventoryButton = document.getElementById('inventory-button');
+const inventoryModal = document.getElementById('inventory-modal');
+const inventory = document.getElementById('inventory');
+const closeInventory = document.getElementById('close-inventory');
+const deleteButton = document.getElementById('delete-button');
+const confirmationModal = document.getElementById('confirmation-modal');
+const confirmDelete = document.getElementById('confirm-delete');
+const cancelDelete = document.getElementById('cancel-delete');
+const overlay = document.getElementById('overlay');
+const resultContainer = document.getElementById('result-container');
+const auraName = document.getElementById('aura-name');
+
+let isRolling = false;
+let inventoryItems = JSON.parse(localStorage.getItem('inventory')) || [];
+let isDeleteMode = false;
+let selectedItems = [];
+
+function updateInventory() {
+    inventory.innerHTML = '';
+    inventoryItems.forEach((item, index) => {
+        const inventoryItem = document.createElement('div');
+        inventoryItem.className = 'inventory-item';
+        inventoryItem.style.backgroundColor = item.color;
+        inventoryItem.textContent = item.name;
+        inventoryItem.dataset.index = index;
+        inventoryItem.addEventListener('click', () => toggleItemSelection(inventoryItem));
+        inventory.appendChild(inventoryItem);
+    });
+    localStorage.setItem('inventory', JSON.stringify(inventoryItems));
 }
 
-function unlockAchievement(id) {
-  const achievement = achievements.find(a => a.id === id);
-  if (achievement && !achievement.unlocked) {
-    achievement.unlocked = true;
-    updateAchievements();
-    showModal('Достижение разблокировано!', `Вы получили достижение: ${achievement.name}`);
-  }
+function toggleItemSelection(item) {
+    if (!isDeleteMode) return;
+    item.classList.toggle('selected');
+    const index = selectedItems.indexOf(parseInt(item.dataset.index));
+    if (index > -1) {
+        selectedItems.splice(index, 1);
+    } else {
+        selectedItems.push(parseInt(item.dataset.index));
+    }
 }
 
-function updateStatistics() {
-  statisticsContainer.innerHTML = `
-    <p>Всего кликов: ${totalClicks}</p>
-    <p>Всего заработано: ${Math.floor(totalMoney)} монет</p>
-    <p>Престижей: ${prestigeCount}</p>
-    <p>Текущая сила клика: ${clickValue * multiplier}</p>
-    <p>Авто-клики в секунду: ${autoClickPower}</p>
-    <p>Шанс удачливого клика: ${(luckyClickChance * 100).toFixed(2)}%</p>
-    <p>Офлайн прогресс: ${(offlineProgressRate * 100).toFixed(2)}% в час</p>
-    <p>Шанс золотого клика: ${(goldenClickChance * 100).toFixed(2)}%</p>
-    <p>Шанс найти кристалл: ${(crystalFinderChance * 100).toFixed(2)}%</p>
-  `;
+function toggleDeleteMode() {
+    isDeleteMode = !isDeleteMode;
+    deleteButton.textContent = isDeleteMode ? 'Отменить удаление' : 'Удалить';
+    deleteButton.classList.toggle('active');
+    if (!isDeleteMode) {
+        selectedItems = [];
+        document.querySelectorAll('.inventory-item').forEach(item => item.classList.remove('selected'));
+    }
 }
 
-let canClick = true; // Флаг, разрешающий кликать
-
-clickArea.addEventListener('click', () => {
-  if (canClick && energy >= 1) {
-    canClick = false; // Блокируем клики
-
-    clickArea.classList.add('heartbeat');
-    setTimeout(() => clickArea.classList.remove('heartbeat'), 500);
-
-    let clickPower = clickValue * multiplier;
-    if (Math.random() < luckyClickChance) {
-      clickPower *= 2;
-      createParticles(true);
+function showConfirmationModal() {
+    if (selectedItems.length > 0) {
+        confirmationModal.style.display = 'flex';
     }
-    if (Math.random() < goldenClickChance) {
-      clickPower *= 5;
-      createParticles(true, 'gold');
-    }
-    if (clickStormActive) {
-      clickPower *= 3;
-    }
-    score += clickPower;
-    totalMoney += clickPower;
-    energy--;
-    totalClicks++;
-    updateScore();
-    updateEnergy();
-    updateStatistics();
-    createParticles();
-
-    if (Math.random() < crystalFinderChance) {
-      crystals++;
-      crystalsDisplay.textContent = crystals;
-      createParticles(true, 'purple');
-    }
-
-    if (!achievements.find(a => a.id === 'firstClick').unlocked) {
-      unlockAchievement('firstClick');
-    }
-
-    if (totalClicks >= 100 && !achievements.find(a => a.id === 'hundredClicks').unlocked) {
-      unlockAchievement('hundredClicks');
-    }
-
-    if (totalMoney >= 1000000 && !achievements.find(a => a.id === 'millionaire').unlocked) {
-      unlockAchievement('millionaire');
-    }
-
-    // Разблокируем клики через 0.6 секунд
-    setTimeout(() => {
-      canClick = true;
-    }, 600);
-  }
-});
-
-
-upgradeClickBtn.addEventListener('click', () => {
-  const cost = 10 * (clickUpgrades + 1);
-  if (score >= cost && clickUpgrades < 3) {
-    score -= cost;
-    clickValue++;
-    clickUpgrades++;
-    updateScore();
-    upgradeClickBtn.textContent = clickUpgrades < 3 ? `Улучшить клик (${10 * (clickUpgrades + 1)} монет) [${clickUpgrades}/3]` : 'Улучшить клик [MAX]';
-    if (clickUpgrades >= 3) {
-      upgradeClickBtn.disabled = true;
-    }
-
-    if (!achievements.find(a => a.id === 'firstUpgrade').unlocked) {
-      unlockAchievement('firstUpgrade');
-    }
-  }
-});
-
-upgradeMultiplierBtn.addEventListener('click', () => {
-  const cost = 50 * multiplier;
-  if (score >= cost && multiplier < 3) {
-    score -= cost;
-    multiplier++;
-    updateScore();
-    multiplierDisplay.textContent = `Множитель: x${multiplier}`;
-    upgradeMultiplierBtn.textContent = multiplier < 3 ? `Улучшить множитель (${50 * multiplier} монет)` : 'Максимум';
-    if (multiplier >= 3) {
-      upgradeMultiplierBtn.disabled = true;
-    }
-  }
-});
-
-upgradeEnergyBtn.addEventListener('click', () => {
-  const cost = 100 + (maxEnergy - 50) * 5;
-  if (score >= cost) {
-    score -= cost;
-    maxEnergy += 20;
-    updateScore();
-    updateEnergy();
-    upgradeEnergyBtn.textContent = `Увеличить макс. энергию (${100 + (maxEnergy - 50) * 5} монет)`;
-
-    if (maxEnergy >= 200 && !achievements.find(a => a.id === 'energyMaster').unlocked) {
-      unlockAchievement('energyMaster');
-    }
-  }
-});
-
-upgradeEnergyRegenBtn.addEventListener('click', () => {
-  const cost = 200 + Math.floor((energyRegen - 1) * 200);
-  if (score >= cost) {
-    score -= cost;
-    energyRegen += 0.5;
-    updateScore();
-    upgradeEnergyRegenBtn.textContent = `Ускорить восстановление энергии (${200 + Math.floor((energyRegen - 1) * 200)} монет)`;
-  }
-});
-
-let autoClickUpgrades = 0;
-upgradeAutoClickBtn.addEventListener('click', () => {
-  const cost = 500 * (autoClickUpgrades + 1);
-  if (score >= cost && autoClickUpgrades < 3) {
-    score -= cost;
-    autoClickUpgrades++;
-    autoClickPower += 0.5;
-    updateScore();
-    upgradeAutoClickBtn.textContent = autoClickUpgrades < 3 ? `Авто-клик (${500 * (autoClickUpgrades + 1)} монет, ${autoClickUpgrades}/3)` : 'Максимум';
-    if (autoClickUpgrades >= 3) {
-      upgradeAutoClickBtn.disabled = true;
-    }
-  }
-});
-
-let luckyClickUpgrades = 0;
-upgradeLuckyClicksBtn.addEventListener('click', () => {
-  const cost = 1000 * (luckyClickUpgrades + 1);
-  if (score >= cost && luckyClickUpgrades < 3) {
-    score -= cost;
-    luckyClickUpgrades++;
-    luckyClickChance += 0.05;
-    updateScore();
-    upgradeLuckyClicksBtn.textContent = luckyClickUpgrades < 3 ? `Удачливые клики (${1000 * (luckyClickUpgrades + 1)} монет, ${luckyClickUpgrades}/3)` : 'Максимум';
-    if (luckyClickUpgrades >= 3) {
-      upgradeLuckyClicksBtn.disabled = true;
-    }
-  }
-});
-
-upgradeOfflineProgressBtn.addEventListener('click', () => {
-  const cost = 2000;
-  if (score >= cost) {
-    score -= cost;
-    offlineProgressRate += 0.01;
-    updateScore();
-    upgradeOfflineProgressBtn.textContent = `Офл айн прогресс (${2000 + Math.floor(offlineProgressRate * 100) * 500} монет)`;
-  }
-});
-
-upgradeGoldenClicksBtn.addEventListener('click', () => {
-  const cost = 3000;
-  if (score >= cost) {
-    score -= cost;
-    goldenClickChance += 0.01;
-    updateScore();
-    upgradeGoldenClicksBtn.textContent = `Золотые клики (${3000 + Math.floor(goldenClickChance * 100) * 1000} монет)`;
-  }
-});
-
-upgradeEnergyCapacityBtn.addEventListener('click', () => {
-  const cost = 5000;
-  if (score >= cost) {
-    score -= cost;
-    maxEnergy += 50;
-    updateScore();
-    updateEnergy();
-    upgradeEnergyCapacityBtn.textContent = `Энергетическая ёмкость (${5000 + Math.floor((maxEnergy - 50) / 50) * 2500} монет)`;
-  }
-});
-
-let clickStormUpgrades = 0;
-upgradeClickStormBtn.addEventListener('click', () => {
-  const cost = 7500;
-  if (score >= cost) {
-    score -= cost;
-    clickStormUpgrades++;
-    updateScore();
-    upgradeClickStormBtn.textContent = `Шторм кликов (${7500 + clickStormUpgrades * 5000} монет)`;
-    if (!clickStormInterval) {
-      startClickStorm();
-    }
-  }
-});
-
-upgradeCrystalFinderBtn.addEventListener('click', () => {
-  const cost = 10000;
-  if (score >= cost) {
-    score -= cost;
-    crystalFinderChance += 0.005;
-    updateScore();
-    upgradeCrystalFinderBtn.textContent = `Кристальный искатель (${10000 + Math.floor(crystalFinderChance * 1000) * 5000} монет)`;
-  }
-});
-
-crystalClickPowerBtn.addEventListener('click', () => {
-  if (crystals >= 1) {
-    crystals--;
-    clickValue *= 1.05;
-    updateCrystals();
-    crystalClickPowerBtn.textContent = `Сила кликов (+5%, ${Math.floor(crystals)} кристалл)`;
-  }
-});
-
-crystalOfflineProgressBtn.addEventListener('click', () => {
-  if (crystals >= 2) {
-    crystals -= 2;
-    offlineProgressRate += 0.01;
-    updateCrystals();
-    crystalOfflineProgressBtn.textContent = `Офлайн прогресс (+1% в час, ${Math.floor(crystals)} кристалла)`;
-  }
-});
-
-crystalEnergyBoostBtn.addEventListener('click', () => {
-  if (crystals >= 3) {
-    crystals -= 3;
-    maxEnergy *= 1.1;
-    updateCrystals();
-    updateEnergy();
-    crystalEnergyBoostBtn.textContent = `Энергетический буст (+10% макс. энергии, ${Math.floor(crystals)} кристалла)`;
-  }
-});
-
-crystalAutoClickerBtn.addEventListener('click', () => {
-  if (crystals >= 5) {
-    crystals -= 5;
-    autoClickPower += 1;
-    updateCrystals();
-    crystalAutoClickerBtn.textContent = `Кристальный авто-кликер (${Math.floor(crystals)} кристаллов)`;
-  }
-});
-
-crystalLuckyBonusBtn.addEventListener('click', () => {
-  if (crystals >= 7) {
-    crystals -= 7;
-    luckyClickChance += 0.05;
-    updateCrystals();
-    crystalLuckyBonusBtn.textContent = `Бонус удачи (${Math.floor(crystals)} кристаллов)`;
-  }
-});
-
-prestigeBtn.addEventListener('click', () => {
-  if (score >= prestigeCost) {
-    showModal('Подтверждение престижа', `Вы уверены, что хотите выполнить престиж? Вы получите ${Math.floor(Math.sqrt(score / 1000))} кристаллов, но потеряете весь прогресс.`, performPrestige);
-  } else {
-    showModal('Недостаточно монет', `Для престижа необходимо ${prestigeCost} монет. У вас сейчас ${Math.floor(score)} монет.`);
-  }
-});
-
-function performPrestige() {
-  const crystalsGained = Math.floor(Math.sqrt(score / 1000));
-  crystals += crystalsGained;
-  prestigeCount++;
-  prestigeCost *= 4;
-
-  // Сброс прогресса
-  score = 0;
-  clickValue = 1;
-  multiplier = 1;
-  energy = 50;
-  maxEnergy = 50;
-  energyRegen = 1;
-  autoClickPower = 0;
-  luckyClickChance = 0;
-  offlineProgressRate = 0;
-  goldenClickChance = 0;
-  clickStormActive = false;
-  crystalFinderChance = 0;
-  clickUpgrades = 0;
-  autoClickUpgrades = 0;
-  luckyClickUpgrades = 0;
-
-  // Обновление отображения
-  updateScore();
-  updateEnergy();
-  updateCrystals();
-  updateUpgradeButtons();
-
-  showModal('Престиж выполнен!', `Вы получили ${crystalsGained} кристаллов! Ваш прогресс был сброшен, но теперь у вас есть кристаллы для мощных улучшений.`);
-
-  if (prestigeCount >= 5 && !achievements.find(a => a.id === 'prestigeMaster').unlocked) {
-    unlockAchievement('prestigeMaster');
-  }
 }
 
-function updateUpgradeButtons() {
-  upgradeClickBtn.textContent = `Улучшить клик (10 монет) [0/3]`;
-  upgradeClickBtn.disabled = false;
-  upgradeMultiplierBtn.textContent = `Улучшить множитель (50 монет)`;
-  upgradeMultiplierBtn.disabled = false;
-  upgradeEnergyBtn.textContent = `Увеличить макс. энергию (100 монет)`;
-  upgradeEnergyRegenBtn.textContent = `Ускорить восстановление энергии (200 монет)`;
-  upgradeAutoClickBtn.textContent = `Авто-клик (500 монет, 0/3)`;
-  upgradeAutoClickBtn.disabled = false;
-  upgradeLuckyClicksBtn.textContent = `Удачливые клики (1000 монет, 0/3)`;
-  upgradeLuckyClicksBtn.disabled = false;
-  upgradeOfflineProgressBtn.textContent = `Офлайн прогресс (2000 монет)`;
-  upgradeGoldenClicksBtn.textContent = `Золотые клики (3000 монет)`;
-  upgradeEnergyCapacityBtn.textContent = `Энергетическая ёмкость (5000 монет)`;
-  upgradeClickStormBtn.textContent = `Шторм кликов (7500 монет)`;
-  upgradeCrystalFinderBtn.textContent = `Кристальный искатель (10000 монет)`;
+function hideConfirmationModal() {
+    confirmationModal.style.display = 'none';
 }
 
-menuButton.addEventListener('click', () => {
-  menu.classList.toggle('open');
-});
-
-function updateScore() {
-  scoreDisplay.textContent = `Монеты: ${Math.floor(score)}`;
-  updateUpgradeButtons();
+function deleteSelectedItems() {
+    inventoryItems = inventoryItems.filter((_, index) => !selectedItems.includes(index));
+    updateInventory();
+    selectedItems = [];
+    toggleDeleteMode();
+    hideConfirmationModal();
 }
 
-function updateEnergy() {
-  energyDisplay.textContent = `${Math.floor(energy)}/${maxEnergy}`;
-  energyBar.style.width = `${(energy / maxEnergy) * 100}%`;
-}
-
-function updateCrystals() {
-  crystalsDisplay.textContent = Math.floor(crystals);
-}
-
-function createParticles(isCritical = false, color = 'white') {
-  const particleCount = isCritical ? 15 : 5;
-
-  for (let i = 0; i < particleCount; i++) {
-    const particle = document.createElement('div');
-    particle.classList.add('particle');
-    particle.style.backgroundColor = color;
-
-    const angle = Math.random() * Math.PI * 2;
-    const speed = Math.random() * 30 + 20;
-    const x = Math.cos(angle) * speed;
-    const y = Math.sin(angle) * speed;
-
-    particle.style.setProperty('--x', `${x}px`);
-    particle.style.setProperty('--y', `${y}px`);
-
-    clickArea.appendChild(particle);
-
-    setTimeout(() => {
-      particle.remove();
-    }, 1000);
-  }
-}
-
-let clickStormInterval;
-
-function startClickStorm() {
-  clickStormInterval = setInterval(() => {
-    if (Math.random() < 0.1 + clickStormUpgrades * 0.02) {
-      clickStormActive = true;
-      showModal('Шторм кликов!', 'Шторм кликов активирован на 10 секунд! Клики в 3 раза мощнее!');
-      setTimeout(() => {
-        clickStormActive = false;
-        showModal('Шторм кликов закончился', 'Шторм кликов завершился. Удачной игры!');
-      }, 10000);
-    }
-  }, 60000);
-}
-
-function showModal(title, content, onConfirm = null) {
-  modalTitle.textContent = title;
-  modalContent.textContent = content;
-  overlay.classList.add('active');
-
-  if (onConfirm) {
-    modalConfirm.style.display = 'inline-block';
-    modalConfirm.onclick = () => {
-      onConfirm();
-      overlay.classList.remove('active');
-    };
-  } else {
-    modalConfirm.style.display = 'none';
-  }
-
-  modalCancel.onclick = () => {
-    overlay.classList.remove('active');
-  };
-}
-
-function gameLoop() {
-  const currentTime = Date.now();
-  const deltaTime = (currentTime - lastUpdateTime) / 1000;
-
-  // Авто-клик
-  if (autoClickPower > 0) {
-    const autoClickScore = autoClickPower * clickValue * multiplier * deltaTime;
-    score += autoClickScore;
-    totalMoney += autoClickScore;
-  }
-
-  // Восстановление энергии
-  energy = Math.min(maxEnergy, energy + energyRegen * deltaTime);
-
-  // Обновление отображения
-  updateScore();
-  updateEnergy();
-  updateStatistics();
-
-  lastUpdateTime = currentTime;
-  requestAnimationFrame(gameLoop);
-}
-
-function saveGame() {
-  const gameData = {
-    score,
-    clickValue,
-    multiplier,
-    energy,
-    maxEnergy,
-    energyRegen,
-    crystals,
-    prestigeCount,
-    prestigeCost,
-    autoClickPower,
-    luckyClickChance,
-    offlineProgressRate,
-    totalClicks,
-    totalMoney,
-    goldenClickChance,
-    clickStormActive,
-    crystalFinderChance,
-    clickUpgrades,
-    achievements: achievements.map(a => ({ id: a.id, unlocked: a.unlocked }))
-  };
-  localStorage.setItem('epicClickerSave', JSON.stringify(gameData));
-}
-
-function loadGame() {
-  const savedData = localStorage.getItem('epicClickerSave');
-  if (savedData) {
-    const gameData = JSON.parse(savedData);
-    score = gameData.score || 0;
-    clickValue = gameData.clickValue || 1;
-    multiplier = gameData.multiplier || 1;
-    energy = gameData.energy || 50;
-    maxEnergy = gameData.maxEnergy || 50;
-    energyRegen = gameData.energyRegen || 1;
-    crystals = gameData.crystals || 0;
-    prestigeCount = gameData.prestigeCount || 0;
-    prestigeCost = gameData.prestigeCost || 1000;
-    autoClickPower = gameData.autoClickPower || 0;
-    luckyClickChance = gameData.luckyClickChance || 0;
-    offlineProgressRate = gameData.offlineProgressRate || 0;
-    totalClicks = gameData.totalClicks || 0;
-    totalMoney = gameData.totalMoney || 0;
-    goldenClickChance = gameData.goldenClickChance || 0;
-    clickStormActive = gameData.clickStormActive || false;
-    crystalFinderChance = gameData.crystalFinderChance || 0;
-    clickUpgrades = gameData.clickUpgrades || 0;
-
-    if (gameData.achievements) {
-      gameData.achievements.forEach(savedAchievement => {
-        const achievement = achievements.find(a => a.id === savedAchievement.id);
-        if (achievement) {
-          achievement.unlocked = savedAchievement.unlocked;
+function getRandomAura() {
+    const random = Math.random();
+    let cumulativeChance = 0;
+    for (const aura of auras) {
+        cumulativeChance += aura.chance;
+        if (random < cumulativeChance) {
+            return aura;
         }
-      });
     }
-
-    updateScore();
-    updateEnergy();
-    updateCrystals();
-    updateAchievements();
-    updateStatistics();
-
-    const currentTime = Date.now();
-    const offlineTime = (currentTime - lastUpdateTime) / 1000 / 3600; // в часах
-    const offlineEarnings = score * offlineProgressRate * offlineTime;
-    score += offlineEarnings;
-    totalMoney += offlineEarnings;
-
-    if (offlineEarnings > 0) {
-      showModal('Добро пожаловать обратно!', `Вы заработали ${Math.floor(offlineEarnings)} монет, пока были в офлайне!`);
-    }
-  }
+    return auras[auras.length - 1];
 }
 
-// Запуск игры
-loadGame();
-gameLoop();
-setInterval(saveGame, 60000); // Сохранение каждую минуту
+function displayAura(aura, index) {
+    const auraElement = document.getElementById(`aura${index}`);
+    auraElement.style.color = aura.color;
+    auraElement.style.fontFamily = aura.font;
+    auraElement.textContent = aura.name;
+    auraElement.style.opacity = '1';
+    setTimeout(() => {
+        auraElement.style.opacity = '0';
+    }, 800);
+}
 
-// Обработка событий видимости страницы
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden) {
-    saveGame();
-  } else {
-    loadGame();
-  }
+function roll() {
+    if (isRolling) return;
+    isRolling = true;
+    rollButton.disabled = true;
+    resultContainer.style.opacity = '0';
+    overlay.style.display = 'flex';
+
+    const result = getRandomAura();
+    let displayCount = 0;
+
+    function displayNextAura() {
+        if (displayCount < 4) {
+            const randomAura = auras[Math.floor(Math.random() * auras.length)];
+            displayAura(randomAura, displayCount + 1);
+            displayCount++;
+            setTimeout(displayNextAura, 1000);
+        } else {
+            setTimeout(() => {
+                displayAura(result, 5);
+                finishRoll(result);
+            }, 1000);
+        }
+    }
+
+    displayNextAura();
+}
+
+function finishRoll(result) {
+    inventoryItems.push(result);
+    updateInventory();
+    isRolling = false;
+    rollButton.disabled = false;
+    auraName.textContent = result.name;
+    auraName.style.color = result.color;
+    resultContainer.style.opacity = '1';
+    setTimeout(() => {
+        overlay.style.display = 'none';
+        setTimeout(() => {
+            resultContainer.style.opacity = '0';
+        }, 3000);
+    }, 2000);
+}
+
+rollButton.addEventListener('click', roll);
+inventoryButton.addEventListener('click', () => {
+    inventoryModal.style.display = 'block';
 });
+
+closeInventory.addEventListener('click', () => {
+    inventoryModal.style.display = 'none';
+    if (isDeleteMode) toggleDeleteMode();
+});
+
+window.addEventListener('click', (event) => {
+    if (event.target == inventoryModal) {
+        inventoryModal.style.display = 'none';
+        if (isDeleteMode) toggleDeleteMode();
+    }
+});
+
+deleteButton.addEventListener('click', () => {
+    if (isDeleteMode && selectedItems.length > 0) {
+        showConfirmationModal();
+    } else {
+        toggleDeleteMode();
+    }
+});
+
+confirmDelete.addEventListener('click', deleteSelectedItems);
+cancelDelete.addEventListener('click', hideConfirmationModal);
+
+updateInventory();
 </script>
-</body>
-</html>
+</body></html>
