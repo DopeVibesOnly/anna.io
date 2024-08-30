@@ -1,515 +1,577 @@
-<html><head><base href="https://websim.io/sols-rng-game/">
+<html><head><base href="https://websimcreationengine.com/simulator-ru-dark-potions-improved/" target="_blank">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>понос</title>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Montserrat:wght@400;700&family=Poppins:wght@400;600&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<title>сим</title>
 <style>
-@keyframes gradient {
-    0% {background-position: 0% 50%;}
-    50% {background-position: 100% 50%;}
-    100% {background-position: 0% 50%;}
-}
-
-@keyframes float {
-    0% {transform: translateY(0px);}
-    50% {transform: translateY(-20px);}
-    100% {transform: translateY(0px);}
-}
-
-@keyframes pulse {
-    0% {transform: scale(1);}
-    50% {transform: scale(1.05);}
-    100% {transform: scale(1);}
-}
-
-@keyframes slideIn {
-    0% {
-        transform: translateY(-100%);
-        opacity: 0;
+    body {
+        font-family: 'Roboto', sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #1a1a2e;
+        color: #e0e0e0;
+        overflow: hidden;
     }
-    100% {
-        transform: translateY(0);
-        opacity: 1;
+
+    #game-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
     }
-}
 
-@keyframes slideOut {
-    0% {
-        transform: translateY(0);
-        opacity: 1;
+    #menu-button {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        font-size: 28px;
+        cursor: pointer;
+        background: none;
+        border: none;
+        color: #4CAF50;
+        transition: transform 0.3s ease;
     }
-    100% {
-        transform: translateY(100%);
-        opacity: 0;
+
+    #menu-button:hover {
+        transform: scale(1.1);
     }
-}
 
-@keyframes glowPulse {
-    0% {
-        box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+    #menu {
+        position: absolute;
+        top: 0;
+        left: -350px;
+        width: 350px;
+        height: 100%;
+        background-color: rgba(26, 26, 46, 0.95);
+        transition: left 0.3s ease-in-out;
+        overflow-y: auto;
+        padding: 20px;
+        box-sizing: border-box;
+        box-shadow: 5px 0 15px rgba(0, 0, 0, 0.3);
+        border-right: 2px solid #4CAF50;
     }
-    50% {
-        box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+
+    #menu.open {
+        left: 0;
     }
-    100% {
-        box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+
+    #close-menu {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 24px;
+        cursor: pointer;
+        background: none;
+        border: none;
+        color: #e0e0e0;
     }
-}
 
-body {
-    font-family: 'Roboto', sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    margin: 0;
-    background: white;
-    color: #333;
-    overflow-x: hidden;
-}
+    #main-window {
+        text-align: center;
+        background-color: rgba(26, 26, 46, 0.8);
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
+    }
 
-.game-container {
-    text-align: center;
-    background: linear-gradient(45deg, #f3f4f6, #ddd);
-    background-size: 200% 200%;
-    animation: gradient 15s ease infinite;
-    padding: 40px;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    max-width: 90%;
-    width: 400px;
-    transition: all 0.3s ease;
-}
+    #farm-button {
+        font-size: 72px;
+        cursor: pointer;
+        background: none;
+        border: none;
+        margin: 20px 0;
+        transition: transform 0.1s, filter 0.3s;
+        filter: drop-shadow(0 0 10px rgba(76, 175, 80, 0.7));
+    }
 
-.game-container:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-}
+    #farm-button:hover {
+        transform: scale(1.1);
+        filter: drop-shadow(0 0 15px rgba(76, 175, 80, 1));
+    }
 
-h1 {
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 700;
-    font-size: 2.5em;
-    margin-bottom: 30px;
-    color: #2c3e50;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-    animation: float 6s ease-in-out infinite;
-}
+    #farm-button:active {
+        transform: scale(0.95);
+    }
 
-button {
-    font-family: 'Poppins', sans-serif;
-    font-size: 18px;
-    padding: 12px 24px;
-    margin: 10px;
-    cursor: pointer;
-    background: linear-gradient(45deg, #4CAF50, #45a049);
-    color: white;
-    border: none;
-    border-radius: 50px;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    position: relative;
-    overflow: hidden;
-}
+    #balance, #timer {
+        font-size: 28px;
+        margin: 15px 0;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
 
-button:before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: rgba(255,255,255,0.1);
-    transform: rotate(45deg);
-    transition: all 0.3s ease;
-}
+    .upgrade-button, .glove-button, .potion-button {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        margin: 15px 0;
+        font-size: 16px;
+        cursor: pointer;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
 
-button:hover:before {
-    left: 100%;
-}
+    .upgrade-button:hover, .glove-button:hover, .potion-button:hover {
+        background-color: #45a049;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    }
 
-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 8px rgba(0,0,0,0.15);
-}
+    .upgrade-button:disabled, .glove-button:disabled, .potion-button:disabled {
+        background-color: #555;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
 
-button:disabled {
-    background: linear-gradient(45deg, #cccccc, #bbbbbb);
-    cursor: not-allowed;
-}
+    .upgrade-description, .glove-description, .potion-description {
+        font-size: 14px;
+        margin-top: 8px;
+        color: #bbb;
+        font-style: italic;
+    }
 
-#overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.8);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    perspective: 1000px;
-}
+    #inventory-button {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        font-size: 28px;
+        cursor: pointer;
+        background: none;
+        border: none;
+        color: #4CAF50;
+        transition: transform 0.3s ease;
+    }
 
-#aura-display {
-    font-size: 32px;
-    font-weight: bold;
-    text-align: center;
-    padding: 20px;
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    max-width: 80%;
-    transition: all 0.5s ease;
-    position: absolute;
-    animation: glowPulse 2s infinite;
-}
+    #inventory-button:hover {
+        transform: scale(1.1);
+    }
 
-#result-container {
-    margin-top: 30px;
-    font-size: 24px;
-    font-weight: 300;
-    opacity: 0;
-    transition: opacity 0.5s ease-in-out;
-    color: #2c3e50;
-}
+    #inventory {
+        position: absolute;
+        bottom: -300px;
+        right: 20px;
+        width: 300px;
+        background-color: rgba(26, 26, 46, 0.95);
+        transition: bottom 0.3s ease-in-out;
+        padding: 20px;
+        box-sizing: border-box;
+        border-radius: 10px 10px 0 0;
+        box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.3);
+    }
 
-.inventory-modal {
-    display: none;
-    position: fixed;
-    z-index: 1;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(255,255,255,0.9);
-}
+    #inventory.open {
+        bottom: 0;
+    }
 
-.inventory-content {
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    margin: 10% auto;
-    padding: 30px;
-    border-radius: 15px;
-    width: 80%;
-    max-width: 600px;
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-    color: #333;
-    animation: float 6s ease-in-out infinite;
-}
+    .inventory-item {
+        display: inline-block;
+        margin: 8px;
+        padding: 8px;
+        background-color: #2a2a4e;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
 
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: color 0.3s ease;
-}
+    .inventory-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+    }
 
-.close:hover,
-.close:focus {
-    color: #333;
-}
+    .background-shape {
+        position: absolute;
+        opacity: 0.05;
+        z-index: -1;
+    }
 
-.inventory-item {
-    display: inline-block;
-    margin: 8px;
-    padding: 10px 15px;
-    border-radius: 25px;
-    cursor: pointer;
-    font-family: 'Lato', sans-serif;
-    font-weight: 700;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
+    #shape1 {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        background-color: #4CAF50;
+        top: 10%;
+        left: 10%;
+        animation: float 15s infinite ease-in-out;
+    }
 
-.inventory-item:hover {
-    transform: translateY(-2px) rotate(3deg);
-    box-shadow: 0 6px 8px rgba(0,0,0,0.15);
-}
+    #shape2 {
+        width: 200px;
+        height: 200px;
+        background-color: #4CAF50;
+        transform: rotate(45deg);
+        top: 70%;
+        right: 15%;
+        animation: rotate 20s infinite linear;
+    }
 
-.delete-mode .inventory-item {
-    opacity: 0.7;
-}
+    #shape3 {
+        width: 100px;
+        height: 100px;
+        background-color: #4CAF50;
+        clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+        bottom: 20%;
+        left: 20%;
+        animation: bounce 12s infinite ease-in-out;
+    }
 
-.delete-mode .inventory-item.selected {
-    opacity: 1;
-    box-shadow: 0 0 0 3px #ff0000;
-    animation: pulse 1s infinite;
-}
+    @keyframes float {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-30px) rotate(180deg); }
+    }
 
-.confirmation-modal {
-    display: none;
-    position: fixed;
-    z-index: 2;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(255,255,255,0.9);
-}
+    @keyframes rotate {
+        0% { transform: rotate(45deg); }
+        100% { transform: rotate(405deg); }
+    }
 
-.confirmation-content {
-    background: linear-gradient(135deg, #FF9A8B 0%, #FF6A88 55%, #FF99AC 100%);
-    margin: 15% auto;
-    padding: 30px;
-    border-radius: 15px;
-    width: 300px;
-    text-align: center;
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-    color: white;
-    animation: float 4s ease-in-out infinite;
-}
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0) scale(1); }
+        50% { transform: translateY(-20px) scale(1.1); }
+    }
 
-.confirmation-content button {
-    margin: 10px;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 25px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: all 0.3s ease;
-}
+    h2 {
+        color: #4CAF50;
+        border-bottom: 2px solid #4CAF50;
+        padding-bottom: 10px;
+        margin-top: 30px;
+    }
 
-.confirmation-content button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
+    /* Новые стили для улучшения дизайна */
+    #menu::-webkit-scrollbar {
+        width: 10px;
+    }
 
-#confirm-delete {
-    background: linear-gradient(45deg, #4CAF50, #45a049);
-    color: white;
-}
+    #menu::-webkit-scrollbar-track {
+        background: #1a1a2e;
+    }
 
-#cancel-delete {
-    background: linear-gradient(45deg, #f44336, #d32f2f);
-    color: white;
-}
+    #menu::-webkit-scrollbar-thumb {
+        background: #4CAF50;
+        border-radius: 5px;
+    }
 
+    #menu::-webkit-scrollbar-thumb:hover {
+        background: #45a049;
+    }
+
+    .section-title {
+        font-size: 24px;
+        color: #4CAF50;
+        margin-bottom: 15px;
+        text-align: center;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .menu-section {
+        background-color: rgba(38, 38, 68, 0.6);
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
 </style>
 </head>
 <body>
-    <div class="game-container">
-        <h1>смачный рнг</h1>
-        <button id="roll-button">Крутить</button>
-        <button id="inventory-button">Инвентарь</button>
-        <div id="result-container"></div>
-    </div>
+<div id="game-container">
+    <div class="background-shape" id="shape1"></div>
+    <div class="background-shape" id="shape2"></div>
+    <div class="background-shape" id="shape3"></div>
 
-    <div id="overlay">
-        <div id="aura-display"></div>
-    </div>
-
-    <div id="inventory-modal" class="inventory-modal">
-        <div class="inventory-content">
-            <span class="close">&times;</span>
-            <h2>Инвентарь</h2>
-            <div id="inventory-items"></div>
-            <button id="delete-button">Удалить выбранные</button>
+    <button id="menu-button">☰</button>
+    <div id="menu">
+        <button id="close-menu">✖</button>
+        <div class="menu-section">
+            <h2 class="section-title">Улучшения</h2>
+            <div id="upgrades"></div>
+        </div>
+        <div class="menu-section">
+            <h2 class="section-title">Магазин перчаток</h2>
+            <div id="gloves"></div>
+        </div>
+        <div class="menu-section">
+            <h2 class="section-title">Магазин зелий</h2>
+            <button id="buy-potion-box" class="potion-button">Купить коробку зелий (500 монет)</button>
+            <div class="potion-description">Содержит случайное зелье, которое может увеличить ваш доход на определенное время. Шанс получить: Обычное (60%), Среднее (30%), Редкое (10%)</div>
         </div>
     </div>
 
-    <div id="confirmation-modal" class="confirmation-modal">
-        <div class="confirmation-content">
-            <h2>Подтверждение</h2>
-            <p>Вы уверены, что хотите удалить выбранные предметы?</p>
-            <button id="confirm-delete">Да</button>
-            <button id="cancel-delete">Нет</button>
-        </div>
+    <div id="main-window">
+        <div id="balance">Баланс: $0</div>
+        <div id="farm-button">💰</div>
+        <div id="timer"></div>
     </div>
+
+    <button id="inventory-button">🎒</button>
+    <div id="inventory">
+        <h3 class="section-title">Инвентарь</h3>
+        <div id="inventory-items"></div>
+    </div>
+</div>
 
 <script>
-const auras = [
-    { name: "Огненная вспышка", color: "#ff4136", chance: 1/2, font: "Roboto" },
-    { name: "Ледяной бриз", color: "#7fdbff", chance: 1/5, font: "Montserrat" },
-    { name: "Земляной щит", color: "#3d9970", chance: 1/15, font: "Poppins" },
-    { name: "Воздушный вихрь", color: "#aaaaaa", chance: 1/69, font: "Lato" },
-    { name: "Электрический разряд", color: "#ffdc00", chance: 1/500, font: "Roboto" },
-    { name: "Теневое покрывало", color: "#333333", chance: 1/999, font: "Montserrat" },
-    { name: "Световая аура", color: "#ffff99", chance: 1/3000, font: "Poppins" },
-    { name: "Космическая пыль", color: "#b10dc9", chance: 1/5555, font: "Lato" },
-    { name: "Временной разлом", color: "#01ff70", chance: 1/9999, font: "Roboto" },
-    { name: "Звёздный ветер", color: "#f012be", chance: 1/40000, font: "Montserrat" },
-    { name: "Вселенская гармония", color: "#39cccc", chance: 1/99999, font: "Poppins" }
-];
+    // Установка начального баланса
+    let balance = 1000;
 
-const rollButton = document.getElementById('roll-button');
-const inventoryButton = document.getElementById('inventory-button');
-const resultContainer = document.getElementById('result-container');
-const overlay = document.getElementById('overlay');
-const auraDisplay = document.getElementById('aura-display');
-const inventoryModal = document.getElementById('inventory-modal');
-const closeInventory = document.querySelector('.close');
-const inventoryItems = document.getElementById('inventory-items');
-const deleteButton = document.getElementById('delete-button');
-const confirmationModal = document.getElementById('confirmation-modal');
-const confirmDelete = document.getElementById('confirm-delete');
-const cancelDelete = document.getElementById('cancel-delete');
+    let farmCooldown = 30;
+    let farmValue = 1;
+    let timer = 0;
+    let timerInterval;
+    let equippedGlove = null;
+    let inventoryPotions = [];
+    let activePotionTimer = null;
+    let potionMultiplier = 1;
 
-let isRolling = false;
-let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
-let isDeleteMode = false;
-let selectedItems = [];
+    let upgrades = [
+        { name: "Начинающий Фермер", emoji: "🌱", cost: 5, maxLevel: 5, currentLevel: 0, effect: () => farmValue += 0.5, description: "Увеличивает доход от каждого сбора на $0.50." },
+        { name: "Быстрое Фермерство", emoji: "⏱️", cost: 10, maxLevel: 5, currentLevel: 0, effect: () => farmCooldown = Math.max(1, farmCooldown - 5), description: "Уменьшает время ожидания между сборами на 5 секунд." },
+        { name: "Улучшенный Урожай", emoji: "🌾", cost: 15, maxLevel: 5, currentLevel: 0, effect: () => farmValue += 1, description: "Увеличивает доход от каждого сбора на $1." },
+        { name: "Счастливый Клевер", emoji: "🍀", cost: 50, maxLevel: 1, currentLevel: 0, effect: () => farmValue *= 2, description: "Удваивает ваш доход от каждого сбора." },
+        { name: "Автополив", emoji: "💧", cost: 100, maxLevel: 3, currentLevel: 0, effect: () => setInterval(() => addToBalance(farmValue / 2), 10000), description: "Автоматически собирает половину урожая каждые 10 секунд." },
+        { name: "Усиленные Удобрения", emoji: "🧪", cost: 75, maxLevel: 3, currentLevel: 0, effect: () => farmValue += 5, description: "Увеличивает доход от каждого сбора на $5." },
+        { name: "Рыночные Связи", emoji: "🤝", cost: 200, maxLevel: 1, currentLevel: 0, effect: () => farmValue *= 1.5, description: "Увеличивает доход на 50% благодаря лучшим ценам на рынке." },
+        { name: "Контроль Погоды", emoji: "🌦️", cost: 500, maxLevel: 1, currentLevel: 0, effect: () => { farmCooldown /= 2; farmValue *= 2; }, description: "Уменьшает время ожидания вдвое и удваивает доход." },
+        { name: "Генная Инженерия", emoji: "🧬", cost: 1000, maxLevel: 3, currentLevel: 0, effect: () => farmValue += 20, description: "Увеличивает доход от каждого сбора на $20." },
+        { name: "Сингулярность", emoji: "🌀", cost: 5000, maxLevel: 1, currentLevel: 0, effect: () => { farmValue *= 10; farmCooldown = 1; }, description: "Увеличивает доход в 10 раз и уменьшает время ожидания до 1 секунды." }
+    ];
 
-function getRandomAura() {
-    const random = Math.random();
-    let cumulativeChance = 0;
-    for (const aura of auras) {
-        cumulativeChance += aura.chance;
-        if (random <= cumulativeChance) {
-            return aura;
+    let gloves = [
+        { name: "Перчатка Скорости", emoji: "⚡", cost: 1000, effect: () => farmCooldown *= 0.8, description: "Уменьшает время для следующего сбора на 20%", equipped: false, purchased: false },
+        { name: "Перчатка Богатства", emoji: "💰", cost: 3000, effect: () => farmValue *= 1.2, description: "Увеличивает текущий заработок на 20%", equipped: false, purchased: false },
+        { name: "Супер Перчатка", emoji: "🌟", cost: 5000, effect: () => { farmCooldown *= 0.8; farmValue *= 1.2; }, description: "Уменьшает время сбора на 20% и увеличивает заработок на 20%", equipped: false, purchased: false }
+    ];
+
+    const potions = [
+        { name: "Обычное зелье", emoji: "🧪", effect: 1.2, duration: 120000, chance: 0.6 },
+        { name: "Среднее зелье", emoji: "🧪", effect: 1.5, duration: 120000, chance: 0.3 },
+        { name: "Редкое зелье", emoji: "🧪", effect: 3, duration: 120000, chance: 0.1 }
+    ];
+
+    function updateBalance() {
+        document.getElementById('balance').textContent = `Баланс: $${balance.toFixed(2)}`;
+        updateUpgradeButtons();
+        updateGloveButtons();
+        document.getElementById('buy-potion-box').disabled = balance < 500;
+    }
+
+    function addToBalance(amount) {
+        balance += amount * potionMultiplier;
+        updateBalance();
+    }
+
+    function farm() {
+        if (timer === 0) {
+            addToBalance(farmValue);
+            timer = farmCooldown;
+            updateTimer();
+            timerInterval = setInterval(updateTimer, 1000);
         }
     }
-    return auras[auras.length - 1];
-}
 
-function roll() {
-    if (isRolling) return;
-    isRolling = true;
-    rollButton.disabled = true;
-    resultContainer.style.opacity = '0';
-    overlay.style.display = 'flex';
-
-    const result = getRandomAura();
-    let displayCount = 0;
-
-    function displayNextAura() {
-        if (displayCount < 20) {
-            const randomAura = auras[Math.floor(Math.random() * auras.length)];
-            displayAura(randomAura, displayCount + 1);
-            displayCount++;
-            setTimeout(displayNextAura, 100);
+    function updateTimer() {
+        if (timer > 0) {
+            timer--;
+            document.getElementById('timer').textContent = `Следующий сбор через: ${timer}с`;
         } else {
-            setTimeout(() => {
-                displayAura(result, 21);
-                finishRoll(result);
-            }, 500);
+            clearInterval(timerInterval);
+            document.getElementById('timer').textContent = 'Готово к сбору!';
         }
     }
 
-    displayNextAura();
-}
-
-function displayAura(aura, count) {
-    auraDisplay.style.color = aura.color;
-    auraDisplay.style.fontFamily = aura.font;
-    auraDisplay.textContent = `${aura.name}`;
-    auraDisplay.style.animation = 'none';
-    void auraDisplay.offsetWidth; // Trigger reflow
-    auraDisplay.style.animation = count % 2 === 0 ? 'slideIn 0.2s ease-out' : 'slideOut 0.2s ease-in';
-    
-    // Add 3D rotation effect
-    const rotationAmount = Math.random() * 20 - 10; // Random rotation between -10 and 10 degrees
-    auraDisplay.style.transform = `rotateX(${rotationAmount}deg)`;
-}
-
-function finishRoll(result) {
-    setTimeout(() => {
-        overlay.style.display = 'none';
-        resultContainer.textContent = `Вы получили: ${result.name}`;
-        resultContainer.style.opacity = '1';
-        resultContainer.style.animation = 'pulse 1s ease-in-out';
-        rollButton.disabled = false;
-        isRolling = false;
-        addToInventory(result);
-    }, 1500);
-}
-
-function addToInventory(aura) {
-    inventory.push(aura);
-    localStorage.setItem('inventory', JSON.stringify(inventory));
-    updateInventory();
-}
-
-function updateInventory() {
-    inventoryItems.innerHTML = '';
-    inventory.forEach((item, index) => {
-        const itemElement = document.createElement('span');
-        itemElement.textContent = item.name;
-        itemElement.className = 'inventory-item';
-        itemElement.style.backgroundColor = item.color;
-        itemElement.style.color = getContrastColor(item.color);
-        itemElement.dataset.index = index;
-        itemElement.onclick = () => toggleItemSelection(itemElement);
-        inventoryItems.appendChild(itemElement);
-    });
-}
-
-function getContrastColor(hexcolor) {
-    hexcolor = hexcolor.replace("#", "");
-    var r = parseInt(hexcolor.substr(0,2),16);
-    var g = parseInt(hexcolor.substr(2,2),16);
-    var b = parseInt(hexcolor.substr(4,2),16);
-    var yiq = ((r*299)+(g*587)+(b*114))/1000;
-    return (yiq >= 128) ? 'black' : 'white';
-}
-
-function toggleDeleteMode() {
-    isDeleteMode = !isDeleteMode;
-    deleteButton.textContent = isDeleteMode ? 'Отменить удаление' : 'Удалить выбранные';
-    inventoryItems.classList.toggle('delete-mode');
-    selectedItems = [];
-    updateInventory();
-}
-
-function toggleItemSelection(item) {
-    if (!isDeleteMode) return;
-    item.classList.toggle('selected');
-    const index = selectedItems.indexOf(item.dataset.index);
-    if (index > -1) {
-        selectedItems.splice(index, 1);
-    } else {
-        selectedItems.push(item.dataset.index);
+    function updateUpgradeButtons() {
+        const upgradesContainer = document.getElementById('upgrades');
+        upgradesContainer.innerHTML = '';
+        upgrades.forEach((upgrade, index) => {
+            const button = document.createElement('button');
+            button.classList.add('upgrade-button');
+            button.innerHTML = `${upgrade.emoji} ${upgrade.name} (${upgrade.currentLevel}/${upgrade.maxLevel}) - $${upgrade.cost}`;
+            button.disabled = balance < upgrade.cost || upgrade.currentLevel >= upgrade.maxLevel;
+            button.onclick = () => buyUpgrade(index);
+            
+            const description = document.createElement('div');
+            description.classList.add('upgrade-description');
+            description.textContent = upgrade.description;
+            
+            const container = document.createElement('div');
+            container.appendChild(button);
+            container.appendChild(description);
+            upgradesContainer.appendChild(container);
+        });
     }
-}
 
-function showConfirmationModal() {
-    confirmationModal.style.display = 'block';
-}
+    function buyUpgrade(index) {
+        const upgrade = upgrades[index];
+        if (balance >= upgrade.cost && upgrade.currentLevel < upgrade.maxLevel) {
+            balance -= upgrade.cost;
+            upgrade.currentLevel++;
+            upgrade.cost = Math.floor(upgrade.cost * 1.5);
+            upgrade.effect();
+            updateBalance();
+        }
+    }
 
-function hideConfirmationModal() {
-    confirmationModal.style.display = 'none';
-}
+    function updateGloveButtons() {
+        const glovesContainer = document.getElementById('gloves');
+        glovesContainer.innerHTML = '';
+        gloves.forEach((glove, index) => {
+            const button = document.createElement('button');
+            button.classList.add('glove-button');
+            if (!glove.purchased) {
+                button.innerHTML = `${glove.emoji} Купить ${glove.name} - $${glove.cost}`;
+                button.disabled = balance < glove.cost;
+                button.onclick = () => buyGlove(index);
+            } else {
+                button.innerHTML = `${glove.emoji} ${glove.equipped ? 'Снять' : 'Надеть'} ${glove.name}`;
+                button.onclick = () => equipGlove(index);
+            }
+            
+            const description = document.createElement('div');
+            description.classList.add('glove-description');
+            description.textContent = glove.description;
+            
+            const container = document.createElement('div');
+            container.appendChild(button);
+            container.appendChild(description);
+            glovesContainer.appendChild(container);
+        });
+    }
 
-function deleteSelectedItems() {
-    inventory = inventory.filter((_, index) => !selectedItems.includes(index.toString()));
-    localStorage.setItem('inventory', JSON.stringify(inventory));
-    hideConfirmationModal();
-    toggleDeleteMode();
+    function buyGlove(index) {
+        const glove = gloves[index];
+        if (balance >= glove.cost && !glove.purchased) {
+            balance -= glove.cost;
+            glove.purchased = true;
+            updateBalance();
+        }
+    }
+
+    function equipGlove(index) {
+        if (equippedGlove !== null) {
+            gloves[equippedGlove].equipped = false;
+            gloves[equippedGlove].effect();
+        }
+        if (equippedGlove === index) {
+            equippedGlove = null;
+        } else {
+            gloves[index].equipped = true;
+            gloves[index].effect();
+            equippedGlove = index;
+        }
+        updateGloveButtons();
+    }
+
+    function buyPotionBox() {
+        if (balance >= 500) {
+            balance -= 500;
+            const randomNum = Math.random();
+            let selectedPotion;
+            if (randomNum < potions[0].chance) {
+                selectedPotion = potions[0];
+            } else if (randomNum < potions[0].chance + potions[1].chance) {
+                selectedPotion = potions[1];
+            } else {
+                selectedPotion = potions[2];
+            }
+            inventoryPotions.push(selectedPotion);
+            updateBalance();
+            updateInventory();
+            alert(`Вы получили ${selectedPotion.name}!`);
+        }
+    }
+
+    function updateInventory() {
+        const inventoryContainer = document.getElementById('inventory-items');
+        inventoryContainer.innerHTML = '';
+        inventoryPotions.forEach((potion, index) => {
+            const potionElement = document.createElement('div');
+            potionElement.classList.add('inventory-item');
+            potionElement.textContent = `${potion.emoji} ${potion.name}`;
+            potionElement.onclick = () => usePotion(index);
+            inventoryContainer.appendChild(potionElement);
+        });
+    }
+
+    function usePotion(index) {
+        if (activePotionTimer) {
+            alert('Уже активно другое зелье!');
+            return;
+        }
+        
+        if (confirm('Вы уверены, что хотите использовать это зелье?')) {
+            const potion = inventoryPotions[index];
+            potionMultiplier = potion.effect;
+            activePotionTimer = setTimeout(() => {
+                potionMultiplier = 1;
+                activePotionTimer = null;
+                alert('Действие зелья закончилось!');
+            }, potion.duration);
+            inventoryPotions.splice(index, 1);
+            updateInventory();
+            alert(`${potion.name} активировано! Эффект: x${potion.effect} к доходу на ${potion.duration / 1000} секунд.`);
+        }
+    }
+
+    function toggleMenu() {
+        document.getElementById('menu').classList.toggle('open');
+    }
+
+    function toggleInventory() {
+        document.getElementById('inventory').classList.toggle('open');
+    }
+
+    function saveGame() {
+        const gameState = {
+            balance,
+            farmCooldown,
+            farmValue,
+            upgrades,
+            gloves,
+            equippedGlove,
+            inventoryPotions
+        };
+        localStorage.setItem('farmerGame', JSON.stringify(gameState));
+    }
+
+    function loadGame() {
+        const savedState = localStorage.getItem('farmerGame');
+        if (savedState) {
+            const gameState = JSON.parse(savedState);
+            balance = gameState.balance;
+            farmCooldown = gameState.farmCooldown;
+            farmValue = gameState.farmValue;
+            upgrades = gameState.upgrades;
+            gloves = gameState.gloves;
+            equippedGlove = gameState.equippedGlove;
+            inventoryPotions = gameState.inventoryPotions;
+            updateBalance();
+            updateUpgradeButtons();
+            updateGloveButtons();
+            updateInventory();
+        }
+    }
+
+    document.getElementById('farm-button').onclick = farm;
+    document.getElementById('menu-button').onclick = toggleMenu;
+    document.getElementById('close-menu').onclick = toggleMenu;
+    document.getElementById('inventory-button').onclick = toggleInventory;
+    document.getElementById('buy-potion-box').onclick = buyPotionBox;
+
+    loadGame();
+    setInterval(saveGame, 30000);
+
+    updateBalance();
+    updateUpgradeButtons();
+    updateGloveButtons();
     updateInventory();
-}
-
-rollButton.addEventListener('click', roll);
-inventoryButton.addEventListener('click', () => {
-    inventoryModal.style.display = 'block';
-});
-
-closeInventory.addEventListener('click', () => {
-    inventoryModal.style.display = 'none';
-    if (isDeleteMode) toggleDeleteMode();
-});
-
-window.addEventListener('click', (event) => {
-    if (event.target == inventoryModal) {
-        inventoryModal.style.display = 'none';
-        if (isDeleteMode) toggleDeleteMode();
-    }
-});
-
-deleteButton.addEventListener('click', () => {
-    if (isDeleteMode && selectedItems.length > 0) {
-        showConfirmationModal();
-    } else {
-        toggleDeleteMode();
-    }
-});
-
-confirmDelete.addEventListener('click', deleteSelectedItems);
-cancelDelete.addEventListener('click', hideConfirmationModal);
-
-updateInventory();
 </script>
-</body></html>
+</body>
+</html>
