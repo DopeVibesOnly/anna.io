@@ -1,577 +1,520 @@
-<html><head><base href="https://websimcreationengine.com/simulator-ru-dark-potions-improved/" target="_blank">
+<html><head><base href="https://example.com">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>сим</title>
+<title>ProjectPro - Инновационная система управления проектами</title>
 <style>
-    body {
-        font-family: 'Roboto', sans-serif;
+    :root {
+        --primary-color: #2c3e50;
+        --secondary-color: #ecf0f1;
+        --accent-color: #e74c3c;
+        --text-color: #333;
+    }
+    
+    * {
         margin: 0;
         padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        box-sizing: border-box;
+    }
+    
+    body {
+        font-family: 'Roboto', sans-serif;
+        line-height: 1.6;
+        color: var(--text-color);
+    }
+    
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+    
+    /* Hero Section */
+    .hero {
+        background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://example.com/images/hero-bg.jpg') no-repeat center center/cover;
         height: 100vh;
-        background-color: #1a1a2e;
-        color: #e0e0e0;
-        overflow: hidden;
-    }
-
-    #game-container {
-        position: relative;
-        width: 100%;
-        height: 100%;
         display: flex;
-        flex-direction: column;
         align-items: center;
         justify-content: center;
-    }
-
-    #menu-button {
-        position: absolute;
-        top: 20px;
-        left: 20px;
-        font-size: 28px;
-        cursor: pointer;
-        background: none;
-        border: none;
-        color: #4CAF50;
-        transition: transform 0.3s ease;
-    }
-
-    #menu-button:hover {
-        transform: scale(1.1);
-    }
-
-    #menu {
-        position: absolute;
-        top: 0;
-        left: -350px;
-        width: 350px;
-        height: 100%;
-        background-color: rgba(26, 26, 46, 0.95);
-        transition: left 0.3s ease-in-out;
-        overflow-y: auto;
-        padding: 20px;
-        box-sizing: border-box;
-        box-shadow: 5px 0 15px rgba(0, 0, 0, 0.3);
-        border-right: 2px solid #4CAF50;
-    }
-
-    #menu.open {
-        left: 0;
-    }
-
-    #close-menu {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        font-size: 24px;
-        cursor: pointer;
-        background: none;
-        border: none;
-        color: #e0e0e0;
-    }
-
-    #main-window {
         text-align: center;
-        background-color: rgba(26, 26, 46, 0.8);
-        padding: 40px;
-        border-radius: 20px;
-        box-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
+        color: #fff;
     }
-
-    #farm-button {
-        font-size: 72px;
-        cursor: pointer;
-        background: none;
-        border: none;
-        margin: 20px 0;
-        transition: transform 0.1s, filter 0.3s;
-        filter: drop-shadow(0 0 10px rgba(76, 175, 80, 0.7));
+    
+    .hero-content {
+        max-width: 800px;
     }
-
-    #farm-button:hover {
-        transform: scale(1.1);
-        filter: drop-shadow(0 0 15px rgba(76, 175, 80, 1));
+    
+    .hero h1 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        animation: fadeInUp 1s ease-out;
     }
-
-    #farm-button:active {
-        transform: scale(0.95);
+    
+    .hero p {
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+        animation: fadeInUp 1s ease-out 0.5s;
+        opacity: 0;
+        animation-fill-mode: forwards;
     }
-
-    #balance, #timer {
-        font-size: 28px;
-        margin: 15px 0;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-    }
-
-    .upgrade-button, .glove-button, .potion-button {
-        display: block;
-        width: 100%;
-        padding: 12px;
-        margin: 15px 0;
-        font-size: 16px;
-        cursor: pointer;
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .upgrade-button:hover, .glove-button:hover, .potion-button:hover {
-        background-color: #45a049;
-        transform: translateY(-2px);
-        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
-    }
-
-    .upgrade-button:disabled, .glove-button:disabled, .potion-button:disabled {
-        background-color: #555;
-        cursor: not-allowed;
-        transform: none;
-        box-shadow: none;
-    }
-
-    .upgrade-description, .glove-description, .potion-description {
-        font-size: 14px;
-        margin-top: 8px;
-        color: #bbb;
-        font-style: italic;
-    }
-
-    #inventory-button {
-        position: absolute;
-        bottom: 20px;
-        right: 20px;
-        font-size: 28px;
-        cursor: pointer;
-        background: none;
-        border: none;
-        color: #4CAF50;
-        transition: transform 0.3s ease;
-    }
-
-    #inventory-button:hover {
-        transform: scale(1.1);
-    }
-
-    #inventory {
-        position: absolute;
-        bottom: -300px;
-        right: 20px;
-        width: 300px;
-        background-color: rgba(26, 26, 46, 0.95);
-        transition: bottom 0.3s ease-in-out;
-        padding: 20px;
-        box-sizing: border-box;
-        border-radius: 10px 10px 0 0;
-        box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.3);
-    }
-
-    #inventory.open {
-        bottom: 0;
-    }
-
-    .inventory-item {
+    
+    .cta-button {
         display: inline-block;
-        margin: 8px;
-        padding: 8px;
-        background-color: #2a2a4e;
-        border-radius: 8px;
-        cursor: pointer;
+        padding: 12px 30px;
+        background-color: var(--accent-color);
+        color: #fff;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        animation: fadeInUp 1s ease-out 1s;
+        opacity: 0;
+        animation-fill-mode: forwards;
+    }
+    
+    .cta-button:hover {
+        background-color: #c0392b;
+        transform: translateY(-3px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    
+    /* Product Description */
+    .product-description {
+        padding: 100px 0;
+        background-color: var(--secondary-color);
+    }
+    
+    .product-description h2 {
+        text-align: center;
+        margin-bottom: 50px;
+        font-size: 2.5rem;
+        color: var(--primary-color);
+    }
+    
+    .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+    }
+    
+    .feature-item {
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         transition: all 0.3s ease;
     }
-
-    .inventory-item:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+    
+    .feature-item:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.2);
     }
-
-    .background-shape {
-        position: absolute;
-        opacity: 0.05;
-        z-index: -1;
+    
+    .feature-item i {
+        font-size: 3rem;
+        color: var(--accent-color);
+        margin-bottom: 20px;
     }
-
-    #shape1 {
-        width: 150px;
-        height: 150px;
-        border-radius: 50%;
-        background-color: #4CAF50;
-        top: 10%;
-        left: 10%;
-        animation: float 15s infinite ease-in-out;
+    
+    .feature-item h3 {
+        margin-bottom: 15px;
+        color: var(--primary-color);
     }
-
-    #shape2 {
-        width: 200px;
-        height: 200px;
-        background-color: #4CAF50;
-        transform: rotate(45deg);
-        top: 70%;
-        right: 15%;
-        animation: rotate 20s infinite linear;
+    
+    /* Testimonials */
+    .testimonials {
+        padding: 100px 0;
+        background-color: var(--primary-color);
+        color: #fff;
     }
-
-    #shape3 {
+    
+    .testimonials h2 {
+        text-align: center;
+        margin-bottom: 50px;
+        font-size: 2.5rem;
+    }
+    
+    .testimonial-slider {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .testimonial-item {
+        text-align: center;
+    }
+    
+    .testimonial-item img {
         width: 100px;
         height: 100px;
-        background-color: #4CAF50;
-        clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-        bottom: 20%;
-        left: 20%;
-        animation: bounce 12s infinite ease-in-out;
-    }
-
-    @keyframes float {
-        0%, 100% { transform: translateY(0) rotate(0deg); }
-        50% { transform: translateY(-30px) rotate(180deg); }
-    }
-
-    @keyframes rotate {
-        0% { transform: rotate(45deg); }
-        100% { transform: rotate(405deg); }
-    }
-
-    @keyframes bounce {
-        0%, 100% { transform: translateY(0) scale(1); }
-        50% { transform: translateY(-20px) scale(1.1); }
-    }
-
-    h2 {
-        color: #4CAF50;
-        border-bottom: 2px solid #4CAF50;
-        padding-bottom: 10px;
-        margin-top: 30px;
-    }
-
-    /* Новые стили для улучшения дизайна */
-    #menu::-webkit-scrollbar {
-        width: 10px;
-    }
-
-    #menu::-webkit-scrollbar-track {
-        background: #1a1a2e;
-    }
-
-    #menu::-webkit-scrollbar-thumb {
-        background: #4CAF50;
-        border-radius: 5px;
-    }
-
-    #menu::-webkit-scrollbar-thumb:hover {
-        background: #45a049;
-    }
-
-    .section-title {
-        font-size: 24px;
-        color: #4CAF50;
-        margin-bottom: 15px;
-        text-align: center;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-    }
-
-    .menu-section {
-        background-color: rgba(38, 38, 68, 0.6);
-        padding: 15px;
+        border-radius: 50%;
         margin-bottom: 20px;
+    }
+    
+    .testimonial-item p {
+        font-style: italic;
+        margin-bottom: 20px;
+    }
+    
+    .testimonial-item .author {
+        font-weight: bold;
+    }
+    
+    /* Product Showcase */
+    .product-showcase {
+        padding: 100px 0;
+        background-color: #fff;
+    }
+    
+    .product-showcase h2 {
+        text-align: center;
+        margin-bottom: 50px;
+        font-size: 2.5rem;
+        color: var(--primary-color);
+    }
+    
+    .gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+    
+    .gallery-item {
+        position: relative;
+        overflow: hidden;
         border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
     }
-</style>
-</head>
-<body>
-<div id="game-container">
-    <div class="background-shape" id="shape1"></div>
-    <div class="background-shape" id="shape2"></div>
-    <div class="background-shape" id="shape3"></div>
-
-    <button id="menu-button">☰</button>
-    <div id="menu">
-        <button id="close-menu">✖</button>
-        <div class="menu-section">
-            <h2 class="section-title">Улучшения</h2>
-            <div id="upgrades"></div>
-        </div>
-        <div class="menu-section">
-            <h2 class="section-title">Магазин перчаток</h2>
-            <div id="gloves"></div>
-        </div>
-        <div class="menu-section">
-            <h2 class="section-title">Магазин зелий</h2>
-            <button id="buy-potion-box" class="potion-button">Купить коробку зелий (500 монет)</button>
-            <div class="potion-description">Содержит случайное зелье, которое может увеличить ваш доход на определенное время. Шанс получить: Обычное (60%), Среднее (30%), Редкое (10%)</div>
-        </div>
-    </div>
-
-    <div id="main-window">
-        <div id="balance">Баланс: $0</div>
-        <div id="farm-button">💰</div>
-        <div id="timer"></div>
-    </div>
-
-    <button id="inventory-button">🎒</button>
-    <div id="inventory">
-        <h3 class="section-title">Инвентарь</h3>
-        <div id="inventory-items"></div>
-    </div>
-</div>
-
-<script>
-    // Установка начального баланса
-    let balance = 1000;
-
-    let farmCooldown = 30;
-    let farmValue = 1;
-    let timer = 0;
-    let timerInterval;
-    let equippedGlove = null;
-    let inventoryPotions = [];
-    let activePotionTimer = null;
-    let potionMultiplier = 1;
-
-    let upgrades = [
-        { name: "Начинающий Фермер", emoji: "🌱", cost: 5, maxLevel: 5, currentLevel: 0, effect: () => farmValue += 0.5, description: "Увеличивает доход от каждого сбора на $0.50." },
-        { name: "Быстрое Фермерство", emoji: "⏱️", cost: 10, maxLevel: 5, currentLevel: 0, effect: () => farmCooldown = Math.max(1, farmCooldown - 5), description: "Уменьшает время ожидания между сборами на 5 секунд." },
-        { name: "Улучшенный Урожай", emoji: "🌾", cost: 15, maxLevel: 5, currentLevel: 0, effect: () => farmValue += 1, description: "Увеличивает доход от каждого сбора на $1." },
-        { name: "Счастливый Клевер", emoji: "🍀", cost: 50, maxLevel: 1, currentLevel: 0, effect: () => farmValue *= 2, description: "Удваивает ваш доход от каждого сбора." },
-        { name: "Автополив", emoji: "💧", cost: 100, maxLevel: 3, currentLevel: 0, effect: () => setInterval(() => addToBalance(farmValue / 2), 10000), description: "Автоматически собирает половину урожая каждые 10 секунд." },
-        { name: "Усиленные Удобрения", emoji: "🧪", cost: 75, maxLevel: 3, currentLevel: 0, effect: () => farmValue += 5, description: "Увеличивает доход от каждого сбора на $5." },
-        { name: "Рыночные Связи", emoji: "🤝", cost: 200, maxLevel: 1, currentLevel: 0, effect: () => farmValue *= 1.5, description: "Увеличивает доход на 50% благодаря лучшим ценам на рынке." },
-        { name: "Контроль Погоды", emoji: "🌦️", cost: 500, maxLevel: 1, currentLevel: 0, effect: () => { farmCooldown /= 2; farmValue *= 2; }, description: "Уменьшает время ожидания вдвое и удваивает доход." },
-        { name: "Генная Инженерия", emoji: "🧬", cost: 1000, maxLevel: 3, currentLevel: 0, effect: () => farmValue += 20, description: "Увеличивает доход от каждого сбора на $20." },
-        { name: "Сингулярность", emoji: "🌀", cost: 5000, maxLevel: 1, currentLevel: 0, effect: () => { farmValue *= 10; farmCooldown = 1; }, description: "Увеличивает доход в 10 раз и уменьшает время ожидания до 1 секунды." }
-    ];
-
-    let gloves = [
-        { name: "Перчатка Скорости", emoji: "⚡", cost: 1000, effect: () => farmCooldown *= 0.8, description: "Уменьшает время для следующего сбора на 20%", equipped: false, purchased: false },
-        { name: "Перчатка Богатства", emoji: "💰", cost: 3000, effect: () => farmValue *= 1.2, description: "Увеличивает текущий заработок на 20%", equipped: false, purchased: false },
-        { name: "Супер Перчатка", emoji: "🌟", cost: 5000, effect: () => { farmCooldown *= 0.8; farmValue *= 1.2; }, description: "Уменьшает время сбора на 20% и увеличивает заработок на 20%", equipped: false, purchased: false }
-    ];
-
-    const potions = [
-        { name: "Обычное зелье", emoji: "🧪", effect: 1.2, duration: 120000, chance: 0.6 },
-        { name: "Среднее зелье", emoji: "🧪", effect: 1.5, duration: 120000, chance: 0.3 },
-        { name: "Редкое зелье", emoji: "🧪", effect: 3, duration: 120000, chance: 0.1 }
-    ];
-
-    function updateBalance() {
-        document.getElementById('balance').textContent = `Баланс: $${balance.toFixed(2)}`;
-        updateUpgradeButtons();
-        updateGloveButtons();
-        document.getElementById('buy-potion-box').disabled = balance < 500;
+    
+    .gallery-item img {
+        width: 100%;
+        height: auto;
+        transition: transform 0.3s ease;
     }
-
-    function addToBalance(amount) {
-        balance += amount * potionMultiplier;
-        updateBalance();
+    
+    .gallery-item:hover img {
+        transform: scale(1.1);
     }
-
-    function farm() {
-        if (timer === 0) {
-            addToBalance(farmValue);
-            timer = farmCooldown;
-            updateTimer();
-            timerInterval = setInterval(updateTimer, 1000);
+    
+    /* Pricing */
+    .pricing {
+        padding: 100px 0;
+        background-color: var(--secondary-color);
+    }
+    
+    .pricing h2 {
+        text-align: center;
+        margin-bottom: 50px;
+        font-size: 2.5rem;
+        color: var(--primary-color);
+    }
+    
+    .pricing-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+    }
+    
+    .pricing-item {
+        background-color: #fff;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    
+    .pricing-item:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+    
+    .pricing-item h3 {
+        margin-bottom: 20px;
+        color: var(--primary-color);
+    }
+    
+    .pricing-item .price {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: var(--accent-color);
+    }
+    
+    .pricing-item ul {
+        list-style-type: none;
+        margin-bottom: 30px;
+    }
+    
+    .pricing-item ul li {
+        margin-bottom: 10px;
+    }
+    
+    /* Footer */
+    footer {
+        background-color: var(--primary-color);
+        color: #fff;
+        padding: 50px 0;
+    }
+    
+    .footer-content {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+    
+    .footer-section {
+        flex: 1;
+        margin-right: 30px;
+    }
+    
+    .footer-section h3 {
+        margin-bottom: 20px;
+    }
+    
+    .footer-section ul {
+        list-style-type: none;
+    }
+    
+    .footer-section ul li {
+        margin-bottom: 10px;
+    }
+    
+    .footer-section ul li a {
+        color: #fff;
+        text-decoration: none;
+    }
+    
+    .social-icons a {
+        display: inline-block;
+        margin-right: 15px;
+        font-size: 1.5rem;
+        color: #fff;
+        transition: color 0.3s ease;
+    }
+    
+    .social-icons a:hover {
+        color: var(--accent-color);
+    }
+    
+    /* Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
     }
-
-    function updateTimer() {
-        if (timer > 0) {
-            timer--;
-            document.getElementById('timer').textContent = `Следующий сбор через: ${timer}с`;
-        } else {
-            clearInterval(timerInterval);
-            document.getElementById('timer').textContent = 'Готово к сбору!';
-        }
-    }
-
-    function updateUpgradeButtons() {
-        const upgradesContainer = document.getElementById('upgrades');
-        upgradesContainer.innerHTML = '';
-        upgrades.forEach((upgrade, index) => {
-            const button = document.createElement('button');
-            button.classList.add('upgrade-button');
-            button.innerHTML = `${upgrade.emoji} ${upgrade.name} (${upgrade.currentLevel}/${upgrade.maxLevel}) - $${upgrade.cost}`;
-            button.disabled = balance < upgrade.cost || upgrade.currentLevel >= upgrade.maxLevel;
-            button.onclick = () => buyUpgrade(index);
-            
-            const description = document.createElement('div');
-            description.classList.add('upgrade-description');
-            description.textContent = upgrade.description;
-            
-            const container = document.createElement('div');
-            container.appendChild(button);
-            container.appendChild(description);
-            upgradesContainer.appendChild(container);
-        });
-    }
-
-    function buyUpgrade(index) {
-        const upgrade = upgrades[index];
-        if (balance >= upgrade.cost && upgrade.currentLevel < upgrade.maxLevel) {
-            balance -= upgrade.cost;
-            upgrade.currentLevel++;
-            upgrade.cost = Math.floor(upgrade.cost * 1.5);
-            upgrade.effect();
-            updateBalance();
-        }
-    }
-
-    function updateGloveButtons() {
-        const glovesContainer = document.getElementById('gloves');
-        glovesContainer.innerHTML = '';
-        gloves.forEach((glove, index) => {
-            const button = document.createElement('button');
-            button.classList.add('glove-button');
-            if (!glove.purchased) {
-                button.innerHTML = `${glove.emoji} Купить ${glove.name} - $${glove.cost}`;
-                button.disabled = balance < glove.cost;
-                button.onclick = () => buyGlove(index);
-            } else {
-                button.innerHTML = `${glove.emoji} ${glove.equipped ? 'Снять' : 'Надеть'} ${glove.name}`;
-                button.onclick = () => equipGlove(index);
-            }
-            
-            const description = document.createElement('div');
-            description.classList.add('glove-description');
-            description.textContent = glove.description;
-            
-            const container = document.createElement('div');
-            container.appendChild(button);
-            container.appendChild(description);
-            glovesContainer.appendChild(container);
-        });
-    }
-
-    function buyGlove(index) {
-        const glove = gloves[index];
-        if (balance >= glove.cost && !glove.purchased) {
-            balance -= glove.cost;
-            glove.purchased = true;
-            updateBalance();
-        }
-    }
-
-    function equipGlove(index) {
-        if (equippedGlove !== null) {
-            gloves[equippedGlove].equipped = false;
-            gloves[equippedGlove].effect();
-        }
-        if (equippedGlove === index) {
-            equippedGlove = null;
-        } else {
-            gloves[index].equipped = true;
-            gloves[index].effect();
-            equippedGlove = index;
-        }
-        updateGloveButtons();
-    }
-
-    function buyPotionBox() {
-        if (balance >= 500) {
-            balance -= 500;
-            const randomNum = Math.random();
-            let selectedPotion;
-            if (randomNum < potions[0].chance) {
-                selectedPotion = potions[0];
-            } else if (randomNum < potions[0].chance + potions[1].chance) {
-                selectedPotion = potions[1];
-            } else {
-                selectedPotion = potions[2];
-            }
-            inventoryPotions.push(selectedPotion);
-            updateBalance();
-            updateInventory();
-            alert(`Вы получили ${selectedPotion.name}!`);
-        }
-    }
-
-    function updateInventory() {
-        const inventoryContainer = document.getElementById('inventory-items');
-        inventoryContainer.innerHTML = '';
-        inventoryPotions.forEach((potion, index) => {
-            const potionElement = document.createElement('div');
-            potionElement.classList.add('inventory-item');
-            potionElement.textContent = `${potion.emoji} ${potion.name}`;
-            potionElement.onclick = () => usePotion(index);
-            inventoryContainer.appendChild(potionElement);
-        });
-    }
-
-    function usePotion(index) {
-        if (activePotionTimer) {
-            alert('Уже активно другое зелье!');
-            return;
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .hero h1 {
+            font-size: 2rem;
         }
         
-        if (confirm('Вы уверены, что хотите использовать это зелье?')) {
-            const potion = inventoryPotions[index];
-            potionMultiplier = potion.effect;
-            activePotionTimer = setTimeout(() => {
-                potionMultiplier = 1;
-                activePotionTimer = null;
-                alert('Действие зелья закончилось!');
-            }, potion.duration);
-            inventoryPotions.splice(index, 1);
-            updateInventory();
-            alert(`${potion.name} активировано! Эффект: x${potion.effect} к доходу на ${potion.duration / 1000} секунд.`);
+        .hero p {
+            font-size: 1rem;
+        }
+        
+        .feature-grid,
+        .pricing-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .footer-content {
+            flex-direction: column;
+        }
+        
+        .footer-section {
+            margin-right: 0;
+            margin-bottom: 30px;
         }
     }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+</head>
+<body>
+    <header class="hero">
+        <div class="hero-content">
+            <h1>ProjectPro: Революция в управлении проектами</h1>
+            <p>Повысьте продуктивность вашей команды с помощью нашей инновационной системы</p>
+            <a href="#product-description" class="cta-button">Узнать больше</a>
+        </div>
+    </header>
 
-    function toggleMenu() {
-        document.getElementById('menu').classList.toggle('open');
-    }
+    <section id="product-description" class="product-description">
+        <div class="container">
+            <h2>Почему ProjectPro?</h2>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <i class="fas fa-tasks"></i>
+                    <h3>Умное планирование</h3>
+                    <p>Автоматизированное распределение задач и ресурсов для максимальной эффективности.</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Аналитика в реальном времени</h3>
+                    <p>Мгновенный доступ к ключевым показателям и прогрессу проекта.</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-comments"></i>
+                    <h3>Интегрированная коммуникация</h3>
+                    <p>Встроенные инструменты для эффективного общения и совместной работы команды.</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    function toggleInventory() {
-        document.getElementById('inventory').classList.toggle('open');
-    }
+    <section class="testimonials">
+        <div class="container">
+            <h2>Что говорят наши клиенты</h2>
+            <div class="testimonial-slider">
+                <div class="testimonial-item">
+                    <img src="https://example.com/images/testimonial-1.jpg" alt="Фото клиента" width="100" height="100">
+                    <p>"ProjectPro изменил способ работы нашей команды. Теперь мы более организованы и продуктивны, чем когда-либо."</p>
+                    <span class="author">- Анна Смирнова, CEO TechInnovate</span>
+                </div>
+                <!-- Добавьте больше отзывов здесь -->
+            </div>
+        </div>
+    </section>
 
-    function saveGame() {
-        const gameState = {
-            balance,
-            farmCooldown,
-            farmValue,
-            upgrades,
-            gloves,
-            equippedGlove,
-            inventoryPotions
-        };
-        localStorage.setItem('farmerGame', JSON.stringify(gameState));
-    }
+    <section class="product-showcase">
+        <div class="container">
+            <h2>Посмотрите ProjectPro в действии</h2>
+            <div class="gallery">
+                <div class="gallery-item">
+                    <img src="https://example.com/images/showcase-1.jpg" alt="Интерфейс ProjectPro" width="300" height="200">
+                </div>
+                <div class="gallery-item">
+                    <img src="https://example.com/images/showcase-2.jpg" alt="Диаграмма Ганта в ProjectPro" width="300" height="200">
+                </div>
+                <div class="gallery-item">
+                    <img src="https://example.com/images/showcase-3.jpg" alt="Мобильное приложение ProjectPro" width="300" height="200">
+                </div>
+                <!-- Добавьте больше изображений здесь -->
+            </div>
+        </div>
+    </section>
 
-    function loadGame() {
-        const savedState = localStorage.getItem('farmerGame');
-        if (savedState) {
-            const gameState = JSON.parse(savedState);
-            balance = gameState.balance;
-            farmCooldown = gameState.farmCooldown;
-            farmValue = gameState.farmValue;
-            upgrades = gameState.upgrades;
-            gloves = gameState.gloves;
-            equippedGlove = gameState.equippedGlove;
-            inventoryPotions = gameState.inventoryPotions;
-            updateBalance();
-            updateUpgradeButtons();
-            updateGloveButtons();
-            updateInventory();
-        }
-    }
+    <section class="pricing">
+        <div class="container">
+            <h2>Выберите свой план</h2>
+            <div class="pricing-grid">
+                <div class="pricing-item">
+                    <h3>Стартап</h3>
+                    <div class="price">$29/мес</div>
+                    <ul>
+                        <li>До 10 пользователей</li>
+                        <li>Базовая аналитика</li>
+                        <li>5 ГБ хранилища</li>
+                    </ul>
+                    <a href="https://example.com/pricing/startup" class="cta-button">Выбрать план</a>
+                </div>
+                <div class="pricing-item">
+                    <h3>Бизнес</h3>
+                    <div class="price">$99/мес</div>
+                    <ul>
+                        <li>До 50 пользователей</li>
+                        <li>Расширенная аналитика</li>
+                        <li>50 ГБ хранилища</li>
+                    </ul>
+                    <a href="https://example.com/pricing/business" class="cta-button">Выбрать план</a>
+                </div>
+                <div class="pricing-item">
+                    <h3>Корпоративный</h3>
+                    <div class="price">Индивидуально</div>
+                    <ul>
+                        <li>Неограниченное количество пользователей</li>
+                        <li>Персонализированная аналитика</li>
+                        <li>Неограниченное хранилище</li>
+                    </ul>
+                    <a href="https://example.com/pricing/enterprise" class="cta-button">Связаться с нами</a>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    document.getElementById('farm-button').onclick = farm;
-    document.getElementById('menu-button').onclick = toggleMenu;
-    document.getElementById('close-menu').onclick = toggleMenu;
-    document.getElementById('inventory-button').onclick = toggleInventory;
-    document.getElementById('buy-potion-box').onclick = buyPotionBox;
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>О нас</h3>
+                    <p>ProjectPro - инновационная система управления проектами, разработанная для повышения продуктивности команд любого масштаба.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Контакты</h3>
+                    <p>Email: info@projectpro.com</p>
+                    <p>Телефон: +7 (999) 123-45-67</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Ссылки</h3>
+                    <ul>
+                        <li><a href="https://example.com/privacy">Политика конфиденциальности</a></li>
+                        <li><a href="https://example.com/terms">Условия использования</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Мы в соцсетях</h3>
+                    <div class="social-icons">
+                        <a href="https://facebook.com/projectpro"><i class="fab fa-facebook"></i></a>
+                        <a href="https://twitter.com/projectpro"><i class="fab fa-twitter"></i></a>
+                        <a href="https://linkedin.com/company/projectpro"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
 
-    loadGame();
-    setInterval(saveGame, 30000);
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            // Плавная прокрутка к секциям
+            $('a[href^="#"]').on('click', function(event) {
+                var target = $(this.getAttribute('href'));
+                if( target.length ) {
+                    event.preventDefault();
+                    $('html, body').stop().animate({
+                        scrollTop: target.offset().top
+                    }, 1000);
+                }
+            });
 
-    updateBalance();
-    updateUpgradeButtons();
-    updateGloveButtons();
-    updateInventory();
-</script>
+            // Инициализация слайдера отзывов
+            $('.testimonial-slider').slick({
+                dots: true,
+                infinite: true,
+                speed: 500,
+                fade: true,
+                cssEase: 'linear',
+                autoplay: true,
+                autoplaySpeed: 5000
+            });
+
+            // Анимация при прокрутке
+            $(window).scroll(function() {
+                $('.feature-item, .pricing-item, .gallery-item').each(function(){
+                    var bottom_of_object = $(this).offset().top + $(this).outerHeight();
+                    var bottom_of_window = $(window).scrollTop() + $(window).height();
+                    
+                    if( bottom_of_window > bottom_of_object ){
+                        $(this).animate({'opacity':'1', 'margin-top':'0px'},500);
+                    }
+                });
+            });
+
+            // Модальное окно для галереи
+            $('.gallery-item').click(function(){
+                var imgSrc = $(this).find('img').attr('src');
+                $('body').append('<div class="modal"><img src="' + imgSrc + '" /></div>');
+                $('.modal').click(function(){
+                    $(this).remove();
+                });
+            });
+        });
+    </script>
 </body>
 </html>
