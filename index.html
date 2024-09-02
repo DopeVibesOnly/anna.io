@@ -1,676 +1,520 @@
-<html>
-
-<head>
-  <base href="https://websim.creativeengine.ai/hackersim/">
-  <meta charset="UTF-8">
-  <title>CyberVoid: скилл</title>
-  <style>
-    body,
-    html {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      background-color: #000;
-      color: #0F0;
-      font-family: 'Consolas', 'Courier New', monospace;
-      overflow: hidden;
+<html><head><base href="https://example.com">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProjectPro - Инновационная система управления проектами</title>
+<style>
+    :root {
+        --primary-color: #2c3e50;
+        --secondary-color: #ecf0f1;
+        --accent-color: #e74c3c;
+        --text-color: #333;
     }
-
-    #terminal {
-      height: calc(100% - 60px);
-      padding: 10px;
-      box-sizing: border-box;
-      overflow-y: auto;
-      position: relative;
+    
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
     }
-
-    #input-line {
-      display: flex;
-      align-items: center;
+    
+    body {
+        font-family: 'Roboto', sans-serif;
+        line-height: 1.6;
+        color: var(--text-color);
     }
-
-    #prompt {
-      color: #0F0;
-      margin-right: 5px;
+    
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
     }
-
-    #command-input {
-      background-color: transparent;
-      border: none;
-      color: #0F0;
-      font-family: 'Consolas', 'Courier New', monospace;
-      font-size: 14px;
-      outline: none;
-      width: 100%;
+    
+    /* Hero Section */
+    .hero {
+        background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://example.com/images/hero-bg.jpg') no-repeat center center/cover;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: #fff;
     }
-
-    .output {
-      margin-bottom: 5px;
+    
+    .hero-content {
+        max-width: 800px;
     }
-
-    #terminal::before {
-      content: " ";
-      display: block;
-      position: absolute;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      right: 0;
-      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-      z-index: 2;
-      background-size: 100% 2px, 3px 100%;
-      pointer-events: none;
+    
+    .hero h1 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        animation: fadeInUp 1s ease-out;
     }
-
-    #terminal-header {
-      background-color: #0F0;
-      color: #000;
-      padding: 5px 10px;
-      font-weight: bold;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    
+    .hero p {
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+        animation: fadeInUp 1s ease-out 0.5s;
+        opacity: 0;
+        animation-fill-mode: forwards;
     }
-
-    .header-button {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      display: inline-block;
-      margin-left: 5px;
+    
+    .cta-button {
+        display: inline-block;
+        padding: 12px 30px;
+        background-color: var(--accent-color);
+        color: #fff;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        animation: fadeInUp 1s ease-out 1s;
+        opacity: 0;
+        animation-fill-mode: forwards;
     }
-
-    .close {
-      background-color: #FF5F56;
+    
+    .cta-button:hover {
+        background-color: #c0392b;
+        transform: translateY(-3px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     }
-
-    .minimize {
-      background-color: #FFBD2E;
+    
+    /* Product Description */
+    .product-description {
+        padding: 100px 0;
+        background-color: var(--secondary-color);
     }
-
-    .maximize {
-      background-color: #27C93F;
+    
+    .product-description h2 {
+        text-align: center;
+        margin-bottom: 50px;
+        font-size: 2.5rem;
+        color: var(--primary-color);
     }
-
-    #status-bar {
-      background-color: #0F0;
-      color: #000;
-      padding: 5px 10px;
-      font-weight: bold;
-      display: flex;
-      justify-content: space-between;
+    
+    .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
     }
-
-    #upgrades-menu {
-      position: fixed;
-      top: 50px;
-      right: -300px;
-      width: 280px;
-      height: calc(100% - 60px);
-      background-color: #001100;
-      border: 2px solid #0F0;
-      padding: 10px;
-      transition: right 0.3s ease-in-out;
-      overflow-y: auto;
+    
+    .feature-item {
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
     }
-
-    #upgrades-menu.open {
-      right: 10px;
+    
+    .feature-item:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.2);
     }
-
-    .upgrade {
-      border: 1px solid #0F0;
-      margin-bottom: 10px;
-      padding: 5px;
+    
+    .feature-item i {
+        font-size: 3rem;
+        color: var(--accent-color);
+        margin-bottom: 20px;
     }
-
-    .upgrade h3 {
-      margin: 0 0 5px 0;
+    
+    .feature-item h3 {
+        margin-bottom: 15px;
+        color: var(--primary-color);
     }
-
-    .upgrade p {
-      margin: 0 0 5px 0;
-      font-size: 12px;
+    
+    /* Testimonials */
+    .testimonials {
+        padding: 100px 0;
+        background-color: var(--primary-color);
+        color: #fff;
     }
-
-    .upgrade button {
-      background-color: #0F0;
-      color: #000;
-      border: none;
-      padding: 2px 5px;
-      cursor: pointer;
-      font-family: 'Consolas', 'Courier New', monospace;
+    
+    .testimonials h2 {
+        text-align: center;
+        margin-bottom: 50px;
+        font-size: 2.5rem;
     }
-
-    .upgrade button:disabled {
-      background-color: #030;
-      color: #060;
-      cursor: not-allowed;
+    
+    .testimonial-slider {
+        max-width: 800px;
+        margin: 0 auto;
     }
-
-    #missions-menu {
-      position: fixed;
-      top: 50px;
-      right: -300px;
-      width: 280px;
-      height: calc(100% - 60px);
-      background-color: #001100;
-      border: 2px solid #0F0;
-      padding: 10px;
-      transition: right 0.3s ease-in-out;
-      overflow-y: auto;
+    
+    .testimonial-item {
+        text-align: center;
     }
-
-    #missions-menu.open {
-      right: 10px;
+    
+    .testimonial-item img {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        margin-bottom: 20px;
     }
-
-    .mission {
-      border: 1px solid #0F0;
-      margin-bottom: 10px;
-      padding: 5px;
+    
+    .testimonial-item p {
+        font-style: italic;
+        margin-bottom: 20px;
     }
-
-    .mission h3 {
-      margin: 0 0 5px 0;
+    
+    .testimonial-item .author {
+        font-weight: bold;
     }
-
-    .mission p {
-      margin: 0 0 5px 0;
-      font-size: 12px;
+    
+    /* Product Showcase */
+    .product-showcase {
+        padding: 100px 0;
+        background-color: #fff;
     }
-
-    .mission button {
-      background-color: #0F0;
-      color: #000;
-      border: none;
-      padding: 2px 5px;
-      cursor: pointer;
-      font-family: 'Consolas', 'Courier New', monospace;
+    
+    .product-showcase h2 {
+        text-align: center;
+        margin-bottom: 50px;
+        font-size: 2.5rem;
+        color: var(--primary-color);
     }
-
-    .mission button:disabled {
-      background-color: #030;
-      color: #060;
-      cursor: not-allowed;
+    
+    .gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
     }
-
-    @keyframes spin {
-      0% {
-        transform: rotateX(0deg) rotateY(0deg);
-      }
-
-      100% {
-        transform: rotateX(360deg) rotateY(360deg);
-      }
+    
+    .gallery-item {
+        position: relative;
+        overflow: hidden;
+        border-radius: 10px;
+        cursor: pointer;
     }
-
-    .dice {
-      font-family: monospace;
-      white-space: pre;
-      display: inline-block;
-      animation: spin 2s linear infinite;
+    
+    .gallery-item img {
+        width: 100%;
+        height: auto;
+        transition: transform 0.3s ease;
     }
-  </style>
+    
+    .gallery-item:hover img {
+        transform: scale(1.1);
+    }
+    
+    /* Pricing */
+    .pricing {
+        padding: 100px 0;
+        background-color: var(--secondary-color);
+    }
+    
+    .pricing h2 {
+        text-align: center;
+        margin-bottom: 50px;
+        font-size: 2.5rem;
+        color: var(--primary-color);
+    }
+    
+    .pricing-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+    }
+    
+    .pricing-item {
+        background-color: #fff;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    
+    .pricing-item:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+    
+    .pricing-item h3 {
+        margin-bottom: 20px;
+        color: var(--primary-color);
+    }
+    
+    .pricing-item .price {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: var(--accent-color);
+    }
+    
+    .pricing-item ul {
+        list-style-type: none;
+        margin-bottom: 30px;
+    }
+    
+    .pricing-item ul li {
+        margin-bottom: 10px;
+    }
+    
+    /* Footer */
+    footer {
+        background-color: var(--primary-color);
+        color: #fff;
+        padding: 50px 0;
+    }
+    
+    .footer-content {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+    
+    .footer-section {
+        flex: 1;
+        margin-right: 30px;
+    }
+    
+    .footer-section h3 {
+        margin-bottom: 20px;
+    }
+    
+    .footer-section ul {
+        list-style-type: none;
+    }
+    
+    .footer-section ul li {
+        margin-bottom: 10px;
+    }
+    
+    .footer-section ul li a {
+        color: #fff;
+        text-decoration: none;
+    }
+    
+    .social-icons a {
+        display: inline-block;
+        margin-right: 15px;
+        font-size: 1.5rem;
+        color: #fff;
+        transition: color 0.3s ease;
+    }
+    
+    .social-icons a:hover {
+        color: var(--accent-color);
+    }
+    
+    /* Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .hero h1 {
+            font-size: 2rem;
+        }
+        
+        .hero p {
+            font-size: 1rem;
+        }
+        
+        .feature-grid,
+        .pricing-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .footer-content {
+            flex-direction: column;
+        }
+        
+        .footer-section {
+            margin-right: 0;
+            margin-bottom: 30px;
+        }
+    }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
 </head>
-
 <body>
-  <div id="terminal-header">
-    <span>CyberVoid Terminal</span>
-    <div>
-      <span class="header-button minimize"></span>
-      <span class="header-button maximize"></span>
-      <span class="header-button close"></span>
-    </div>
-  </div>
-  <div id="terminal">
-    <div id="output"></div>
-    <div id="input-line">
-      <span id="prompt">root@cybervoid:~#</span>
-      <input type="text" id="command-input" autofocus>
-    </div>
-  </div>
-  <div id="status-bar">
-    <span id="balance">Баланс: 0 BTC</span>
-    <span id="status">Статус: В сети</span>
-  </div>
-  <div id="upgrades-menu">
-    <h2>Улучшения</h2>
-    <div id="upgrades-list"></div>
-  </div>
-  <div id="missions-menu">
-    <h2>Миссии</h2>
-    <div id="missions-list"></div>
-  </div>
+    <header class="hero">
+        <div class="hero-content">
+            <h1>ProjectPro: Революция в управлении проектами</h1>
+            <p>Повысьте продуктивность вашей команды с помощью нашей инновационной системы</p>
+            <a href="#product-description" class="cta-button">Узнать больше</a>
+        </div>
+    </header>
 
-  <script>
-    const output = document.getElementById('output');
-    const input = document.getElementById('command-input');
-    const balanceElement = document.getElementById('balance');
-    const upgradesMenu = document.getElementById('upgrades-menu');
-    const upgradesList = document.getElementById('upgrades-list');
-    const missionsMenu = document.getElementById('missions-menu');
-    const missionsList = document.getElementById('missions-list');
+    <section id="product-description" class="product-description">
+        <div class="container">
+            <h2>Почему ProjectPro?</h2>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <i class="fas fa-tasks"></i>
+                    <h3>Умное планирование</h3>
+                    <p>Автоматизированное распределение задач и ресурсов для максимальной эффективности.</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Аналитика в реальном времени</h3>
+                    <p>Мгновенный доступ к ключевым показателям и прогрессу проекта.</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-comments"></i>
+                    <h3>Интегрированная коммуникация</h3>
+                    <p>Встроенные инструменты для эффективного общения и совместной работы команды.</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    let balance = 0;
-    let lastHackTime = 0;
-    let lastMissionTime = 0;
-    let hackCooldown = 25000; // 25 секунд
-    let missionCooldown = 120000; // 2 минуты
-    let hackSuccessChance = 0.4;
-    let hackRewardMultiplier = 1;
-    let criticalHackChance = 0.05;
-    let detectionChance = 0.1;
+    <section class="testimonials">
+        <div class="container">
+            <h2>Что говорят наши клиенты</h2>
+            <div class="testimonial-slider">
+                <div class="testimonial-item">
+                    <img src="https://example.com/images/testimonial-1.jpg" alt="Фото клиента" width="100" height="100">
+                    <p>"ProjectPro изменил способ работы нашей команды. Теперь мы более организованы и продуктивны, чем когда-либо."</p>
+                    <span class="author">- Анна Смирнова, CEO TechInnovate</span>
+                </div>
+                <!-- Добавьте больше отзывов здесь -->
+            </div>
+        </div>
+    </section>
 
-    let isMissionActive = false;
-    let secretPassword = '';
-    let waitingForCubikBet = false;
-    let waitingForCubikNumber = false;
-    let cubikBet = 0;
+    <section class="product-showcase">
+        <div class="container">
+            <h2>Посмотрите ProjectPro в действии</h2>
+            <div class="gallery">
+                <div class="gallery-item">
+                    <img src="https://example.com/images/showcase-1.jpg" alt="Интерфейс ProjectPro" width="300" height="200">
+                </div>
+                <div class="gallery-item">
+                    <img src="https://example.com/images/showcase-2.jpg" alt="Диаграмма Ганта в ProjectPro" width="300" height="200">
+                </div>
+                <div class="gallery-item">
+                    <img src="https://example.com/images/showcase-3.jpg" alt="Мобильное приложение ProjectPro" width="300" height="200">
+                </div>
+                <!-- Добавьте больше изображений здесь -->
+            </div>
+        </div>
+    </section>
 
-    const upgrades = [
-      {
-        name: 'Улучшенный процессор',
-        description: 'Увеличивает шанс успешного взлома на 2%.',
-        cost: 0.1,
-        effect: () => { hackSuccessChance += 0.02; },
-        count: 0
-      },
-      {
-        name: 'Расширенная память',
-        description: 'Увеличивает награду за успешный взлом на 5%.',
-        cost: 0.15,
-        effect: () => { hackRewardMultiplier *= 1.05; },
-        count: 0
-      },
-      {
-        name: 'Квантовый алгоритм',
-        description: 'Сокращает время между взломами на 1 секунду.',
-        cost: 0.2,
-        effect: () => { hackCooldown -= 1000; },
-        count: 0
-      },
-      {
-        name: 'Нейронная сеть',
-        description: 'Увеличивает шанс критического взлома на 1%.',
-        cost: 0.25,
-        effect: () => { criticalHackChance += 0.01; },
-        count: 0
-      },
-      {
-        name: 'Стелс-модуль',
-        description: 'Уменьшает шанс обнаружения на 2%.',
-        cost: 0.3,
-        effect: () => { detectionChance = Math.max(0, detectionChance - 0.02); },
-        count: 0
-      }
-    ];
+    <section class="pricing">
+        <div class="container">
+            <h2>Выберите свой план</h2>
+            <div class="pricing-grid">
+                <div class="pricing-item">
+                    <h3>Стартап</h3>
+                    <div class="price">$29/мес</div>
+                    <ul>
+                        <li>До 10 пользователей</li>
+                        <li>Базовая аналитика</li>
+                        <li>5 ГБ хранилища</li>
+                    </ul>
+                    <a href="https://example.com/pricing/startup" class="cta-button">Выбрать план</a>
+                </div>
+                <div class="pricing-item">
+                    <h3>Бизнес</h3>
+                    <div class="price">$99/мес</div>
+                    <ul>
+                        <li>До 50 пользователей</li>
+                        <li>Расширенная аналитика</li>
+                        <li>50 ГБ хранилища</li>
+                    </ul>
+                    <a href="https://example.com/pricing/business" class="cta-button">Выбрать план</a>
+                </div>
+                <div class="pricing-item">
+                    <h3>Корпоративный</h3>
+                    <div class="price">Индивидуально</div>
+                    <ul>
+                        <li>Неограниченное количество пользователей</li>
+                        <li>Персонализированная аналитика</li>
+                        <li>Неограниченное хранилище</li>
+                    </ul>
+                    <a href="https://example.com/pricing/enterprise" class="cta-button">Связаться с нами</a>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    const missions = [
-      {
-        name: 'Взлом сейфа с BTC',
-        description: 'Попробуйте взломать защищенный сейф с криптовалютой. Каждый взлом может привести вас к секретному паролю.',
-        reward: 1.0,
-        startMission: () => {
-          isMissionActive = true;
-          secretPassword = generateSecretPassword();
-          return "Миссия 'Взлом сейфа с BTC' начата. Используйте команду 'hack' для поиска секретного пароля.";
-        },
-        checkCompletion: (password) => {
-          if (password === secretPassword) {
-            isMissionActive = false;
-            balance += 1.0;
-            updateBalance();
-            return "Поздравляем! Вы успешно взломали сейф и получили 1.0 BTC!";
-          }
-          return "Неверный пароль. Продолжайте поиски.";
-        }
-      }
-    ];
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>О нас</h3>
+                    <p>ProjectPro - инновационная система управления проектами, разработанная для повышения продуктивности команд любого масштаба.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Контакты</h3>
+                    <p>Email: info@projectpro.com</p>
+                    <p>Телефон: +7 (999) 123-45-67</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Ссылки</h3>
+                    <ul>
+                        <li><a href="https://example.com/privacy">Политика конфиденциальности</a></li>
+                        <li><a href="https://example.com/terms">Условия использования</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Мы в соцсетях</h3>
+                    <div class="social-icons">
+                        <a href="https://facebook.com/projectpro"><i class="fab fa-facebook"></i></a>
+                        <a href="https://twitter.com/projectpro"><i class="fab fa-twitter"></i></a>
+                        <a href="https://linkedin.com/company/projectpro"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
 
-    loadGameData();
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            // Плавная прокрутка к секциям
+            $('a[href^="#"]').on('click', function(event) {
+                var target = $(this.getAttribute('href'));
+                if( target.length ) {
+                    event.preventDefault();
+                    $('html, body').stop().animate({
+                        scrollTop: target.offset().top
+                    }, 1000);
+                }
+            });
 
-    const cubeFaces = [
-      [
-        "  ▄▄▄▄▄  ",
-        " ▐     ▌ ",
-        " ▐  ●  ▌ ",
-        " ▐     ▌ ",
-        "  ▀▀▀▀▀  "
-      ],
-      [
-        "  ▄▄▄▄▄  ",
-        " ▐ ●   ▌ ",
-        " ▐     ▌ ",
-        " ▐   ● ▌ ",
-        "  ▀▀▀▀▀  "
-      ],
-      [
-        "  ▄▄▄▄▄  ",
-        " ▐ ●   ▌ ",
-        " ▐  ●  ▌ ",
-        " ▐   ● ▌ ",
-        "  ▀▀▀▀▀  "
-      ],
-      [
-        "  ▄▄▄▄▄  ",
-        " ▐ ● ● ▌ ",
-        " ▐     ▌ ",
-        " ▐ ● ● ▌ ",
-        "  ▀▀▀▀▀  "
-      ],
-      [
-        "  ▄▄▄▄▄  ",
-        " ▐ ● ● ▌ ",
-        " ▐  ●  ▌ ",
-        " ▐ ● ● ▌ ",
-        "  ▀▀▀▀▀  "
-      ],
-      [
-        "  ▄▄▄▄▄  ",
-        " ▐ ● ● ▌ ",
-        " ▐ ● ● ▌ ",
-        " ▐ ● ● ▌ ",
-        "  ▀▀▀▀▀  "
-      ]
-    ];
+            // Инициализация слайдера отзывов
+            $('.testimonial-slider').slick({
+                dots: true,
+                infinite: true,
+                speed: 500,
+                fade: true,
+                cssEase: 'linear',
+                autoplay: true,
+                autoplaySpeed: 5000
+            });
 
-    const commands = {
-      help: () => 'Доступные команды: help, hack, balance, upgrades, missions, clear, cubik',
-      balance: () => `Текущий баланс: ${balance.toFixed(8)} BTC`,
-      upgrades: () => {
-        upgradesMenu.classList.toggle('open');
-        renderUpgrades();
-        return 'Открыто меню улучшений.';
-      },
-      missions: () => {
-        missionsMenu.classList.toggle('open');
-        renderMissions();
-        return 'Открыто меню миссий.';
-      },
-      clear: () => {
-        output.innerHTML = '';
-        return '';
-      },
-      hack: async () => {
-        const now = Date.now();
-        if (now - lastHackTime < hackCooldown) {
-          const remainingTime = Math.ceil((hackCooldown - (now - lastHackTime)) / 1000);
-          return `Подождите еще ${remainingTime} секунд перед следующим взломом.`;
-        }
+            // Анимация при прокрутке
+            $(window).scroll(function() {
+                $('.feature-item, .pricing-item, .gallery-item').each(function(){
+                    var bottom_of_object = $(this).offset().top + $(this).outerHeight();
+                    var bottom_of_window = $(window).scrollTop() + $(window).height();
+                    
+                    if( bottom_of_window > bottom_of_object ){
+                        $(this).animate({'opacity':'1', 'margin-top':'0px'},500);
+                    }
+                });
+            });
 
-        lastHackTime = now;
-        const target = generateTarget();
-        let success = Math.random() < hackSuccessChance;
-
-        await simulateHacking(target, success);
-
-        if (success) {
-          const baseReward = (Math.random() * 0.1 + 0.01);
-          let reward = baseReward * hackRewardMultiplier;
-
-          const isCritical = Math.random() < criticalHackChance;
-          if (isCritical) {
-            reward *= 2;
-            output.innerHTML += '<div class="output">Критический взлом! Награда удвоена!</div>';
-          }
-
-          balance += reward;
-          updateBalance();
-
-          if (isMissionActive) {
-            const foundPassword = Math.random() < 0.1; // 10% шанс найти пароль
-            if (foundPassword) {
-              return `Взлом успешен! Получено ${reward.toFixed(8)} BTC.\nВы нашли часть секретного пароля: ${secretPassword.substring(0, 3)}***`;
-            }
-          }
-
-          return `Взлом успешен! Получено ${reward.toFixed(8)} BTC.`;
-        } else {
-          if (Math.random() < detectionChance) {
-            return "Взлом не удался. Система безопасности обнаружила вторжение.";
-          } else {
-            return "Взлом не удался, но вам удалось избежать обнаружения.";
-          }
-        }
-      },
-      cubik: () => {
-        waitingForCubikBet = true;
-        return "Введите вашу ставку (не менее 0.01 BTC):";
-      }
-    };
-
-    function generateTarget() {
-      const ips = ['192.168.1.1', '10.0.0.1', '172.16.0.1', '8.8.8.8'];
-      const organizations = ['MegaCorp', 'TechGiant', 'DataHaven', 'CyberSec'];
-      return {
-        ip: ips[Math.floor(Math.random() * ips.length)],
-        name: organizations[Math.floor(Math.random() * organizations.length)]
-      };
-    }
-
-    function generateSecretPassword() {
-      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-      let result = '';
-      for (let i = 0; i < 6; i++) {
-        result += characters.charAt(Math.floor(Math.random() * characters.length));
-      }
-      return result;
-    }
-
-    async function simulateHacking(target, success) {
-      const steps = [
-        `Инициализация атаки на ${target.name} (${target.ip})...`,
-        "Сканирование портов...",
-        "Обнаружены уязвимости в системе безопасности...",
-        "Внедрение эксплойта...",
-        "Обход файервола...",
-        "Получение доступа к системе...",
-        "Повышение привилегий...",
-        "Поиск ценных данных...",
-        "Шифрование каналов связи...",
-        "Скачивание данных...",
-        success ? "Заметание следов..." : "Обнаружение вторжения системой безопасности!",
-        "Завершение операции..."
-      ];
-
-      for (let step of steps) {
-        await new Promise(resolve => setTimeout(resolve, Math.random() * 1000 + 500));
-        const stepElement = document.createElement('div');
-        stepElement.textContent = step;
-        stepElement.classList.add('output');
-        output.appendChild(stepElement);
-        output.scrollTop = output.scrollHeight;
-      }
-    }
-
-    function updateBalance() {
-      balanceElement.textContent = `Баланс: ${balance.toFixed(8)} BTC`;
-      saveGameData();
-    }
-
-    function saveGameData() {
-      const gameData = {
-        balance,
-        upgrades: upgrades.map(u => u.count),
-        hackSuccessChance,
-        hackRewardMultiplier,
-        criticalHackChance,
-        detectionChance,
-        hackCooldown
-      };
-      localStorage.setItem('hackerGameData', JSON.stringify(gameData));
-    }
-
-    function loadGameData() {
-      const savedData = localStorage.getItem('hackerGameData');
-      if (savedData) {
-        const gameData = JSON.parse(savedData);
-        balance = gameData.balance;
-        hackSuccessChance = gameData.hackSuccessChance;
-        hackRewardMultiplier = gameData.hackRewardMultiplier;
-        criticalHackChance = gameData.criticalHackChance;
-        detectionChance = gameData.detectionChance;
-        hackCooldown = gameData.hackCooldown;
-        upgrades.forEach((upgrade, index) => {
-          upgrade.count = gameData.upgrades[index];
-          for (let i = 0; i < upgrade.count; i++) {
-            upgrade.effect();
-          }
+            // Модальное окно для галереи
+            $('.gallery-item').click(function(){
+                var imgSrc = $(this).find('img').attr('src');
+                $('body').append('<div class="modal"><img src="' + imgSrc + '" /></div>');
+                $('.modal').click(function(){
+                    $(this).remove();
+                });
+            });
         });
-      }
-      updateBalance();
-    }
-
-    async function processInput(e) {
-      if (e.key === 'Enter') {
-        const cmd = input.value.toLowerCase();
-        input.value = '';
-
-        const cmdElement = document.createElement('div');
-        cmdElement.textContent = `root@cybervoid:~# ${cmd}`;
-        cmdElement.classList.add('output');
-        output.appendChild(cmdElement);
-
-        let result;
-        if (waitingForCubikBet) {
-          result = await processCubikBet(cmd);
-        } else if (waitingForCubikNumber) {
-          result = await processCubikNumber(cmd);
-        } else if (cmd.startsWith('unlock ')) {
-          const password = cmd.split(' ')[1];
-          result = missions[0].checkCompletion(password);
-        } else if (cmd in commands) {
-          result = await commands[cmd]();
-        } else {
-          result = `Команда не распознана: ${cmd}. Введите 'help' для списка команд.`;
-        }
-
-        const resultElement = document.createElement('div');
-        resultElement.innerHTML = result;
-        resultElement.classList.add('output');
-        output.appendChild(resultElement);
-
-        output.scrollTop = output.scrollHeight;
-      }
-    }
-
-    async function processCubikBet(bet) {
-      waitingForCubikBet = false;
-      const betAmount = parseFloat(bet);
-
-      if (isNaN(betAmount) || betAmount < 0.01) {
-        return "Неверная ставка. Минимальная ставка 0.01 BTC.";
-      }
-
-      if (betAmount > balance) {
-        return "У вас недостаточно средств для этой ставки.";
-      }
-
-      cubikBet = betAmount;
-      waitingForCubikNumber = true;
-      return "Выберите число от 1 до 6:";
-    }
-
-    async function processCubikNumber(number) {
-      waitingForCubikNumber = false;
-      const chosenNumber = parseInt(number);
-
-      if (isNaN(chosenNumber) || chosenNumber < 1 || chosenNumber > 6) {
-        return "Неверное число. Выберите число от 1 до 6.";
-      }
-
-      let result = "Бросаем кубик...<br>";
-      result += '<div class="dice">';
-
-      for (let i = 0; i < 20; i++) {
-        await new Promise(r => setTimeout(r, 100));
-        const randomFace = Math.floor(Math.random() * 6);
-        result += cubeFaces[randomFace].join('<br>') + '<br>';
-      }
-
-      const diceResult = Math.floor(Math.random() * 6) + 1;
-      result += cubeFaces[diceResult - 1].join('<br>') + '</div><br>';
-
-      if (diceResult === chosenNumber) {
-        const winAmount = cubikBet * 3;
-        balance += winAmount;
-        updateBalance();
-        result += `Поздравляем! Выпало число ${diceResult}. Вы выиграли ${winAmount.toFixed(8)} BTC!`;
-      } else {
-        balance -= cubikBet;
-        updateBalance();
-        result += `Выпало число ${diceResult}. Вы проиграли ${cubikBet.toFixed(8)} BTC.`;
-      }
-
-      return result;
-    }
-
-    function renderUpgrades() {
-      upgradesList.innerHTML = '';
-      upgrades.forEach((upgrade, index) => {
-        const upgradeElement = document.createElement('div');
-        upgradeElement.classList.add('upgrade');
-        upgradeElement.innerHTML = `
-      <h3>${upgrade.name}</h3>
-      <p>${upgrade.description}</p>
-      <p>Стоимость: ${upgrade.cost.toFixed(8)} BTC</p>
-      <p>Уровень: ${upgrade.count}/5</p>
-      <button onclick="buyUpgrade(${index})" ${balance < upgrade.cost || upgrade.count >= 5 ? 'disabled' : ''}>Купить</button>
-    `;
-        upgradesList.appendChild(upgradeElement);
-      });
-    }
-
-    function buyUpgrade(index) {
-      const upgrade = upgrades[index];
-      if (balance >= upgrade.cost && upgrade.count < 5) {
-        balance -= upgrade.cost;
-        upgrade.count++;
-        upgrade.effect();
-        updateBalance();
-        renderUpgrades();
-        const resultElement = document.createElement('div');
-        resultElement.textContent = `Улучшение "${upgrade.name}" приобретено.`;
-        resultElement.classList.add('output');
-        output.appendChild(resultElement);
-        output.scrollTop = output.scrollHeight;
-      }
-    }
-
-    function renderMissions() {
-      missionsList.innerHTML = '';
-      missions.forEach((mission, index) => {
-        const missionElement = document.createElement('div');
-        missionElement.classList.add('mission');
-        missionElement.innerHTML = `
-      <h3>${mission.name}</h3>
-      <p>${mission.description}</p>
-      <p>Награда: ${mission.reward.toFixed(8)} BTC</p>
-      <button onclick="startMission(${index})" ${isMissionActive ? 'disabled' : ''}>Начать миссию</button>
-    `;
-        missionsList.appendChild(missionElement);
-      });
-    }
-
-    function startMission(index) {
-      const mission = missions[index];
-      const resultElement = document.createElement('div');
-      resultElement.textContent = mission.startMission();
-      resultElement.classList.add('output');
-      output.appendChild(resultElement);
-      output.scrollTop = output.scrollHeight;
-      renderMissions();
-    }
-
-    input.addEventListener('keypress', processInput);
-
-    // Initial message
-    const initialMessage = document.createElement('div');
-    initialMessage.textContent = `Добро пожаловать в CyberVoid Hacker Simulator v2.0\nВведите 'help' для списка доступных команд.`;
-    initialMessage.classList.add('output');
-    output.appendChild(initialMessage);
-  </script>
+    </script>
 </body>
-
 </html>
