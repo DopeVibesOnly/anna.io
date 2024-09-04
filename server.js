@@ -1,36 +1,80 @@
+const canvas = document.getElementById('gameCanvas');
+const context = canvas.getContext('2d');
+let players = {};
+const playerId = Math.random().toString(36).substr(2, 9);
+let position = {x: 400, y: 300};
 
-// Устанавливаем зависимости
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
+const startButton = document.getElementById('startConnection');
+const connectButton = document.getElementById('connectToPeer');
+const remoteIdInput = document.getElementById('remoteId');
 
-// Создаем приложение Express
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server);
+let peerConnection;
+let dataChannel;
 
-// Подключаем статические файлы (например, клиентские файлы HTML, CSS, JS)
-app.use(express.static(__dirname + '/public'));
+function drawPlayers() {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    for (let id in players) {
+        const player = players[id];
+        context.fillStyle = 'blue';
+        context.fillRect(player.x, player.y, 20, 20);
+    }
+}
 
-// При подключении нового пользователя
-io.on('connection', (socket) => {
-    console.log('Новый пользователь подключился');
+function setupDataChannel(channel) {
+    channel.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        players[data.id] = data.position;
+        drawPlayers();
+    };
 
-    // Слушаем сообщения от клиента
-    socket.on('chat message', (data) => {
-        console.log('Сообщение: ', data);
-
-        // Рассылаем сообщение всем подключенным клиентам
-        io.emit('chat message', data);
+    document.addEventListener('keydown', (event) => {
+        switch (event.key) {
+            case 'w':
+                position.y -= 5;
+                break;
+            case 's':
+                position.y += 5;
+                break;
+            case 'a':
+                position.x -= 5;
+                break;
+            case 'd':
+                position.x += 5;
+                break;
+        }
+        players[playerId] = position;
+        channel.send(JSON.stringify({ id: playerId, position }));
+        drawPlayers();
     });
+}
 
-    // При отключении пользователя
-    socket.on('disconnect', () => {
-        console.log('Пользователь отключился');
-    });
+startButton.addEventListener('click', async () => {
+    const configuration = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+    peerConnection = new RTCPeerConnection(configuration);
+
+    dataChannel = peerConnection.createDataChannel("game");
+    setupDataChannel(dataChannel);
+
+    peerConnection.onicecandidate = (event) => {
+        if (event.candidate) {
+            console.log("Send this to your peer:", JSON.stringify(peerConnection.localDescription));
+        }
+    };
+
+    const offer = await peerConnection.createOffer();
+    await peerConnection.setLocalDescription(offer);
 });
 
-// Запускаем сервер на порту 3000
-server.listen(3000, () => {
-    console.log('Сервер запущен на http://localhost:3000');
+connectButton.addEventListener('click', async () => {
+    const remoteDescription = new RTCSessionDescription(JSON.parse(remoteIdInput.value));
+    await peerConnection.setRemoteDescription(remoteDescription);
+
+    peerConnection.ondatachannel = (event) => {
+        dataChannel = event.channel;
+        setupDataChannel(dataChannel);
+    };
+
+    const answer = await peerConnection.createAnswer();
+    await peerConnection.setLocalDescription(answer);
+    console.log("Send this to your peer:", JSON.stringify(peerConnection.localDescription));
 });
