@@ -1,98 +1,101 @@
-<html><head><base href="https://chat.websim.io/"><title>WebChat Messenger</title>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-        background-color: #f0f2f5;
-    }
-    .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 20px;
-    }
-    .login-form {
-        background-color: white;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        max-width: 400px;
-        margin: 100px auto;
-    }
-    .login-form h2 {
-        margin-top: 0;
-        color: #5e72e4;
-    }
-    .login-form input {
-        width: 100%;
-        padding: 10px;
-        margin-bottom: 10px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-    }
-    .login-form button {
-        width: 100%;
-        padding: 10px;
-        background-color: #5e72e4;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-    .chat-container {
-        display: none;
-        background-color: white;
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    .chat-header {
-        background-color: #5e72e4;
-        color: white;
-        padding: 15px;
-        font-size: 18px;
-    }
-    .chat-messages {
-        height: 400px;
-        overflow-y: auto;
-        padding: 15px;
-    }
-    .message {
-        margin-bottom: 15px;
-    }
-    .message .username {
-        font-weight: bold;
-        margin-right: 10px;
-    }
-    .message .content {
-        background-color: #f1f0f0;
-        padding: 8px 12px;
-        border-radius: 18px;
-        display: inline-block;
-    }
-    .chat-input {
-        display: flex;
-        padding: 15px;
-        border-top: 1px solid #eee;
-    }
-    .chat-input input {
-        flex-grow: 1;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        margin-right: 10px;
-    }
-    .chat-input button {
-        padding: 10px 20px;
-        background-color: #5e72e4;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-</style>
+<html>
+<head>
+    <base href="https://chat.websim.io/">
+    <title>WebChat Messenger</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .login-form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 400px;
+            margin: 100px auto;
+        }
+        .login-form h2 {
+            margin-top: 0;
+            color: #5e72e4;
+        }
+        .login-form input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .login-form button {
+            width: 100%;
+            padding: 10px;
+            background-color: #5e72e4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .chat-container {
+            display: none;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .chat-header {
+            background-color: #5e72e4;
+            color: white;
+            padding: 15px;
+            font-size: 18px;
+        }
+        .chat-messages {
+            height: 400px;
+            overflow-y: auto;
+            padding: 15px;
+        }
+        .message {
+            margin-bottom: 15px;
+        }
+        .message .username {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .message .content {
+            background-color: #f1f0f0;
+            padding: 8px 12px;
+            border-radius: 18px;
+            display: inline-block;
+        }
+        .chat-input {
+            display: flex;
+            padding: 15px;
+            border-top: 1px solid #eee;
+        }
+        .chat-input input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        .chat-input button {
+            padding: 10px 20px;
+            background-color: #5e72e4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -113,8 +116,10 @@
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.6.10/firebase-database-compat.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js"></script>
+
     <script>
         // Инициализация Firebase
         const firebaseConfig = {
@@ -126,11 +131,14 @@
             messagingSenderId: "251782258091",
             appId: "1:251782258091:web:3f846c4c4ffeed67a8c94f"
         };
-        firebase.initializeApp(firebaseConfig);
 
-        const database = firebase.database();
+        // Инициализация приложения Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database(app);
+        
         let username = '';
 
+        // Вход в чат
         function login() {
             username = document.getElementById('usernameInput').value.trim();
             if (username) {
@@ -140,6 +148,7 @@
             }
         }
 
+        // Отправка сообщения в Firebase
         function sendMessage() {
             const messageInput = document.getElementById('messageInput');
             const message = messageInput.value.trim();
@@ -154,6 +163,7 @@
             }
         }
 
+        // Добавление сообщения в интерфейс
         function addMessageToChat(username, message) {
             const chatMessages = document.getElementById('chatMessages');
             const messageElement = document.createElement('div');
@@ -166,6 +176,7 @@
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
+        // Загрузка сообщений из Firebase
         function loadMessages() {
             const messagesRef = database.ref('messages');
             messagesRef.on('child_added', (snapshot) => {
@@ -174,6 +185,7 @@
             });
         }
 
+        // Обработка нажатия клавиши Enter для отправки сообщения
         document.getElementById('messageInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 sendMessage();
