@@ -1,0 +1,261 @@
+<html><head><base href="https://festivedesign.com/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anna's website</title>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Dancing+Script:wght@700&display=swap');
+
+  :root {
+    --primary-color: #FF69B4;
+    --secondary-color: #FFC0CB;
+    --text-color: #4A4A4A;
+    --bg-color: #FFF0F5;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    overflow-x: hidden;
+  }
+
+  header {
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 5%;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .logo {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    font-family: 'Dancing Script', cursive;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+  }
+
+  .nav-links a {
+    text-decoration: none;
+    color: var(--text-color);
+    font-weight: 400;
+    transition: color 0.3s ease;
+  }
+
+  .nav-links a:hover {
+    color: var(--primary-color);
+  }
+
+  main {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 5%;
+  }
+
+  h1 {
+    color: var(--primary-color);
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    font-family: 'Dancing Script', cursive;
+    text-align: center;
+  }
+
+  .qualities-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2rem;
+  }
+
+  .qualities-box {
+    width: 45%;
+    min-height: 300px;
+    border: 2px dashed var(--primary-color);
+    border-radius: 10px;
+    padding: 1rem;
+    background-color: rgba(255, 255, 255, 0.8);
+  }
+
+  .qualities-box h2 {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .quality {
+    display: inline-block;
+    margin: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    border-radius: 20px;
+    cursor: move;
+    transition: transform 0.2s ease;
+  }
+
+  .quality:hover {
+    transform: scale(1.05);
+  }
+
+  .quality.positive {
+    background-color: #90EE90;
+  }
+
+  .quality.negative {
+    background-color: #FFA07A;
+  }
+
+  #check-button {
+    display: block;
+    margin: 2rem auto;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  #check-button:hover {
+    background-color: #FF1493;
+  }
+
+  #feedback {
+    text-align: center;
+    font-size: 1.2rem;
+    margin-top: 1rem;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <nav>
+      <div class="logo">FestiveDesign</div>
+      <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/qualities">Qualities</a>
+        <a href="/services">Services</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Qualities</h1>
+    <p>Choose some ONLY of your qualities</p>
+
+    <div class="qualities-container">
+      <div class="qualities-box" id="available-qualities">
+        <h2>Available Qualities</h2>
+        <div class="quality positive" draggable="true">Kindness</div>
+        <div class="quality positive" draggable="true">Intelligence</div>
+        <div class="quality positive" draggable="true">Creativity</div>
+        <div class="quality positive" draggable="true">Honesty</div>
+        <div class="quality positive" draggable="true">Empathy</div>
+        <div class="quality negative" draggable="true">Laziness</div>
+        <div class="quality negative" draggable="true">Arrogance</div>
+        <div class="quality negative" draggable="true">Selfishness</div>
+      </div>
+      <div class="qualities-box" id="your-qualities">
+        <h2>My Qualities</h2>
+      </div>
+    </div>
+
+    <button id="check-button">Check My Qualities</button>
+    <div id="feedback"></div>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const availableQualities = document.getElementById('available-qualities');
+      const yourQualities = document.getElementById('your-qualities');
+      const checkButton = document.getElementById('check-button');
+      const feedback = document.getElementById('feedback');
+
+      let draggedItem = null;
+
+      function handleDragStart(e) {
+        draggedItem = e.target;
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', this.innerHTML);
+      }
+
+      function handleDragOver(e) {
+        if (e.preventDefault) {
+          e.preventDefault();
+        }
+        e.dataTransfer.dropEffect = 'move';
+        return false;
+      }
+
+      function handleDrop(e) {
+        if (e.stopPropagation) {
+          e.stopPropagation();
+        }
+        if (draggedItem !== this) {
+          this.appendChild(draggedItem);
+        }
+        return false;
+      }
+
+      const qualities = document.querySelectorAll('.quality');
+      qualities.forEach(quality => {
+        quality.addEventListener('dragstart', handleDragStart);
+      });
+
+      [availableQualities, yourQualities].forEach(container => {
+        container.addEventListener('dragover', handleDragOver);
+        container.addEventListener('drop', handleDrop);
+      });
+
+      checkButton.addEventListener('click', () => {
+        const selectedQualities = yourQualities.querySelectorAll('.quality');
+        let allPositive = true;
+        
+        selectedQualities.forEach(quality => {
+          if (quality.classList.contains('negative')) {
+            allPositive = false;
+          }
+        });
+
+        if (allPositive && selectedQualities.length > 0) {
+          feedback.textContent = "Great job! You've selected some of your qualities";
+          feedback.style.color = 'green';
+          confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 }
+          });
+        } else {
+          feedback.textContent = "Oops! Make sure to select only some of your qualities.";
+          feedback.style.color = 'red';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
