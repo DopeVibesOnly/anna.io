@@ -1,0 +1,303 @@
+<html><head><base href="">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Photos</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Dancing+Script:wght@700&family=Playfair+Display:wght@400;700&display=swap');
+
+    :root {
+        --primary-color: #FF69B4;
+        --secondary-color: #FFC0CB;
+        --text-color: #4A4A4A;
+        --bg-color: #F0F0F0;
+        --accent-color: #FFD700;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        overflow-x: hidden;
+        min-height: 100vh;
+    }
+
+    header {
+        background-color: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+
+    nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 5%;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .logo {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        font-family: 'Dancing Script', cursive;
+    }
+
+    .nav-links {
+        display: flex;
+        gap: 2rem;
+    }
+
+    .nav-links a {
+        text-decoration: none;
+        color: var(--text-color);
+        font-weight: 400;
+        transition: color 0.3s ease;
+    }
+
+    .nav-links a:hover {
+        color: var(--primary-color);
+    }
+
+    .gallery {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 4rem 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .photo-container {
+        width: 100%;
+        max-width: 600px;
+        opacity: 0;
+        transform: translateY(50px) rotate(0deg);
+        transition: opacity 0.8s ease, transform 0.8s ease;
+        margin-bottom: 6rem;
+    }
+
+    .photo-container:nth-child(odd) {
+        align-self: flex-start;
+        transform: translateY(50px) rotate(-5deg);
+    }
+
+    .photo-container:nth-child(even) {
+        align-self: flex-end;
+        transform: translateY(50px) rotate(5deg);
+    }
+
+    .photo-container.visible {
+        opacity: 1;
+        transform: translateY(0) rotate(0deg);
+    }
+
+    .photo-container:nth-child(odd).visible {
+        transform: translateY(0) rotate(-5deg);
+    }
+
+    .photo-container:nth-child(even).visible {
+        transform: translateY(0) rotate(5deg);
+    }
+
+    .photo {
+        width: 100%;
+        height: 300px;
+        background-size: cover;
+        background-position: center;
+        border-radius: 10px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .photo:hover {
+        transform: scale(1.05);
+    }
+
+    .photo-info {
+        margin-top: 1.5rem;
+        text-align: center;
+        position: relative;
+        padding: 1rem;
+        background-color: rgba(255, 255, 255, 0.8);
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .photo-info::before {
+        content: '';
+        position: absolute;
+        top: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 50%;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
+    }
+
+    .photo-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .photo-description {
+        font-size: 1rem;
+        line-height: 1.6;
+        color: var(--text-color);
+    }
+
+    .envelope {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        width: 80px;
+        height: 60px;
+        background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23FF69B4"><path d="M0 0h24v24H0z" fill="none"/><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10zm-8-7L4 6h16l-8 5z"/></svg>');
+        background-size: contain;
+        background-repeat: no-repeat;
+        cursor: pointer;
+        animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background-color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        max-width: 500px;
+        text-align: center;
+        position: relative;
+    }
+
+    .close-modal {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 1.5rem;
+        cursor: pointer;
+    }
+</style>
+</head>
+<body>
+    <header>
+        <nav>
+          <div class="logo">Anna's Website</div>
+          <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="qualities.html">Qualities</a>
+            <a href="dice.html">Dice Roll</a>
+            <a href="Photos">Photos</a>
+          </div>
+        </nav>
+      </header>
+
+<main class="gallery">
+    <div class="photo-container">
+        <div class="photo" style="background-image: url('https://dl.dropboxusercontent.com/scl/fi/pumq069hd2uoke7nk1szk/anorafak.png?rlkey=nefyt97e6jv9xffdiw0wd6odu&st=g2smk755&dl=0')"></div>
+        <div class="photo-info">
+            <h2 class="photo-title">Blade ball</h2>
+            <p class="photo-description">Here is our Anna got killed so hard</p>
+        </div>
+    </div>
+    <div class="photo-container">
+        <div class="photo" style="background-image: url('https://dl.dropboxusercontent.com/scl/fi/8fvbyr5sdv97qd4a3svyc/anorawin.png?rlkey=8qj0ilqwww7cdi2br9qhfkgkx&st=hy2rijo3&dl=0')"></div>
+        <div class="photo-info">
+            <h2 class="photo-title">Valorant</h2>
+            <p class="photo-description">Here is our Anna MVP, keep it up!</p>
+        </div>
+    </div>
+    <div class="photo-container">
+        <div class="photo" style="background-image: url('https://dl.dropboxusercontent.com/scl/fi/a5y29xw6r6dz8wmg9f9w2/us.png?rlkey=kuq319qmoixt07w9wossctmg7&st=gzvier8q&dl=0')"></div>
+        <div class="photo-info">
+            <h2 class="photo-title">Hm..</h2>
+            <p class="photo-description">We?</p>
+        </div>
+    </div>
+    <div class="photo-container">
+        <div class="photo" style="background-image: url('https://dl.dropboxusercontent.com/scl/fi/xct81fnrjpj1431sb53ho/photo_2024-09-19_16-44-42.jpg?rlkey=xcvp7ml4rudez4fndeq0p5e0n&st=u1ck1dhl&dl=0')"></div>
+        <div class="photo-info">
+            <h2 class="photo-title">Funny joke</h2>
+            <p class="photo-description">But to understand it, need to understand russian🥲</p>
+        </div>
+    </div>
+</main>
+
+<div class="envelope"></div>
+
+<div class="modal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Special Message</h2>
+        <p>I'll continue tomorrow😁</p>
+    </div>
+</div>
+
+<script>
+    const photoContainers = document.querySelectorAll('.photo-container');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.1, rootMargin: '0px 0px -100px 0px' });
+
+    photoContainers.forEach(container => {
+        observer.observe(container);
+    });
+
+    const envelope = document.querySelector('.envelope');
+    const modal = document.querySelector('.modal');
+    const closeModal = document.querySelector('.close-modal');
+
+    envelope.addEventListener('click', () => {
+        modal.style.display = 'flex';
+    });
+
+    closeModal.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+
+    setInterval(() => {
+        envelope.style.animation = 'none';
+        envelope.offsetHeight;
+        envelope.style.animation = 'bounce 2s infinite';
+    }, 10000);
+</script>
+</body>
+</html>
